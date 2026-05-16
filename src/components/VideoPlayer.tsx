@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Play, Plus, ThumbsUp, Volume2, VolumeX } from 'lucide-react';
 import { Video } from '@/types/video';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,8 @@ const Player = ReactPlayer as any;
 
 const PLAYER_CONFIG = {
   file: {
-    forceHLS: true,
     attributes: {
-      crossOrigin: 'anonymous'
+      playsInline: true,
     }
   }
 };
@@ -47,11 +46,11 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
     }
   };
 
-  const handleProgress = (state: { playedSeconds: number }) => {
+  const handleProgress = useCallback((state: { playedSeconds: number }) => {
     if (!isPlayingFull && state.playedSeconds >= 30) {
       seekToZero();
     }
-  };
+  }, [isPlayingFull]);
 
   return (
     <div 
@@ -101,7 +100,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               muted={isMuted}
               controls={true}
               onProgress={handleProgress as any}
-              style={{ pointerEvents: isPlayingFull ? 'auto' : 'none' }}
               config={PLAYER_CONFIG}
             />
           ) : (
