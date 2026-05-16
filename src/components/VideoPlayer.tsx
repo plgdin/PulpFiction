@@ -102,7 +102,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                 controls={isPlayingFull}
                 playsInline
                 loop={!isPlayingFull}
-                crossOrigin="anonymous"
                 onTimeUpdate={(e) => {
                   const target = e.target as HTMLVideoElement;
                   if (!isPlayingFull && target.currentTime >= 30) {
