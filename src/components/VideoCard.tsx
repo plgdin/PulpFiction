@@ -28,7 +28,7 @@ const VideoCard = ({
         />
         
         {/* Overlay gradient */}
-        <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent", "opacity-60 group-hover:opacity-90 transition-opacity duration-300")} />
+        <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent", "opacity-60 transition-opacity duration-300")} />
 
         {/* Play button overlay */}
         <div className={cn("absolute inset-0 flex items-center justify-center", "opacity-0 group-hover:opacity-100 transition-opacity duration-300")}>

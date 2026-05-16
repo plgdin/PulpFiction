@@ -95,7 +95,7 @@ const Index = () => {
                           (e.target as HTMLImageElement).src = '/placeholder.svg';
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-90" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity" />
                       <div className="absolute bottom-0 left-0 right-0 p-4">
                         <h3 className="font-display text-lg text-primary">{video.title}</h3>
                         <p className="mt-1 text-sm text-muted-foreground">

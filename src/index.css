@@ -55,7 +55,7 @@
 
     /* Shadows */
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.6);
-    --shadow-glow: 0 0 30px hsl(46 89% 68% / 0.3);
+    --shadow-glow: 0 0 30px hsl(46 89% 68% / 0.4);
 
     /* Sidebar - keeping for compatibility */
     --sidebar-background: 0 0% 3%;
@@ -129,7 +129,7 @@
 @layer components {
   /* Netflix-style horizontal scroll row */
   .scroll-row {
-    @apply flex gap-4 overflow-x-auto pb-4 scrollbar-hide;
+    @apply flex gap-4 overflow-x-auto py-8 scrollbar-hide;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }

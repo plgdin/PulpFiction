@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Play, Plus, ThumbsUp, Volume2, VolumeX } from 'lucide-react';
+import { X, Play, Volume2, VolumeX, Mail, Instagram } from 'lucide-react';
 import { Video } from '@/types/video';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import ReactPlayer from 'react-player';
+import { useCms } from '@/context/CmsContext';
+import { useSearchParams } from 'react-router-dom';
 
 const Player = ReactPlayer as any;
 
@@ -26,6 +28,17 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
   const [isMuted, setIsMuted] = useState(true);
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { getVideosByCategory } = useCms();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const moreVideos = video ? getVideosByCategory(video.category).filter(v => v.id !== video.id) : [];
+
+  const handlePlayRelated = (v: Video) => {
+    setSearchParams({ v: v.id });
+    if (containerRef.current) {
+      containerRef.current.parentElement?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     // Reset state when video changes
@@ -136,7 +149,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           {!isPlayingFull && (
             <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/20 to-transparent flex flex-col justify-end p-10 pointer-events-none">
               {/* Title */}
-              <h2 className="text-5xl sm:text-7xl font-black mb-8 drop-shadow-lg tracking-tight w-3/4 leading-none" style={{ color: '#F5D467' }}>
+              <h2 className="text-5xl sm:text-7xl font-display text-primary text-shadow-cinematic mb-8 tracking-tight w-3/4 leading-none">
                 {video.title}
               </h2>
               
@@ -144,7 +157,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               <div className="flex items-center justify-between w-full pointer-events-auto">
                 <div className="flex items-center gap-3">
                   <Button 
-                    className="bg-white text-black hover:bg-white/80 font-bold px-8 py-6 text-xl gap-3 rounded-md"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8 py-6 text-xl gap-3 rounded-md"
                     onClick={() => {
                       setIsPlayingFull(true);
                       setIsMuted(false);
@@ -162,14 +175,24 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                       }
                     }}
                   >
-                    <Play className="w-7 h-7 fill-black" />
+                    <Play className="w-7 h-7 fill-current" />
                     Play
                   </Button>
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white/10 bg-[#2a2a2a]/60">
-                    <Plus className="w-6 h-6" />
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
+                    onClick={() => window.location.href = 'mailto:tarunkapoor97@gmail.com'}
+                  >
+                    <Mail className="w-5 h-5" />
                   </Button>
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white/10 bg-[#2a2a2a]/60">
-                    <ThumbsUp className="w-5 h-5" />
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
+                    onClick={() => window.open('https://instagram.com/tarunkapoor2', '_blank')}
+                  >
+                    <Instagram className="w-5 h-5" />
                   </Button>
                 </div>
 
@@ -177,7 +200,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                 <Button 
                   variant="outline" 
                   size="icon" 
-                  className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white/10 bg-[#2a2a2a]/60 transition-opacity opacity-0 group-hover:opacity-100"
+                  className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   onClick={() => setIsMuted(!isMuted)}
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -215,6 +238,48 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
             </div>
           </div>
         </div>
+
+        {/* More Like This Section */}
+        {moreVideos.length > 0 && (
+          <div className="p-10 pt-4">
+            <h3 className="text-2xl font-bold text-white mb-6 font-display">More Like This</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {moreVideos.map((v, index) => (
+                <div
+                  key={v.id}
+                  className="video-card aspect-video cursor-pointer"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => handlePlayRelated(v)}
+                >
+                  <div className="group relative h-full w-full overflow-hidden rounded bg-black/40">
+                    <img
+                      src={v.thumbnail || (v.videoUrl?.includes('.b-cdn.net') ? v.videoUrl.replace('/play_720p.mp4', '/thumbnail.jpg').replace('/playlist.m3u8', '/thumbnail.jpg') : '/placeholder.svg')}
+                      alt={v.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                        <Play className="w-6 h-6 text-primary-foreground fill-primary-foreground ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 translate-y-2 group-hover:translate-y-0">
+                      <h3 className="font-display text-primary bg-primary-foreground text-sm truncate px-1 text-center">{v.title}</h3>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-primary/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                        <span>{v.year}</span>
+                        <span>•</span>
+                        <span>{v.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
