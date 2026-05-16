@@ -76,6 +76,14 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               controls={isPlayingFull}
               onProgress={handleProgress as any}
               style={{ pointerEvents: isPlayingFull ? 'auto' : 'none' }}
+              config={{
+                file: {
+                  forceHLS: true,
+                  attributes: {
+                    crossOrigin: 'anonymous'
+                  }
+                }
+              }}
             />
           ) : (
             <img
