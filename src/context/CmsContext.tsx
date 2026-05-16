@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Video, VideoCategory } from '@/types/video';
 import { CmsData, SiteSettings, HeroContent, FooterContent } from '@/types/cms';
+import { supabase } from '@/lib/supabase';
 import {
   videos as defaultVideos,
   categories as defaultCategories,
   featuredVideo as defaultFeaturedVideo,
 } from '@/data/videos';
 
-const CMS_STORAGE_KEY = 'pulpfiction_cms_data';
 const CMS_PASSWORD_KEY = 'pulpfiction_cms_password';
 const CMS_AUTH_KEY = 'pulpfiction_cms_auth';
 const DEFAULT_PASSWORD = 'admin123';
@@ -46,6 +46,7 @@ const getDefaultData = (): CmsData => ({
 
 interface CmsContextType {
   data: CmsData;
+  isLoading: boolean;
   updateSiteSettings: (settings: SiteSettings) => void;
   updateHeroContent: (hero: HeroContent) => void;
   updateCategories: (categories: VideoCategory[]) => void;
@@ -76,36 +77,9 @@ export const useCms = (): CmsContextType => {
   return ctx;
 };
 
-const loadData = (): CmsData => {
-  try {
-    const stored = localStorage.getItem(CMS_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      const defaults = getDefaultData();
-      return {
-        ...defaults,
-        ...parsed,
-        siteSettings: { ...defaults.siteSettings, ...parsed.siteSettings },
-        heroContent: { ...defaults.heroContent, ...parsed.heroContent },
-        footerContent: { ...defaults.footerContent, ...parsed.footerContent },
-      };
-    }
-  } catch (e) {
-    console.error('Failed to load CMS data:', e);
-  }
-  return getDefaultData();
-};
-
-const saveData = (data: CmsData) => {
-  try {
-    localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.error('Failed to save CMS data:', e);
-  }
-};
-
 export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [data, setData] = useState<CmsData>(loadData);
+  const [data, setData] = useState<CmsData>(getDefaultData());
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem(CMS_AUTH_KEY) === 'true';
   });
@@ -114,17 +88,11 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [undoHistory, setUndoHistory] = useState<CmsData[]>([]);
   const skipHistoryRef = useRef(false);
 
-  useEffect(() => {
-    saveData(data);
-  }, [data]);
-
   // Wraps setData to push current state to undo history first
   const updateWithHistory = useCallback((updater: (prev: CmsData) => CmsData) => {
     setData((prev) => {
-      // Push current state to undo history before applying change
       setUndoHistory((history) => {
         const newHistory = [...history, prev];
-        // Trim to max size
         if (newHistory.length > MAX_UNDO_HISTORY) {
           return newHistory.slice(newHistory.length - MAX_UNDO_HISTORY);
         }
@@ -133,6 +101,103 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updater(prev);
     });
   }, []);
+
+  const seedDatabase = async () => {
+    const defaultData = getDefaultData();
+    console.log("Seeding Supabase with default data...");
+    
+    await supabase.from('global_settings').upsert({
+      id: 1,
+      site_settings: defaultData.siteSettings,
+      hero_content: defaultData.heroContent,
+      footer_content: defaultData.footerContent
+    });
+
+    const mappedCategories = defaultData.categories.map(c => ({
+      id: c.id,
+      title: c.title,
+      slug: c.slug
+    }));
+    await supabase.from('categories').upsert(mappedCategories);
+
+    const mappedVideos = defaultData.videos.map(v => ({
+      id: v.id,
+      title: v.title,
+      description: v.description,
+      thumbnail: v.thumbnail,
+      video_url: v.videoUrl,
+      duration: v.duration,
+      year: v.year,
+      category: v.category
+    }));
+    await supabase.from('videos').upsert(mappedVideos);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [{ data: settings }, { data: categories }, { data: videos }] = await Promise.all([
+          supabase.from('global_settings').select('*').maybeSingle(),
+          supabase.from('categories').select('*'),
+          supabase.from('videos').select('*')
+        ]);
+
+        let finalData = getDefaultData();
+
+        if (!categories || categories.length === 0) {
+          // One-time migration for new empty Supabase project
+          await seedDatabase();
+          const [newSettings, newCategories, newVideos] = await Promise.all([
+            supabase.from('global_settings').select('*').maybeSingle(),
+            supabase.from('categories').select('*'),
+            supabase.from('videos').select('*')
+          ]);
+          
+          if (newCategories.data && newCategories.data.length > 0) {
+            finalData = mapSupabaseToCmsData(newSettings.data, newCategories.data, newVideos.data || []);
+          }
+        } else {
+          finalData = mapSupabaseToCmsData(settings, categories, videos);
+        }
+        
+        // Merge with defaults to ensure missing fields don't crash the app
+        setData({
+          siteSettings: { ...finalData.siteSettings },
+          heroContent: { ...finalData.heroContent },
+          footerContent: { ...finalData.footerContent },
+          categories: finalData.categories,
+          videos: finalData.videos
+        });
+      } catch (error) {
+        console.error('Error fetching Supabase data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const mapSupabaseToCmsData = (settings: any, categories: any[], videos: any[]): CmsData => {
+    const defaultData = getDefaultData();
+    return {
+      siteSettings: settings?.site_settings || defaultData.siteSettings,
+      heroContent: settings?.hero_content || defaultData.heroContent,
+      footerContent: settings?.footer_content || defaultData.footerContent,
+      categories: (categories || []).map(c => ({ id: c.id, title: c.title, slug: c.slug })),
+      videos: (videos || []).map(v => ({
+        id: v.id,
+        title: v.title,
+        description: v.description || '',
+        thumbnail: v.thumbnail || '',
+        videoUrl: v.video_url || '',
+        duration: v.duration || '',
+        year: v.year || '',
+        category: v.category
+      })) as Video[]
+    };
+  };
 
   const undo = useCallback(() => {
     setUndoHistory((history) => {
@@ -145,44 +210,70 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  const updateSiteSettings = useCallback(
-    (settings: SiteSettings) => updateWithHistory((d) => ({ ...d, siteSettings: settings })),
-    [updateWithHistory]
-  );
+  const updateSiteSettings = useCallback(async (settings: SiteSettings) => {
+    updateWithHistory((d) => ({ ...d, siteSettings: settings }));
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, site_settings: settings });
+    if (error) console.error("Error updating site settings in Supabase:", error);
+  }, [updateWithHistory]);
 
-  const updateHeroContent = useCallback(
-    (hero: HeroContent) => updateWithHistory((d) => ({ ...d, heroContent: hero })),
-    [updateWithHistory]
-  );
+  const updateHeroContent = useCallback(async (hero: HeroContent) => {
+    updateWithHistory((d) => ({ ...d, heroContent: hero }));
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, hero_content: hero });
+    if (error) console.error("Error updating hero content in Supabase:", error);
+  }, [updateWithHistory]);
 
-  const updateCategories = useCallback(
-    (categories: VideoCategory[]) => updateWithHistory((d) => ({ ...d, categories })),
-    [updateWithHistory]
-  );
+  const updateCategories = useCallback(async (categories: VideoCategory[]) => {
+    updateWithHistory((d) => ({ ...d, categories }));
+    const mapped = categories.map(c => ({ id: c.id, title: c.title, slug: c.slug }));
+    const { error } = await supabase.from('categories').upsert(mapped);
+    if (error) console.error("Error updating categories in Supabase:", error);
+  }, [updateWithHistory]);
 
-  const addVideo = useCallback(
-    (video: Video) => updateWithHistory((d) => ({ ...d, videos: [...d.videos, video] })),
-    [updateWithHistory]
-  );
+  const addVideo = useCallback(async (video: Video) => {
+    updateWithHistory((d) => ({ ...d, videos: [...d.videos, video] }));
+    const { error } = await supabase.from('videos').insert({
+      id: video.id,
+      title: video.title,
+      description: video.description,
+      thumbnail: video.thumbnail,
+      video_url: video.videoUrl,
+      duration: video.duration,
+      year: video.year,
+      category: video.category
+    });
+    if (error) console.error("Error adding video to Supabase:", error);
+  }, [updateWithHistory]);
 
-  const updateVideo = useCallback(
-    (id: string, videoUpdate: Partial<Video>) =>
-      updateWithHistory((d) => ({
-        ...d,
-        videos: d.videos.map((v) => (v.id === id ? { ...v, ...videoUpdate } : v)),
-      })),
-    [updateWithHistory]
-  );
+  const updateVideo = useCallback(async (id: string, videoUpdate: Partial<Video>) => {
+    updateWithHistory((d) => ({
+      ...d,
+      videos: d.videos.map((v) => (v.id === id ? { ...v, ...videoUpdate } : v)),
+    }));
+    
+    const updateData: any = {};
+    if (videoUpdate.title !== undefined) updateData.title = videoUpdate.title;
+    if (videoUpdate.description !== undefined) updateData.description = videoUpdate.description;
+    if (videoUpdate.thumbnail !== undefined) updateData.thumbnail = videoUpdate.thumbnail;
+    if (videoUpdate.videoUrl !== undefined) updateData.video_url = videoUpdate.videoUrl;
+    if (videoUpdate.duration !== undefined) updateData.duration = videoUpdate.duration;
+    if (videoUpdate.year !== undefined) updateData.year = videoUpdate.year;
+    if (videoUpdate.category !== undefined) updateData.category = videoUpdate.category;
 
-  const deleteVideo = useCallback(
-    (id: string) => updateWithHistory((d) => ({ ...d, videos: d.videos.filter((v) => v.id !== id) })),
-    [updateWithHistory]
-  );
+    const { error } = await supabase.from('videos').update(updateData).eq('id', id);
+    if (error) console.error("Error updating video in Supabase:", error);
+  }, [updateWithHistory]);
 
-  const updateFooterContent = useCallback(
-    (footerContent: FooterContent) => updateWithHistory((d) => ({ ...d, footerContent })),
-    [updateWithHistory]
-  );
+  const deleteVideo = useCallback(async (id: string) => {
+    updateWithHistory((d) => ({ ...d, videos: d.videos.filter((v) => v.id !== id) }));
+    const { error } = await supabase.from('videos').delete().eq('id', id);
+    if (error) console.error("Error deleting video in Supabase:", error);
+  }, [updateWithHistory]);
+
+  const updateFooterContent = useCallback(async (footerContent: FooterContent) => {
+    updateWithHistory((d) => ({ ...d, footerContent }));
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, footer_content: footerContent });
+    if (error) console.error("Error updating footer content in Supabase:", error);
+  }, [updateWithHistory]);
 
   const getVideosByCategory = useCallback(
     (category: string) => data.videos.filter((v) => v.category === category),
@@ -243,6 +334,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <CmsContext.Provider
       value={{
         data,
+        isLoading,
         updateSiteSettings,
         updateHeroContent,
         updateCategories,
