@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { Plus, Pencil, Trash2, ExternalLink, ChevronLeft, ChevronRight, Eye, List } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, ChevronLeft, ChevronRight, Eye, List, UploadCloud, Link as LinkIcon } from 'lucide-react';
+import * as tus from 'tus-js-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,11 @@ const VideoManager = () => {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'preview' | 'list'>('preview');
 
+  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+
   const filteredVideos =
     filterCategory === 'all'
       ? data.videos
@@ -41,6 +47,9 @@ const VideoManager = () => {
   const openAdd = () => {
     setEditingId(null);
     setFormData({ ...emptyVideo, category: (data.categories[0]?.slug as Video['category']) || ('' as Video['category']) });
+    setUploadMode('url');
+    setSelectedFile(null);
+    setUploadProgress(0);
     setIsFormOpen(true);
   };
 
@@ -50,19 +59,73 @@ const VideoManager = () => {
       title: video.title, category: video.category, thumbnail: video.thumbnail,
       videoUrl: video.videoUrl, duration: video.duration, year: video.year, description: video.description,
     });
+    setUploadMode('url');
+    setSelectedFile(null);
+    setUploadProgress(0);
     setIsFormOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.title.trim() || !formData.category) {
       toast.error('Title and category are required');
       return;
     }
+
+    let finalVideoUrl = formData.videoUrl;
+
+    if (uploadMode === 'file' && selectedFile) {
+      setIsUploading(true);
+      try {
+        const authRes = await fetch('/api/bunny-upload-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: formData.title }),
+        });
+        
+        if (!authRes.ok) throw new Error('Failed to authorize upload');
+        const { libraryId, videoId, signature, expirationTime } = await authRes.json();
+        
+        await new Promise<void>((resolve, reject) => {
+          const upload = new tus.Upload(selectedFile, {
+            endpoint: 'https://video.bunnycdn.com/tusupload',
+            retryDelays: [0, 3000, 5000, 10000, 20000],
+            headers: {
+              AuthorizationSignature: signature,
+              AuthorizationExpire: expirationTime.toString(),
+              VideoId: videoId,
+              LibraryId: libraryId,
+            },
+            metadata: {
+              filetype: selectedFile.type,
+              title: formData.title,
+            },
+            onError: reject,
+            onProgress: (bytesUploaded, bytesTotal) => {
+              setUploadProgress((bytesUploaded / bytesTotal) * 100);
+            },
+            onSuccess: () => resolve(),
+          });
+          upload.start();
+        });
+        
+        finalVideoUrl = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/play_720p.mp4`;
+        toast.success('Video uploaded to Bunny CDN');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to upload video');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    const newVideoData = { ...formData, videoUrl: finalVideoUrl };
+
     if (editingId) {
-      updateVideo(editingId, formData);
+      updateVideo(editingId, newVideoData);
       toast.success('Video updated successfully');
     } else {
-      addVideo({ ...formData, id: `video-${Date.now()}` });
+      addVideo({ ...newVideoData, id: `video-${Date.now()}` });
       toast.success('Video added successfully');
     }
     setIsFormOpen(false);
@@ -230,8 +293,77 @@ const VideoManager = () => {
               )}
             </div>
             <div>
-              <Label>Video URL (CDN / YouTube / Vimeo)</Label>
-              <Input value={formData.videoUrl} onChange={(e) => updateField('videoUrl', e.target.value)} className="bg-secondary border-border mt-1" placeholder="https://..." />
+              <Label>Video Source</Label>
+              <div className="flex bg-secondary border border-border p-1 rounded-md mt-1 mb-3">
+                <button
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-1.5 text-sm rounded transition-colors",
+                    uploadMode === 'url' ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={() => setUploadMode('url')}
+                >
+                  <LinkIcon className="w-4 h-4" /> Use URL
+                </button>
+                <button
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-1.5 text-sm rounded transition-colors",
+                    uploadMode === 'file' ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={() => setUploadMode('file')}
+                >
+                  <UploadCloud className="w-4 h-4" /> Upload File
+                </button>
+              </div>
+
+              {uploadMode === 'url' ? (
+                <div>
+                  <Input value={formData.videoUrl} onChange={(e) => updateField('videoUrl', e.target.value)} className="bg-secondary border-border" placeholder="https://..." />
+                  <p className="text-xs text-muted-foreground mt-1.5">Paste direct .m3u8, .mp4, or YouTube/Vimeo links.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:bg-secondary/20 transition-colors">
+                    <input 
+                      type="file" 
+                      id="video-upload" 
+                      accept="video/mp4,video/x-m4v,video/*" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setSelectedFile(e.target.files[0]);
+                          if (!formData.title) {
+                            updateField('title', e.target.files[0].name.replace(/\.[^/.]+$/, ""));
+                          }
+                        }
+                      }}
+                    />
+                    <Label htmlFor="video-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                      <UploadCloud className="w-8 h-8 text-muted-foreground" />
+                      <div className="text-sm font-medium">
+                        {selectedFile ? selectedFile.name : "Click to select video file (.mp4)"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : "Max file size depends on your Bunny CDN limit"}
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  {isUploading && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Uploading to Bunny CDN...</span>
+                        <span>{Math.round(uploadProgress)}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary transition-all duration-300 ease-out"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -249,8 +381,10 @@ const VideoManager = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editingId ? 'Save Changes' : 'Add Video'}</Button>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)} disabled={isUploading}>Cancel</Button>
+            <Button onClick={handleSave} disabled={isUploading}>
+              {isUploading ? 'Uploading...' : editingId ? 'Save Changes' : 'Add Video'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

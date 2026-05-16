@@ -11,11 +11,9 @@ const PLAYER_CONFIG = {
   file: {
     attributes: {
       playsInline: true,
+      crossOrigin: "anonymous",
     },
-    hlsOptions: {
-      enableWorker: true,
-      lowLatencyMode: true,
-    }
+    forceHLS: true,
   }
 };
 
@@ -97,7 +95,9 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           {video.videoUrl ? (
             <Player
               ref={playerRef}
-              url={video.videoUrl}
+              url={video.videoUrl.includes('.b-cdn.net') && video.videoUrl.endsWith('/playlist.m3u8') 
+                ? video.videoUrl.replace('/playlist.m3u8', '/play_720p.mp4') 
+                : video.videoUrl}
               width="100%"
               height="100%"
               playing={true}

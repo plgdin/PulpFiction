@@ -5,9 +5,14 @@ import HeroSection from '@/components/HeroSection';
 import CategoryRow from '@/components/CategoryRow';
 import VideoPlayer from '@/components/VideoPlayer';
 import Footer from '@/components/Footer';
-import { categories, videos, featuredVideo, getVideosByCategory } from '@/data/videos';
+import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
+
 const Index = () => {
+  const { data, getVideosByCategory, getFeaturedVideo } = useCms();
+  const { categories, videos } = data;
+  const featuredVideo = getFeaturedVideo();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
