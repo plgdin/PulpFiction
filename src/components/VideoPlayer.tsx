@@ -64,7 +64,24 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         </Button>
 
         {/* Video Player */}
-        <div ref={containerRef} className="relative aspect-video w-full bg-black group">
+        <div 
+          ref={containerRef} 
+          className={cn(
+            "relative aspect-video w-full bg-black group",
+            !isPlayingFull && "preview-mode-video"
+          )}
+        >
+          <style>{`
+            .preview-mode-video video::-webkit-media-controls {
+              display: none !important;
+            }
+            .preview-mode-video video::-moz-media-controls {
+              display: none !important;
+            }
+            .preview-mode-video video {
+              pointer-events: none;
+            }
+          `}</style>
           {video.videoUrl ? (
             <Player
               ref={playerRef}
@@ -73,7 +90,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               height="100%"
               playing={true}
               muted={isMuted}
-              controls={isPlayingFull}
+              controls={true}
               onProgress={handleProgress as any}
               style={{ pointerEvents: isPlayingFull ? 'auto' : 'none' }}
               config={{
