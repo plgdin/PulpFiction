@@ -7,6 +7,15 @@ import ReactPlayer from 'react-player';
 
 const Player = ReactPlayer as any;
 
+const PLAYER_CONFIG = {
+  file: {
+    forceHLS: true,
+    attributes: {
+      crossOrigin: 'anonymous'
+    }
+  }
+};
+
 interface VideoPlayerProps {
   video: Video | null;
   onClose: () => void;
@@ -93,14 +102,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               controls={true}
               onProgress={handleProgress as any}
               style={{ pointerEvents: isPlayingFull ? 'auto' : 'none' }}
-              config={{
-                file: {
-                  forceHLS: true,
-                  attributes: {
-                    crossOrigin: 'anonymous'
-                  }
-                }
-              }}
+              config={PLAYER_CONFIG}
             />
           ) : (
             <img
