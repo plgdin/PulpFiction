@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import CategoryRow from '@/components/CategoryRow';
@@ -6,10 +7,21 @@ import VideoPlayer from '@/components/VideoPlayer';
 import Footer from '@/components/Footer';
 import { categories, videos, featuredVideo, getVideosByCategory } from '@/data/videos';
 import { Video } from '@/types/video';
-
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+
+  // Sync selected video with URL params
+  useEffect(() => {
+    const videoId = searchParams.get('v');
+    if (videoId) {
+      const video = videos.find(v => v.id === videoId);
+      if (video) setSelectedVideo(video);
+    } else {
+      setSelectedVideo(null);
+    }
+  }, [searchParams]);
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
@@ -36,11 +48,11 @@ const Index = () => {
   };
 
   const handlePlayVideo = (video: Video) => {
-    setSelectedVideo(video);
+    setSearchParams({ v: video.id });
   };
 
   const handleClosePlayer = () => {
-    setSelectedVideo(null);
+    setSearchParams({});
   };
 
   return (

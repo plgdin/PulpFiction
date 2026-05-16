@@ -11,6 +11,10 @@ const PLAYER_CONFIG = {
   file: {
     attributes: {
       playsInline: true,
+    },
+    hlsOptions: {
+      enableWorker: true,
+      lowLatencyMode: true,
     }
   }
 };
@@ -46,11 +50,11 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
     }
   };
 
-  const handleProgress = useCallback((state: { playedSeconds: number }) => {
+  const handleProgress = (state: { playedSeconds: number }) => {
     if (!isPlayingFull && state.playedSeconds >= 30) {
       seekToZero();
     }
-  }, [isPlayingFull]);
+  };
 
   return (
     <div 
@@ -100,6 +104,8 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               muted={isMuted}
               controls={true}
               onProgress={handleProgress as any}
+              onError={(e: any) => console.error("Video Player Error:", e)}
+              onReady={() => console.log("Video Player Ready")}
               config={PLAYER_CONFIG}
             />
           ) : (
