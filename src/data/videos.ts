@@ -57,7 +57,7 @@ export const videos: Video[] = [
     duration: '0:30',
     year: '2025',
     description: 'Festive campaign for OLA Electric celebrating the spirit of Onam.',
-    videoUrl: 'https://www.behance.net/gallery/235103957/OLA-Electric-Onam-Campaign-2025',
+    videoUrl: 'https://vz-5e858353-fc6.b-cdn.net/6a889e8c-7d03-44de-938d-1c5a7ddd2e0b/playlist.m3u8',
   },
 
   // Music Videos

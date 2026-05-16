@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const emptyVideo: Omit<Video, 'id'> = {
-  title: '', category: '', thumbnail: '', videoUrl: '',
+  title: '', category: '' as Video['category'], thumbnail: '', videoUrl: '',
   duration: '', year: new Date().getFullYear().toString(), description: '',
 };
 
@@ -40,7 +40,7 @@ const VideoManager = () => {
 
   const openAdd = () => {
     setEditingId(null);
-    setFormData({ ...emptyVideo, category: data.categories[0]?.slug || '' });
+    setFormData({ ...emptyVideo, category: (data.categories[0]?.slug as Video['category']) || ('' as Video['category']) });
     setIsFormOpen(true);
   };
 
@@ -230,8 +230,8 @@ const VideoManager = () => {
               )}
             </div>
             <div>
-              <Label>Video / Behance URL</Label>
-              <Input value={formData.videoUrl} onChange={(e) => updateField('videoUrl', e.target.value)} className="bg-secondary border-border mt-1" placeholder="https://www.behance.net/..." />
+              <Label>Video URL (CDN / YouTube / Vimeo)</Label>
+              <Input value={formData.videoUrl} onChange={(e) => updateField('videoUrl', e.target.value)} className="bg-secondary border-border mt-1" placeholder="https://..." />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
