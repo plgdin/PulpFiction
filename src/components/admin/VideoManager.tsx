@@ -109,6 +109,13 @@ const VideoManager = () => {
         });
         
         finalVideoUrl = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/play_720p.mp4`;
+        const autoThumbnail = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/thumbnail.jpg`;
+        
+        setFormData(prev => ({
+          ...prev,
+          thumbnail: prev.thumbnail || autoThumbnail
+        }));
+        
         toast.success('Video uploaded to Bunny CDN');
       } catch (err) {
         console.error(err);
@@ -119,7 +126,15 @@ const VideoManager = () => {
       setIsUploading(false);
     }
 
-    const newVideoData = { ...formData, videoUrl: finalVideoUrl };
+    const autoThumbnail = formData.videoUrl !== finalVideoUrl && uploadMode === 'file' 
+      ? finalVideoUrl.replace('/play_720p.mp4', '/thumbnail.jpg') 
+      : formData.thumbnail;
+
+    const newVideoData = { 
+      ...formData, 
+      videoUrl: finalVideoUrl,
+      thumbnail: formData.thumbnail || autoThumbnail
+    };
 
     if (editingId) {
       updateVideo(editingId, newVideoData);

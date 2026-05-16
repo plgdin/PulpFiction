@@ -88,9 +88,12 @@ const Index = () => {
                   >
                     <div className="group relative h-full w-full overflow-hidden rounded">
                       <img
-                        src={video.thumbnail}
+                        src={video.thumbnail || (video.videoUrl?.includes('.b-cdn.net') ? video.videoUrl.replace('/play_720p.mp4', '/thumbnail.jpg').replace('/playlist.m3u8', '/thumbnail.jpg') : '/placeholder.svg')}
                         alt={video.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 bg-black/40"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/placeholder.svg';
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-90" />
                       <div className="absolute bottom-0 left-0 right-0 p-4">

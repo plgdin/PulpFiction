@@ -12,8 +12,7 @@ const PLAYER_CONFIG = {
     attributes: {
       playsInline: true,
       crossOrigin: "anonymous",
-    },
-    forceHLS: true,
+    }
   }
 };
 
@@ -93,21 +92,39 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
             }
           `}</style>
           {video.videoUrl ? (
-            <Player
-              ref={playerRef}
-              url={video.videoUrl.includes('.b-cdn.net') && video.videoUrl.endsWith('/playlist.m3u8') 
-                ? video.videoUrl.replace('/playlist.m3u8', '/play_720p.mp4') 
-                : video.videoUrl}
-              width="100%"
-              height="100%"
-              playing={true}
-              muted={isMuted}
-              controls={true}
-              onProgress={handleProgress as any}
-              onError={(e: any) => console.error("Video Player Error:", e)}
-              onReady={() => console.log("Video Player Ready")}
-              config={PLAYER_CONFIG}
-            />
+            video.videoUrl.includes('.b-cdn.net') ? (
+              <video
+                ref={playerRef}
+                src={video.videoUrl.replace('/playlist.m3u8', '/play_720p.mp4')}
+                className="w-full h-full object-contain"
+                autoPlay={true}
+                muted={isMuted}
+                controls={isPlayingFull}
+                playsInline
+                loop={!isPlayingFull}
+                crossOrigin="anonymous"
+                onTimeUpdate={(e) => {
+                  const target = e.target as HTMLVideoElement;
+                  if (!isPlayingFull && target.currentTime >= 30) {
+                    target.currentTime = 0;
+                  }
+                }}
+              />
+            ) : (
+              <Player
+                ref={playerRef}
+                url={video.videoUrl}
+                width="100%"
+                height="100%"
+                playing={true}
+                muted={isMuted}
+                controls={true}
+                onProgress={handleProgress as any}
+                onError={(e: any) => console.error("Video Player Error:", e)}
+                onReady={() => console.log("Video Player Ready")}
+                config={PLAYER_CONFIG}
+              />
+            )
           ) : (
             <img
               src={video.thumbnail}

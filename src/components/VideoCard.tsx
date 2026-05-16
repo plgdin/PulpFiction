@@ -17,8 +17,15 @@ const VideoCard = ({
     animationDelay: `${index * 0.1}s`
   }} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={() => onPlay(video)}>
       {/* Thumbnail */}
-      <div className="relative w-full h-full overflow-hidden rounded">
-        <img src={video.thumbnail} alt={video.title} className={cn("w-full h-full object-cover transition-transform duration-500", isHovered && "scale-110")} />
+      <div className="relative w-full h-full overflow-hidden rounded bg-black/40">
+        <img 
+          src={video.thumbnail || (video.videoUrl?.includes('.b-cdn.net') ? video.videoUrl.replace('/play_720p.mp4', '/thumbnail.jpg').replace('/playlist.m3u8', '/thumbnail.jpg') : '/placeholder.svg')} 
+          alt={video.title} 
+          className={cn("w-full h-full object-cover transition-transform duration-500", isHovered && "scale-110")} 
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/placeholder.svg';
+          }}
+        />
         
         {/* Overlay gradient */}
         <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent", "opacity-60 group-hover:opacity-90 transition-opacity duration-300")} />
