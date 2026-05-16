@@ -26,9 +26,21 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
 
   if (!video) return null;
 
+  const seekToZero = () => {
+    if (playerRef.current) {
+      if (typeof playerRef.current.seekTo === 'function') {
+        playerRef.current.seekTo(0);
+      } else if (playerRef.current.getInternalPlayer && typeof playerRef.current.getInternalPlayer()?.currentTime !== 'undefined') {
+        playerRef.current.getInternalPlayer().currentTime = 0;
+      } else if (typeof playerRef.current.currentTime !== 'undefined') {
+        playerRef.current.currentTime = 0;
+      }
+    }
+  };
+
   const handleProgress = (state: { playedSeconds: number }) => {
     if (!isPlayingFull && state.playedSeconds >= 30) {
-      playerRef.current?.seekTo(0);
+      seekToZero();
     }
   };
 
@@ -89,7 +101,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                     onClick={() => {
                       setIsPlayingFull(true);
                       setIsMuted(false);
-                      playerRef.current?.seekTo(0);
+                      seekToZero();
                       
                       // Request fullscreen
                       if (containerRef.current) {
