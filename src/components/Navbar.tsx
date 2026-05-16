@@ -13,8 +13,6 @@ interface NavbarProps {
 
 const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,18 +23,13 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(searchQuery);
-  };
-
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+        "hidden md:block fixed top-0 left-0 right-0 z-40 transition-all duration-500",
         isScrolled 
-          ? "bg-background/95 backdrop-blur-md shadow-lg" 
-          : "bg-gradient-to-b from-background/80 to-transparent"
+          ? "bg-black/40 backdrop-blur-lg" 
+          : "bg-transparent pt-2"
       )}
     >
       <div className="px-4 md:px-12 py-4">
@@ -63,58 +56,16 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
 
           {/* Right side */}
           <div className="flex items-center gap-4">
-            {/* Search */}
-            {isSearchOpen ? (
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 animate-slide-in-right">
-                <Input
-                  type="search"
-                  placeholder="Search videos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 md:w-64 bg-secondary border-border focus:border-primary"
-                  autoFocus
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    setSearchQuery('');
-                    onSearch('');
-                  }}
-                  className="text-primary hover:bg-primary/10"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </form>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSearchOpen(true)}
-                className="text-primary hover:bg-primary/10"
-              >
-                <Search className="w-5 h-5" />
-              </Button>
-            )}
-
             {/* Behance link */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden md:flex gap-2 text-muted-foreground hover:text-primary"
-              asChild
+            <a
+              href="https://www.behance.net/tarunkapoor2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
             >
-              <a
-                href="https://www.behance.net/tarunkapoor2"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="text-sm">Behance</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </Button>
+              <span className="text-sm">Behance</span>
+              <ExternalLink className="w-4 h-4 drop-shadow-[0_0_8px_rgba(245,212,103,0.8)]" />
+            </a>
           </div>
         </div>
       </div>
