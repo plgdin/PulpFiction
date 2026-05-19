@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Plus, Pencil, Trash2, ExternalLink, ChevronLeft, ChevronRight, Eye, List, UploadCloud, Link as LinkIcon } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Plus, Pencil, Trash2, ExternalLink, ChevronLeft, ChevronRight, Eye, List, UploadCloud, Link as LinkIcon, GripVertical } from 'lucide-react';
 import * as tus from 'tus-js-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ const emptyVideo: Omit<Video, 'id'> = {
 };
 
 const VideoManager = () => {
-  const { data, addVideo, updateVideo, deleteVideo } = useCms();
+  const { data, addVideo, updateVideo, deleteVideo, reorderVideos } = useCms();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Omit<Video, 'id'>>(emptyVideo);
@@ -39,10 +39,46 @@ const VideoManager = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Drag-and-drop state
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
   const filteredVideos =
     filterCategory === 'all'
       ? data.videos
       : data.videos.filter((v) => v.category === filterCategory);
+
+  const handleDragStart = useCallback((videoId: string) => {
+    setDragId(videoId);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, videoId: string) => {
+    e.preventDefault();
+    if (dragId && videoId !== dragId) setDragOverId(videoId);
+  }, [dragId]);
+
+  const handleDragEnd = useCallback(() => {
+    if (!dragId || !dragOverId || dragId === dragOverId) {
+      setDragId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    const sourceList = filterCategory === 'all' ? data.videos : data.videos;
+    const newVideos = [...sourceList];
+    const fromIdx = newVideos.findIndex(v => v.id === dragId);
+    const toIdx = newVideos.findIndex(v => v.id === dragOverId);
+
+    if (fromIdx !== -1 && toIdx !== -1) {
+      const [moved] = newVideos.splice(fromIdx, 1);
+      newVideos.splice(toIdx, 0, moved);
+      reorderVideos(newVideos);
+      toast.success('Video order updated');
+    }
+
+    setDragId(null);
+    setDragOverId(null);
+  }, [dragId, dragOverId, data.videos, filterCategory, reorderVideos]);
 
   const openAdd = () => {
     setEditingId(null);
@@ -223,6 +259,9 @@ const VideoManager = () => {
       {/* ===== PREVIEW MODE - Horizontal scroll like main page ===== */}
       {viewMode === 'preview' && (
         <div className="space-y-8">
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <GripVertical className="w-3.5 h-3.5" /> Drag cards to reorder videos within each category.
+          </p>
           {videosByCategory.map(({ category, videos }) => (
             <PreviewCategoryRow
               key={category.id}
@@ -230,6 +269,12 @@ const VideoManager = () => {
               videos={videos}
               onEdit={openEdit}
               onDelete={(id) => setDeleteId(id)}
+              dragId={dragId}
+              dragOverId={dragOverId}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDragLeave={(id) => { if (dragOverId === id) setDragOverId(null); }}
             />
           ))}
           {videosByCategory.length === 0 && (
@@ -242,9 +287,33 @@ const VideoManager = () => {
 
       {/* ===== LIST MODE - Compact table ===== */}
       {viewMode === 'list' && (
-        <div className="grid gap-3">
-          {filteredVideos.map((video) => (
-            <div key={video.id} className="flex items-center gap-4 bg-secondary/50 border border-border rounded-lg p-3 hover:bg-secondary/80 transition-colors">
+        <div className="grid gap-2">
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1">
+            <GripVertical className="w-3.5 h-3.5" /> Drag to reorder videos. Order is reflected on the main site.
+          </p>
+          {filteredVideos.map((video, idx) => (
+            <div
+              key={video.id}
+              draggable
+              onDragStart={() => handleDragStart(video.id)}
+              onDragOver={(e) => handleDragOver(e, video.id)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={() => { if (dragOverId === video.id) setDragOverId(null); }}
+              className={cn(
+                'flex items-center gap-3 bg-secondary/50 border rounded-lg p-3 transition-all duration-200 cursor-grab active:cursor-grabbing',
+                dragId === video.id
+                  ? 'opacity-40 border-primary/50 scale-[0.98]'
+                  : dragOverId === video.id
+                    ? 'border-primary bg-primary/10 shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
+                    : 'border-border hover:bg-secondary/80'
+              )}
+            >
+              {/* Drag handle */}
+              <div className="flex-shrink-0 text-muted-foreground/50 hover:text-primary transition-colors">
+                <GripVertical className="w-5 h-5" />
+              </div>
+              {/* Position number */}
+              <span className="flex-shrink-0 w-6 text-center text-xs font-mono text-muted-foreground/60">{idx + 1}</span>
               <div className="w-24 h-14 rounded overflow-hidden flex-shrink-0 bg-card">
                 <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
@@ -429,9 +498,15 @@ interface PreviewCategoryRowProps {
   videos: Video[];
   onEdit: (video: Video) => void;
   onDelete: (id: string) => void;
+  dragId: string | null;
+  dragOverId: string | null;
+  onDragStart: (id: string) => void;
+  onDragOver: (e: React.DragEvent, id: string) => void;
+  onDragEnd: () => void;
+  onDragLeave: (id: string) => void;
 }
 
-const PreviewCategoryRow = ({ title, videos, onEdit, onDelete }: PreviewCategoryRowProps) => {
+const PreviewCategoryRow = ({ title, videos, onEdit, onDelete, dragId, dragOverId, onDragStart, onDragOver, onDragEnd, onDragLeave }: PreviewCategoryRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -466,6 +541,12 @@ const PreviewCategoryRow = ({ title, videos, onEdit, onDelete }: PreviewCategory
               index={index}
               onEdit={() => onEdit(video)}
               onDelete={() => onDelete(video.id)}
+              isDragging={dragId === video.id}
+              isDragOver={dragOverId === video.id}
+              onDragStart={() => onDragStart(video.id)}
+              onDragOver={(e) => onDragOver(e, video.id)}
+              onDragEnd={onDragEnd}
+              onDragLeave={() => onDragLeave(video.id)}
             />
           ))}
         </div>
@@ -491,16 +572,29 @@ interface PreviewVideoCardProps {
   index: number;
   onEdit: () => void;
   onDelete: () => void;
+  isDragging: boolean;
+  isDragOver: boolean;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+  onDragLeave: () => void;
 }
 
-const PreviewVideoCard = ({ video, index, onEdit, onDelete }: PreviewVideoCardProps) => {
+const PreviewVideoCard = ({ video, index, onEdit, onDelete, isDragging, isDragOver, onDragStart, onDragOver, onDragEnd, onDragLeave }: PreviewVideoCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnd={onDragEnd}
+      onDragLeave={onDragLeave}
       className={cn(
-        'video-card group cursor-pointer flex-shrink-0',
-        'w-[280px] md:w-[320px] lg:w-[360px] aspect-video'
+        'video-card group flex-shrink-0 cursor-grab active:cursor-grabbing',
+        'w-[280px] md:w-[320px] lg:w-[360px] aspect-video',
+        isDragging && 'opacity-40 scale-95',
+        isDragOver && 'ring-2 ring-primary ring-offset-2 ring-offset-background scale-105'
       )}
       style={{ animationDelay: `${index * 0.1}s` }}
       onMouseEnter={() => setIsHovered(true)}
@@ -529,6 +623,14 @@ const PreviewVideoCard = ({ video, index, onEdit, onDelete }: PreviewVideoCardPr
           <div className="flex items-center gap-1 text-xs font-medium text-primary">
             {video.duration}
           </div>
+        </div>
+
+        {/* Drag handle indicator - top center */}
+        <div className={cn(
+          'absolute top-2 left-1/2 -translate-x-1/2 px-2 py-1 rounded-full bg-card/70 backdrop-blur-sm transition-opacity duration-200',
+          isHovered ? 'opacity-100' : 'opacity-0'
+        )}>
+          <GripVertical className="w-4 h-4 text-primary/80" />
         </div>
 
         {/* Admin action buttons - top left on hover */}

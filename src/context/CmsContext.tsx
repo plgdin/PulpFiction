@@ -54,6 +54,7 @@ interface CmsContextType {
   addVideo: (video: Video) => void;
   updateVideo: (id: string, video: Partial<Video>) => void;
   deleteVideo: (id: string) => void;
+  reorderVideos: (reorderedVideos: Video[]) => void;
   updateFooterContent: (footer: FooterContent) => void;
   getVideosByCategory: (category: string) => Video[];
   getFeaturedVideo: () => Video;
@@ -182,21 +183,34 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const mapSupabaseToCmsData = (settings: any, categories: any[], videos: any[]): CmsData => {
     const defaultData = getDefaultData();
+    const videoOrder: string[] = settings?.hero_content?.videoOrder || [];
+    let mappedVideos = (videos || []).map(v => ({
+      id: v.id,
+      title: v.title,
+      description: v.description || '',
+      thumbnail: v.thumbnail || '',
+      videoUrl: v.video_url || '',
+      duration: v.duration || '',
+      year: v.year || '',
+      category: v.category
+    })) as Video[];
+
+    // Apply saved video order if available
+    if (videoOrder.length > 0) {
+      const orderMap = new Map(videoOrder.map((id, idx) => [id, idx]));
+      mappedVideos.sort((a, b) => {
+        const aIdx = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
+        const bIdx = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
+        return aIdx - bIdx;
+      });
+    }
+
     return {
       siteSettings: settings?.site_settings || defaultData.siteSettings,
       heroContent: settings?.hero_content ? { ...defaultData.heroContent, ...settings.hero_content, slideshowVideos: settings.hero_content.slideshowVideos || [] } : defaultData.heroContent,
       footerContent: settings?.footer_content || defaultData.footerContent,
       categories: (categories || []).map(c => ({ id: c.id, title: c.title, slug: c.slug })),
-      videos: (videos || []).map(v => ({
-        id: v.id,
-        title: v.title,
-        description: v.description || '',
-        thumbnail: v.thumbnail || '',
-        videoUrl: v.video_url || '',
-        duration: v.duration || '',
-        year: v.year || '',
-        category: v.category
-      })) as Video[]
+      videos: mappedVideos
     };
   };
 
@@ -270,6 +284,16 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (error) console.error("Error deleting video in Supabase:", error);
   }, [updateWithHistory]);
 
+  const reorderVideos = useCallback(async (reorderedVideos: Video[]) => {
+    updateWithHistory((d) => ({ ...d, videos: reorderedVideos }));
+    const videoOrder = reorderedVideos.map(v => v.id);
+    // Store video order inside hero_content JSON (avoids needing a new column)
+    const currentHero = data.heroContent;
+    const updatedHero = { ...currentHero, videoOrder };
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, hero_content: updatedHero });
+    if (error) console.error("Error saving video order to Supabase:", error);
+  }, [updateWithHistory, data.heroContent]);
+
   const updateFooterContent = useCallback(async (footerContent: FooterContent) => {
     updateWithHistory((d) => ({ ...d, footerContent }));
     const { error } = await supabase.from('global_settings').upsert({ id: 1, footer_content: footerContent });
@@ -342,6 +366,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addVideo,
         updateVideo,
         deleteVideo,
+        reorderVideos,
         updateFooterContent,
         getVideosByCategory,
         getFeaturedVideo,

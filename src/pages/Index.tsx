@@ -119,37 +119,24 @@ const Index = () => {
 
         {!filteredVideos && (
           <>
-            <section id="ad-films" className="pt-4 md:pt-6" ref={(el) => (sectionRefs.current['ad-films'] = el)}>
-              <CategoryRow
-                title="Ad Films"
-                videos={getVideosByCategory('ad-films')}
-                onPlayVideo={handlePlayVideo}
-              />
-            </section>
-
-            <section id="music-videos" ref={(el) => (sectionRefs.current['music-videos'] = el)}>
-              <CategoryRow
-                title="Music Videos"
-                videos={getVideosByCategory('music-videos')}
-                onPlayVideo={handlePlayVideo}
-              />
-            </section>
-
-            <section id="brand-films" ref={(el) => (sectionRefs.current['brand-films'] = el)}>
-              <CategoryRow
-                title="Brand Films"
-                videos={getVideosByCategory('brand-films')}
-                onPlayVideo={handlePlayVideo}
-              />
-            </section>
-
-            <section id="short-films" ref={(el) => (sectionRefs.current['short-films'] = el)}>
-              <CategoryRow
-                title="Short Films"
-                videos={getVideosByCategory('short-films')}
-                onPlayVideo={handlePlayVideo}
-              />
-            </section>
+            {categories.map((cat, idx) => {
+              const catVideos = getVideosByCategory(cat.slug);
+              if (catVideos.length === 0) return null;
+              return (
+                <section
+                  key={cat.id}
+                  id={cat.slug}
+                  className={idx === 0 ? 'pt-4 md:pt-6' : undefined}
+                  ref={(el) => (sectionRefs.current[cat.slug] = el)}
+                >
+                  <CategoryRow
+                    title={cat.title}
+                    videos={catVideos}
+                    onPlayVideo={handlePlayVideo}
+                  />
+                </section>
+              );
+            })}
           </>
         )}
       </main>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, X, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -36,9 +37,11 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-9">
-            <h1 className="font-display text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider">
-              TARUN KAPOOR
-            </h1>
+            <Link to="/" className="block">
+              <h1 className="font-display text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider hover:text-primary/90 transition-colors cursor-pointer">
+                TARUN KAPOOR
+              </h1>
+            </Link>
 
             {/* Category links - Desktop */}
             <div className="hidden lg:flex items-center gap-7">

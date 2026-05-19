@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Plus, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ import {
 import { useCms } from '@/context/CmsContext';
 import { VideoCategory } from '@/types/video';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const slugify = (text: string) =>
   text
@@ -37,6 +38,10 @@ const CategoryManager = () => {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Drag-and-drop state
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const openAdd = () => {
     setEditingId(null);
@@ -100,16 +105,36 @@ const CategoryManager = () => {
     }
   };
 
-  const moveCategory = (index: number, direction: 'up' | 'down') => {
+  const handleDragStart = useCallback((catId: string) => {
+    setDragId(catId);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, catId: string) => {
+    e.preventDefault();
+    if (dragId && catId !== dragId) setDragOverId(catId);
+  }, [dragId]);
+
+  const handleDragEnd = useCallback(() => {
+    if (!dragId || !dragOverId || dragId === dragOverId) {
+      setDragId(null);
+      setDragOverId(null);
+      return;
+    }
+
     const newCategories = [...data.categories];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newCategories.length) return;
-    [newCategories[index], newCategories[targetIndex]] = [
-      newCategories[targetIndex],
-      newCategories[index],
-    ];
-    updateCategories(newCategories);
-  };
+    const fromIdx = newCategories.findIndex(c => c.id === dragId);
+    const toIdx = newCategories.findIndex(c => c.id === dragOverId);
+
+    if (fromIdx !== -1 && toIdx !== -1) {
+      const [moved] = newCategories.splice(fromIdx, 1);
+      newCategories.splice(toIdx, 0, moved);
+      updateCategories(newCategories);
+      toast.success('Category order updated');
+    }
+
+    setDragId(null);
+    setDragOverId(null);
+  }, [dragId, dragOverId, data.categories, updateCategories]);
 
   return (
     <div className="space-y-6">
@@ -128,32 +153,35 @@ const CategoryManager = () => {
 
       {/* Category list */}
       <div className="grid gap-2">
+        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1">
+          <GripVertical className="w-3.5 h-3.5" /> Drag to reorder categories. Order is reflected on the main site.
+        </p>
         {data.categories.map((cat, index) => {
           const videoCount = data.videos.filter((v) => v.category === cat.slug).length;
           return (
             <div
               key={cat.id}
-              className="flex items-center gap-3 bg-secondary/50 border border-border rounded-lg p-3 hover:bg-secondary/80 transition-colors"
+              draggable
+              onDragStart={() => handleDragStart(cat.id)}
+              onDragOver={(e) => handleDragOver(e, cat.id)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={() => { if (dragOverId === cat.id) setDragOverId(null); }}
+              className={cn(
+                'flex items-center gap-3 bg-secondary/50 border rounded-lg p-3 transition-all duration-200 cursor-grab active:cursor-grabbing',
+                dragId === cat.id
+                  ? 'opacity-40 border-primary/50 scale-[0.98]'
+                  : dragOverId === cat.id
+                    ? 'border-primary bg-primary/10 shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
+                    : 'border-border hover:bg-secondary/80'
+              )}
             >
-              {/* Drag handle / reorder */}
-              <div className="flex flex-col gap-0.5">
-                <button
-                  onClick={() => moveCategory(index, 'up')}
-                  disabled={index === 0}
-                  className="text-muted-foreground hover:text-primary disabled:opacity-30 text-xs"
-                >
-                  ▲
-                </button>
-                <button
-                  onClick={() => moveCategory(index, 'down')}
-                  disabled={index === data.categories.length - 1}
-                  className="text-muted-foreground hover:text-primary disabled:opacity-30 text-xs"
-                >
-                  ▼
-                </button>
+              {/* Drag handle */}
+              <div className="flex-shrink-0 text-muted-foreground/50 hover:text-primary transition-colors">
+                <GripVertical className="w-5 h-5" />
               </div>
 
-              <GripVertical className="w-4 h-4 text-muted-foreground/50" />
+              {/* Position number */}
+              <span className="flex-shrink-0 w-6 text-center text-xs font-mono text-muted-foreground/60">{index + 1}</span>
 
               {/* Info */}
               <div className="flex-1">
