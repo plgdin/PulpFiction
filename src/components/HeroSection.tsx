@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, type SyntheticEvent } from 'react';
 import { Play, ExternalLink, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Video } from '@/types/video';
+import { HeroContent } from '@/types/cms';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import heroBg from '@/assets/hero-bg.jpg';
@@ -14,6 +15,7 @@ const OLA_VIDEO_STREAM =
 interface HeroSectionProps {
   video: Video;
   videos: Video[];
+  heroContent: HeroContent;
   onPlay: (video: Video) => void;
 }
 
@@ -36,21 +38,46 @@ const isPlayableHeroVideo = (url: string) => {
 const HeroSection = ({
   video,
   videos,
+  heroContent,
   onPlay,
 }: HeroSectionProps) => {
   const slides = useMemo<HeroSlide[]>(() => {
+    const cmsSlides = (heroContent.slideshowVideos || [])
+      .map((videoId) => videos.find((item) => item.id === videoId))
+      .filter((item): item is Video => Boolean(item));
+
     const olaSourceVideo =
       videos.find((item) => item.id === OLA_VIDEO_ID) ||
       videos.find((item) => item.videoUrl === OLA_VIDEO_STREAM) ||
       videos.find((item) => item.title.toLowerCase().includes('ola'));
 
-    const orderedVideos: Video[] = olaSourceVideo
-      ? [olaSourceVideo, ...videos.filter((item) => item.id !== olaSourceVideo.id)]
-      : [...videos];
+    const orderedVideos: Video[] = cmsSlides.length > 0
+      ? cmsSlides
+      : olaSourceVideo
+        ? [olaSourceVideo, ...videos.filter((item) => item.id !== olaSourceVideo.id)]
+        : [...videos];
 
     const playableVideos = orderedVideos.filter((item) => isPlayableHeroVideo(item.videoUrl));
     const selectedVideos = playableVideos.slice(0, 5);
     const safeVideos = selectedVideos.length > 0 ? selectedVideos : (isPlayableHeroVideo(video.videoUrl) ? [video] : []);
+    const fallbackImage =
+      heroContent.backgroundImage ||
+      heroContent.featuredVideoThumbnail ||
+      heroBg;
+
+    if (safeVideos.length === 0) {
+      return [
+        {
+          id: 'hero-fallback',
+          title: heroContent.title || video.title,
+          description: heroContent.description || video.description,
+          thumbnail: fallbackImage,
+          previewUrl: '',
+          hasVideoPreview: false,
+          video,
+        },
+      ];
+    }
 
     return safeVideos.map((item) => {
       const hasCdnVideo = item.videoUrl.includes('.b-cdn.net');
@@ -60,15 +87,15 @@ const HeroSection = ({
 
       return {
         id: item.id,
-        title: item.title || video.title,
-        description: item.description || video.description,
-        thumbnail: item.thumbnail || heroBg,
+        title: item.title || heroContent.title || video.title,
+        description: item.description || heroContent.description || video.description,
+        thumbnail: item.thumbnail || fallbackImage,
         previewUrl,
         hasVideoPreview: isPlayableHeroVideo(previewUrl),
         video: item,
       };
     });
-  }, [videos, video]);
+  }, [videos, video, heroContent]);
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isTitleCompact, setIsTitleCompact] = useState(false);
@@ -100,7 +127,10 @@ const HeroSection = ({
   }, [activeSlide]);
 
   const handleViewPortfolio = () => {
-    window.open('https://www.behance.net/tarunkapoor2', '_blank', 'noopener,noreferrer');
+    const url = heroContent.portfolioUrl?.trim();
+    if (!url) return;
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleNextSlide = () => {
@@ -203,7 +233,7 @@ const HeroSection = ({
             onClick={() => onPlay(activeSlide?.video || video)}
           >
             <Play className="h-5 w-5 fill-current" />
-            View Reel
+            {heroContent.ctaPrimaryText || 'View Reel'}
           </Button>
           <Button
             variant="outline"
@@ -212,7 +242,7 @@ const HeroSection = ({
             onClick={handleViewPortfolio}
           >
             <ExternalLink className="h-5 w-5" />
-            Full Portfolio
+            {heroContent.ctaSecondaryText || 'Full Portfolio'}
           </Button>
         </div>
       </div>

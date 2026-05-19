@@ -10,7 +10,7 @@ import { Video } from '@/types/video';
 
 const Index = () => {
   const { data, getVideosByCategory, getFeaturedVideo } = useCms();
-  const { categories, videos } = data;
+  const { categories, videos, heroContent } = data;
   const featuredVideo = getFeaturedVideo();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,7 +68,12 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
 
-      <HeroSection video={featuredVideo} videos={videos} onPlay={handlePlayVideo} />
+      <HeroSection
+        video={featuredVideo}
+        videos={videos}
+        heroContent={heroContent}
+        onPlay={handlePlayVideo}
+      />
 
       <main className="relative z-10 -mt-14 pb-8">
         {filteredVideos && (
