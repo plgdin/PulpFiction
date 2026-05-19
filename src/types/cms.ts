@@ -21,6 +21,7 @@ export interface HeroContent {
   featuredVideoUrl: string;
   featuredVideoThumbnail: string;
   backgroundImage: string;
+  slideshowVideos: string[];
 }
 
 export interface FooterContent {

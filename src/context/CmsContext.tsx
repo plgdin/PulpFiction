@@ -34,6 +34,7 @@ const getDefaultData = (): CmsData => ({
     featuredVideoUrl: defaultFeaturedVideo.videoUrl,
     featuredVideoThumbnail: defaultFeaturedVideo.thumbnail,
     backgroundImage: '',
+    slideshowVideos: [],
   },
   categories: [...defaultCategories],
   videos: [...defaultVideos],
@@ -183,7 +184,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const defaultData = getDefaultData();
     return {
       siteSettings: settings?.site_settings || defaultData.siteSettings,
-      heroContent: settings?.hero_content || defaultData.heroContent,
+      heroContent: settings?.hero_content ? { ...defaultData.heroContent, ...settings.hero_content, slideshowVideos: settings.hero_content.slideshowVideos || [] } : defaultData.heroContent,
       footerContent: settings?.footer_content || defaultData.footerContent,
       categories: (categories || []).map(c => ({ id: c.id, title: c.title, slug: c.slug })),
       videos: (videos || []).map(v => ({
