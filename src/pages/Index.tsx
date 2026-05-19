@@ -68,9 +68,9 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
 
-      <HeroSection video={featuredVideo} onPlay={handlePlayVideo} />
+      <HeroSection video={featuredVideo} videos={videos} onPlay={handlePlayVideo} />
 
-      <main className="relative z-10 -mt-20 pb-8">
+      <main className="relative z-10 -mt-14 pb-8">
         {filteredVideos && (
           <section className="px-4 py-8 md:px-12">
             <h2 className="mb-6 font-display text-2xl text-primary text-shadow-cinematic md:text-3xl">
@@ -114,7 +114,7 @@ const Index = () => {
 
         {!filteredVideos && (
           <>
-            <section id="ad-films" ref={(el) => (sectionRefs.current['ad-films'] = el)}>
+            <section id="ad-films" className="pt-4 md:pt-6" ref={(el) => (sectionRefs.current['ad-films'] = el)}>
               <CategoryRow
                 title="Ad Films"
                 videos={getVideosByCategory('ad-films')}

@@ -9,16 +9,16 @@
 @layer base {
   :root {
     /* Deep black background */
-    --background: 0 0% 0%;
+    --background: 220 12% 10%;
     /* #F5D467 Foreground */
     --foreground: 46 89% 68%;
 
     /* Cards with dark overlay */
-    --card: 0 0% 5%;
+    --card: 220 10% 12%;
     --card-foreground: 46 89% 68%;
 
     /* Popover matching cards */
-    --popover: 0 0% 3%;
+    --popover: 220 10% 11%;
     --popover-foreground: 46 89% 68%;
 
     /* Primary - Golden Yellow */
@@ -26,11 +26,11 @@
     --primary-foreground: 0 0% 0%;
 
     /* Secondary - Dark gray */
-    --secondary: 0 0% 15%;
+    --secondary: 220 9% 18%;
     --secondary-foreground: 46 89% 68%;
 
     /* Muted tones */
-    --muted: 0 0% 10%;
+    --muted: 220 8% 14%;
     --muted-foreground: 46 40% 50%;
 
     /* Accent - Lighter golden */
@@ -42,8 +42,8 @@
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
+    --border: 220 8% 24%;
+    --input: 220 8% 18%;
     --ring: 46 89% 68%;
 
     --radius: 0.25rem;
@@ -70,24 +70,24 @@
 
   /* No dark mode - this design IS the dark mode */
   .dark {
-    --background: 0 0% 0%;
+    --background: 220 12% 10%;
     --foreground: 46 89% 68%;
-    --card: 0 0% 5%;
+    --card: 220 10% 12%;
     --card-foreground: 46 89% 68%;
-    --popover: 0 0% 3%;
+    --popover: 220 10% 11%;
     --popover-foreground: 46 89% 68%;
     --primary: 46 89% 68%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 15%;
+    --secondary: 220 9% 18%;
     --secondary-foreground: 46 89% 68%;
-    --muted: 0 0% 10%;
+    --muted: 220 8% 14%;
     --muted-foreground: 46 40% 50%;
     --accent: 46 95% 75%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
+    --border: 220 8% 24%;
+    --input: 220 8% 18%;
     --ring: 46 89% 68%;
     --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 46 89% 68%;

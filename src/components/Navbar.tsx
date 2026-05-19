@@ -29,24 +29,24 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
         "hidden md:block fixed top-0 left-0 right-0 z-40 transition-all duration-500",
         isScrolled 
           ? "bg-black/40 backdrop-blur-lg" 
-          : "bg-transparent pt-2"
+          : "bg-transparent pt-[0.55rem]"
       )}
     >
-      <div className="px-4 md:px-12 py-4">
+      <div className="px-[1.15rem] md:px-14 py-[1.15rem]">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-8">
-            <h1 className="font-display text-2xl md:text-3xl text-primary text-shadow-glow tracking-wider">
+          <div className="flex items-center gap-9">
+            <h1 className="font-display text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider">
               TARUN KAPOOR
             </h1>
 
             {/* Category links - Desktop */}
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-7">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => onCategoryClick(category)}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
                   {category.title}
                 </button>
@@ -55,7 +55,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             {/* Behance link */}
             <a
               href="https://www.behance.net/tarunkapoor2"
@@ -63,8 +63,8 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
             >
-              <span className="text-sm">Behance</span>
-              <ExternalLink className="w-4 h-4 drop-shadow-[0_0_8px_rgba(245,212,103,0.8)]" />
+              <span className="text-base">Behance</span>
+              <ExternalLink className="w-[1.15rem] h-[1.15rem] drop-shadow-[0_0_8px_rgba(245,212,103,0.8)]" />
             </a>
           </div>
         </div>

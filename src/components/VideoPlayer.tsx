@@ -67,11 +67,11 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 sm:p-0 overflow-y-auto overflow-x-hidden animate-in fade-in duration-200"
       onClick={onClose}
     >
-      <div 
+      <div
         className="relative w-full max-w-5xl bg-[#181818] rounded-xl overflow-hidden shadow-2xl my-8 mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -86,8 +86,8 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         </Button>
 
         {/* Video Player */}
-        <div 
-          ref={containerRef} 
+        <div
+          ref={containerRef}
           className={cn(
             "relative aspect-video w-full bg-black group",
             !isPlayingFull && "preview-mode-video"
@@ -152,17 +152,17 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
               <h2 className="text-5xl sm:text-7xl font-display text-primary text-shadow-cinematic mb-8 tracking-tight w-3/4 leading-none">
                 {video.title}
               </h2>
-              
+
               {/* Buttons Row */}
               <div className="flex items-center justify-between w-full pointer-events-auto">
                 <div className="flex items-center gap-3">
-                  <Button 
+                  <Button
                     className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8 py-6 text-xl gap-3 rounded-md"
                     onClick={() => {
                       setIsPlayingFull(true);
                       setIsMuted(false);
                       seekToZero();
-                      
+
                       // Request fullscreen
                       if (containerRef.current) {
                         if (containerRef.current.requestFullscreen) {
@@ -178,16 +178,16 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                     <Play className="w-7 h-7 fill-current" />
                     Play
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="icon"
                     className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
                     onClick={() => window.location.href = 'mailto:tarunkapoor97@gmail.com'}
                   >
                     <Mail className="w-5 h-5" />
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="icon"
                     className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
                     onClick={() => window.open('https://instagram.com/tarunkapoor2', '_blank')}
@@ -197,9 +197,9 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                 </div>
 
                 {/* Mute Toggle */}
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   onClick={() => setIsMuted(!isMuted)}
                 >
