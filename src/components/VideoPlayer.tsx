@@ -68,11 +68,19 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 sm:p-0 overflow-y-auto overflow-x-hidden animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0 overflow-y-auto overflow-x-hidden animate-in fade-in duration-200"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-5xl bg-[#181818] rounded-xl overflow-hidden shadow-2xl my-8 mx-auto"
+        className="relative w-full max-w-5xl my-8 mx-auto rounded-[28px] overflow-hidden"
+        style={{
+          background: 'rgba(14, 14, 16, 0.68)',
+          backdropFilter: 'blur(40px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+          border: '1px solid rgba(245, 212, 103, 0.18)',
+          boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(255,255,255,0.06) inset, 0 1px 0 rgba(245,212,103,0.15) inset',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -89,7 +97,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         <div
           ref={containerRef}
           className={cn(
-            "relative aspect-video w-full bg-black group",
+            "relative aspect-video w-full bg-transparent group",
             !isPlayingFull && "preview-mode-video"
           )}
         >

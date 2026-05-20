@@ -1,14 +1,16 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import CategoryRow from '@/components/CategoryRow';
+import VideoCard from '@/components/VideoCard';
 import VideoPlayer from '@/components/VideoPlayer';
 import Footer from '@/components/Footer';
 import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
 
 const Index = () => {
+
   const { data, getVideosByCategory, getFeaturedVideo } = useCms();
   const { categories, videos, heroContent } = data;
   const featuredVideo = getFeaturedVideo();
@@ -78,37 +80,19 @@ const Index = () => {
       <main className="relative z-10 -mt-14 pb-8">
         {filteredVideos && (
           <section className="px-4 py-8 md:px-12">
-            <h2 className="mb-6 font-display text-2xl text-primary text-shadow-cinematic md:text-3xl">
+            <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
               Search Results for "{searchQuery}"
             </h2>
 
             {filteredVideos.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="flex flex-wrap gap-6">
                 {filteredVideos.map((video, index) => (
-                  <div
+                  <VideoCard
                     key={video.id}
-                    className="video-card aspect-video cursor-pointer"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                    onClick={() => handlePlayVideo(video)}
-                  >
-                    <div className="group relative h-full w-full overflow-hidden rounded">
-                      <img
-                        src={video.thumbnail || (video.videoUrl?.includes('.b-cdn.net') ? video.videoUrl.replace('/play_720p.mp4', '/thumbnail.jpg').replace('/playlist.m3u8', '/thumbnail.jpg') : '/placeholder.svg')}
-                        alt={video.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 bg-black/40"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <h3 className="font-display text-lg text-primary">{video.title}</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {video.year} • {video.duration}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                    video={video}
+                    onPlay={handlePlayVideo}
+                    index={index}
+                  />
                 ))}
               </div>
             ) : (

@@ -53,7 +53,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
   return (
     <section className="relative py-6">
       {/* Category title */}
-      <h2 className="font-display text-2xl md:text-3xl text-primary mb-4 px-4 md:px-12 text-shadow-cinematic">
+      <h2 className="text-2xl md:text-3xl mb-4 px-4 md:px-12 text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
         {title}
       </h2>
 
@@ -62,7 +62,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
         {/* Left scroll button */}
         {canScrollLeft && (
           <button
-            className="hidden md:block absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-50 p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
+            className="hidden md:block absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
             onClick={() => scroll('left')}
           >
             <ChevronLeft 
@@ -94,7 +94,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
         {/* Right scroll button */}
         {canScrollRight && (
           <button
-            className="hidden md:block absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-50 p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
+            className="hidden md:block absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
             onClick={() => scroll('right')}
           >
             <ChevronRight 
