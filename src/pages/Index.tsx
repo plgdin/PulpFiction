@@ -5,6 +5,7 @@ import HeroSection from '@/components/HeroSection';
 import CategoryRow from '@/components/CategoryRow';
 import VideoPlayer from '@/components/VideoPlayer';
 import Footer from '@/components/Footer';
+import { EtheralShadow } from '@/components/ui/etheral-shadow';
 import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
 
@@ -61,7 +62,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent relative text-foreground">
+      <div className="fixed inset-0 z-[-2] pointer-events-none">
+        <EtheralShadow
+          color="rgba(128, 128, 128, 1)"
+          animation={{ scale: 100, speed: 90 }}
+          noise={{ opacity: 1, scale: 1.2 }}
+          sizing="fill"
+        />
+      </div>
       <Navbar
         categories={categories}
         onSearch={handleSearch}
