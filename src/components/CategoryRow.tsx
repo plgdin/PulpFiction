@@ -21,15 +21,18 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 0);
-      // Use a 2px tolerance for rounding issues
-      setCanScrollRight(Math.ceil(scrollLeft) < scrollWidth - clientWidth - 2);
+      setCanScrollRight(Math.ceil(scrollLeft) < scrollWidth - clientWidth - 10);
     }
   };
 
   useEffect(() => {
     checkScroll();
+    const timeoutId = setTimeout(checkScroll, 500);
     window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkScroll);
+    };
   }, [videos]);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -42,24 +45,25 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
     }
 
     if (scrollRef.current) {
-      const scrollAmount = 400;
+      const scrollAmount = window.innerWidth < 768 ? window.innerWidth * 0.8 : 800;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
+      setTimeout(checkScroll, 350);
     }
   };
 
   return (
-    <section className="relative py-6">
-      {/* Category title */}
-      <h2 className="text-2xl md:text-3xl mb-4 px-4 md:px-12 text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
+    <section className="relative py-2 md:py-4">
+      <h2 
+        className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20" 
+        style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}
+      >
         {title}
       </h2>
 
-      {/* Scroll container wrapper */}
-      <div className="relative group">
-        {/* Left scroll button */}
+      <div className="relative group pt-10">
         {canScrollLeft && (
           <button
             className="hidden md:block absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
@@ -67,31 +71,33 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
           >
             <ChevronLeft 
               className={cn(
-                "w-12 h-12 text-primary drop-shadow-[0_0_8px_rgba(245,212,103,0.8)] transition-all duration-300",
+                "w-12 h-12 text-primary drop-shadow-[0_0_10px_rgba(245,212,103,0.8)] transition-all duration-300",
                 animatingLeft ? "-translate-x-4 opacity-0 scale-90" : "translate-x-0 opacity-100 scale-100 hover:scale-110"
               )} 
             />
           </button>
         )}
 
-        {/* Videos scroll row */}
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="scroll-row px-4 md:px-12 gap-4"
+          className="pl-4 md:pl-12 py-16 md:py-28 flex gap-6 md:gap-8 overflow-x-auto overflow-y-visible scrollbar-hide"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {videos.map((video, index) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              onPlay={onPlayVideo}
-              index={index}
-            />
+            <div key={video.id} className="flex-none w-[260px] md:w-[340px] lg:w-[420px] xl:w-[480px] relative" style={{ scrollSnapAlign: 'start' }}>
+              <VideoCard
+                video={video}
+                onPlay={onPlayVideo}
+                index={index}
+              />
+            </div>
           ))}
+          <div className="flex-none w-4 md:w-12 shrink-0 opacity-0 pointer-events-none" aria-hidden="true">
+            &nbsp;
+          </div>
         </div>
 
-        {/* Right scroll button */}
-        {/* Right scroll button */}
         {canScrollRight && (
           <button
             className="hidden md:block absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
@@ -99,7 +105,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
           >
             <ChevronRight 
               className={cn(
-                "w-12 h-12 text-primary drop-shadow-[0_0_8px_rgba(245,212,103,0.8)] transition-all duration-300",
+                "w-12 h-12 text-primary drop-shadow-[0_0_10px_rgba(245,212,103,0.8)] transition-all duration-300",
                 animatingRight ? "translate-x-4 opacity-0 scale-90" : "translate-x-0 opacity-100 scale-100 hover:scale-110"
               )} 
             />
