@@ -9,7 +9,7 @@
 @layer base {
   :root {
     /* Deep black background */
-    --background: 220 12% 10%;
+    --background: 0 0% 0%;
     /* #F5D467 Foreground */
     --foreground: 46 89% 68%;
 
