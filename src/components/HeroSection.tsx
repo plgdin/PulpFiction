@@ -735,7 +735,7 @@ const HeroSection = ({
       <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
       <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
 
-      <div className="relative z-20 flex h-full w-full items-end px-4 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36">
+      <div className="relative z-20 flex h-full w-full items-end px-4 pb-24 pt-28 md:px-12 md:pb-56 md:pt-36">
         <div className="hero-synced-copy relative max-w-5xl">
           <div className="hero-synced-copy-glow absolute -left-10 bottom-0 top-0 w-[min(62vw,44rem)] blur-3xl" />
 
@@ -794,7 +794,7 @@ const HeroSection = ({
         <Button
           variant="ghost"
           size="icon"
-          className="hero-synced-icon-button absolute bottom-20 right-4 z-20 h-12 w-12 rounded-full border-2 md:bottom-24 md:right-10"
+          className="hero-synced-icon-button absolute bottom-20 right-4 z-50 h-12 w-12 rounded-full border-2 md:bottom-24 md:right-10"
           onClick={() => setIsMuted((prev) => !prev)}
           aria-label={isMuted ? 'Unmute hero video' : 'Mute hero video'}
         >
@@ -806,7 +806,7 @@ const HeroSection = ({
         <>
           <button
             type="button"
-            className="hero-synced-arrow absolute left-3 top-1/2 z-20 -translate-y-1/2 bg-transparent p-0 md:left-8"
+            className="hero-synced-arrow absolute left-3 top-1/2 z-50 -translate-y-1/2 bg-transparent p-0 md:left-8"
             onClick={handlePreviousSlide}
             aria-label="Previous hero video"
           >
@@ -814,7 +814,7 @@ const HeroSection = ({
           </button>
           <button
             type="button"
-            className="hero-synced-arrow absolute right-3 top-1/2 z-20 -translate-y-1/2 bg-transparent p-0 md:right-8"
+            className="hero-synced-arrow absolute right-3 top-1/2 z-50 -translate-y-1/2 bg-transparent p-0 md:right-8"
             onClick={handleNextSlide}
             aria-label="Next hero video"
           >
