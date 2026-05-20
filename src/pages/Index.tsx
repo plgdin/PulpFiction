@@ -61,7 +61,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black text-foreground">
       <Navbar
         categories={categories}
         onSearch={handleSearch}
@@ -75,7 +75,23 @@ const Index = () => {
         onPlay={handlePlayVideo}
       />
 
-      <main className="relative z-10 pb-8">
+      <main className="relative z-10 pb-8 min-h-screen">
+        {/* Glassy Color Bleed into Black Background */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[70vh] pointer-events-none z-[-1]"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)'
+          }}
+        >
+          {/* Dynamic colors leaking from the hero */}
+          <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full mix-blend-screen opacity-40 transition-colors duration-1000 blur-[100px]" style={{ backgroundColor: 'rgb(var(--dynamic-primary-rgb))' }} />
+          <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen opacity-30 transition-colors duration-1000 blur-[120px]" style={{ backgroundColor: 'rgb(var(--dynamic-secondary-rgb))' }} />
+
+          {/* The Glassy Feel Overlay */}
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-[80px]" />
+        </div>
+
         {filteredVideos && (
           <section className="px-4 py-10 md:px-12 md:py-12">
             <h2 className="mb-6 font-display text-2xl text-primary text-shadow-cinematic md:text-3xl">

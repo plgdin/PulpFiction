@@ -734,7 +734,6 @@ const HeroSection = ({
       <div className="hero-synced-aura hero-synced-aura-left absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full blur-3xl" />
       <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
       <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
-
       <div className="relative z-20 flex h-full w-full items-end px-4 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36">
         <div className="hero-synced-copy relative max-w-5xl">
           <div className="hero-synced-copy-glow absolute -left-10 bottom-0 top-0 w-[min(62vw,44rem)] blur-3xl" />
@@ -749,7 +748,7 @@ const HeroSection = ({
           >
             <h1
               key={activeSlide.id}
-              className="hero-synced-title font-display text-[clamp(3.8rem,8.8vw,8.1rem)] leading-[0.9] tracking-[0.02em]"
+              className="hero-synced-title font-display text-[clamp(3.8rem,8.8vw,8.1rem)] leading-[0.9] tracking-[0.02em] pb-2 pt-1"
             >
               {activeSlide.title || video.title}
             </h1>
