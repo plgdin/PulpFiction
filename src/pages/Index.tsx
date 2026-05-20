@@ -75,9 +75,9 @@ const Index = () => {
         onPlay={handlePlayVideo}
       />
 
-      <main className="relative z-10 -mt-14 pb-8">
+      <main className="relative z-10 pb-8">
         {filteredVideos && (
-          <section className="px-4 py-8 md:px-12">
+          <section className="px-4 py-10 md:px-12 md:py-12">
             <h2 className="mb-6 font-display text-2xl text-primary text-shadow-cinematic md:text-3xl">
               Search Results for "{searchQuery}"
             </h2>
@@ -126,7 +126,7 @@ const Index = () => {
                 <section
                   key={cat.id}
                   id={cat.slug}
-                  className={idx === 0 ? 'pt-4 md:pt-6' : undefined}
+                  className={idx === 0 ? 'scroll-mt-24 pt-8 md:pt-12' : 'scroll-mt-24'}
                   ref={(el) => (sectionRefs.current[cat.slug] = el)}
                 >
                   <CategoryRow
