@@ -1,4 +1,96 @@
+import { useState, useEffect } from 'react';
 import { ExternalLink, Mail, Instagram, Youtube } from 'lucide-react';
+
+const FooterTypewriter = () => {
+  const [baseText, setBaseText] = useState('');
+  const [prefixText, setPrefixText] = useState('');
+
+  type Mode = 'TYPE_BASE' | 'MOVE_CURSOR' | 'TYPE_PREFIX' | 'DELETE_PREFIX' | 'PAUSE';
+  const [mode, setMode] = useState<Mode>('TYPE_BASE');
+
+  const [cursorIndex, setCursorIndex] = useState(0);
+
+  const roles = ["Writer", "Actor", "Director"];
+  const [roleIndex, setRoleIndex] = useState(0);
+  const targetBase = "TARUN\u00A0KAPOOR";
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (mode === 'TYPE_BASE') {
+      if (baseText.length < targetBase.length) {
+        timer = setTimeout(() => {
+          setBaseText(targetBase.slice(0, baseText.length + 1));
+          setCursorIndex(baseText.length + 1);
+        }, 120);
+      } else {
+        timer = setTimeout(() => setMode('MOVE_CURSOR'), 1000);
+      }
+    }
+    else if (mode === 'MOVE_CURSOR') {
+      if (cursorIndex > 0) {
+        timer = setTimeout(() => setCursorIndex(prev => prev - 1), 120);
+      } else {
+        timer = setTimeout(() => setMode('TYPE_PREFIX'), 400);
+      }
+    }
+    else if (mode === 'TYPE_PREFIX') {
+      const currentRole = roles[roleIndex].toUpperCase();
+      if (prefixText.length < currentRole.length) {
+        timer = setTimeout(() => setPrefixText(currentRole.slice(0, prefixText.length + 1)), 100);
+      } else {
+        setMode('PAUSE');
+      }
+    }
+    else if (mode === 'PAUSE') {
+      timer = setTimeout(() => setMode('DELETE_PREFIX'), roleIndex === 2 ? 3000 : 1500);
+    }
+    else if (mode === 'DELETE_PREFIX') {
+      if (prefixText.length > 0) {
+        timer = setTimeout(() => setPrefixText(prefixText.slice(0, prefixText.length - 1)), 60);
+      } else {
+        setRoleIndex((prev) => (prev + 1) % roles.length);
+        setMode('TYPE_PREFIX');
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [baseText, prefixText, mode, cursorIndex, roleIndex]);
+
+  const Cursor = () => (
+    <span className="inline-flex w-0 justify-center overflow-visible align-baseline">
+      <span className="animate-blink font-light text-primary/80 -translate-y-[0.05em]">|</span>
+    </span>
+  );
+
+  const renderText = () => {
+    if (mode === 'TYPE_BASE') {
+      return <>{baseText}<Cursor /></>;
+    }
+
+    if (mode === 'MOVE_CURSOR') {
+      const beforeCursor = baseText.slice(0, cursorIndex);
+      const afterCursor = baseText.slice(cursorIndex);
+      return (
+        <>
+          {beforeCursor}<Cursor />{afterCursor}
+        </>
+      );
+    }
+
+    return (
+      <>
+        {prefixText}<Cursor />{prefixText.length > 0 ? '\u00A0' : ''}{baseText}
+      </>
+    );
+  };
+
+  return (
+    <h3 className="font-display text-2xl text-primary mb-4 whitespace-pre-wrap">
+      {renderText()}
+    </h3>
+  );
+};
 
 const Footer = () => {
   return (
@@ -7,9 +99,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="font-display text-2xl text-primary mb-4">TARUN KAPOOR</h3>
+            <FooterTypewriter />
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Director & Cinematographer crafting visual stories that move, inspire, and captivate.
+              Crafting visual stories that move, inspire, and captivate.
             </p>
           </div>
 

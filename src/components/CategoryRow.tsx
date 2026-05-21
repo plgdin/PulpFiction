@@ -53,7 +53,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
   return (
     <section className="relative py-6">
       {/* Category title */}
-      <h2 className="font-display text-2xl md:text-3xl text-primary mb-4 px-4 md:px-12 text-shadow-cinematic">
+      <h2 className="font-display text-2xl md:text-3xl text-primary -mb-2 px-4 md:px-12 text-shadow-cinematic relative z-10">
         {title}
       </h2>
 
