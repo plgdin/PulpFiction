@@ -23,6 +23,8 @@ const getDefaultData = (): CmsData => ({
     youtubeUrl: '',
     titleFont: 'Antonio',
     descriptionFont: 'Lexend Peta',
+    headerFont: 'Antonio',
+    footerFont: 'Lexend Peta',
   },
   heroContent: {
     badge: 'Director Actor & Writer',
@@ -145,7 +147,18 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (data.siteSettings?.descriptionFont) {
       document.documentElement.style.setProperty('--font-description', `'${data.siteSettings.descriptionFont}', sans-serif`);
     }
-  }, [data.siteSettings?.titleFont, data.siteSettings?.descriptionFont]);
+    if (data.siteSettings?.headerFont) {
+      document.documentElement.style.setProperty('--font-header', `'${data.siteSettings.headerFont}', sans-serif`);
+    }
+    if (data.siteSettings?.footerFont) {
+      document.documentElement.style.setProperty('--font-footer', `'${data.siteSettings.footerFont}', sans-serif`);
+    }
+  }, [
+    data.siteSettings?.titleFont, 
+    data.siteSettings?.descriptionFont,
+    data.siteSettings?.headerFont,
+    data.siteSettings?.footerFont
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {

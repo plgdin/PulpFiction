@@ -38,7 +38,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
           {/* Logo */}
           <div className="flex items-center gap-9">
             <Link to="/" className="block">
-              <h1 className="font-display text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider hover:text-primary/90 transition-colors cursor-pointer">
+              <h1 className="font-header uppercase text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider hover:text-primary/90 transition-colors cursor-pointer">
                 TARUN KAPOOR
               </h1>
             </Link>
@@ -49,7 +49,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
                 <button
                   key={category.id}
                   onClick={() => onCategoryClick(category)}
-                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-base font-medium font-header uppercase tracking-wide text-muted-foreground hover:text-primary transition-colors"
                 >
                   {category.title}
                 </button>

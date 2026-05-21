@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCms } from '@/context/CmsContext';
@@ -27,13 +28,23 @@ const SiteSettings = () => {
   const [siteDesc, setSiteDesc] = useState(data.siteSettings.siteDescription);
   const [titleFont, setTitleFont] = useState(data.siteSettings.titleFont || 'Antonio');
   const [descriptionFont, setDescriptionFont] = useState(data.siteSettings.descriptionFont || 'Lexend Peta');
+  const [headerFont, setHeaderFont] = useState(data.siteSettings.headerFont || 'Antonio');
+  const [footerFont, setFooterFont] = useState(data.siteSettings.footerFont || 'Lexend Peta');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveSettings = () => {
-    updateSiteSettings({ ...data.siteSettings, siteName, siteDescription: siteDesc, titleFont, descriptionFont });
+    updateSiteSettings({ 
+      ...data.siteSettings, 
+      siteName, 
+      siteDescription: siteDesc, 
+      titleFont, 
+      descriptionFont,
+      headerFont,
+      footerFont
+    });
     toast.success('Site settings saved');
   };
 
@@ -81,6 +92,8 @@ const SiteSettings = () => {
     setSiteDesc('Director & Cinematographer');
     setTitleFont('Antonio');
     setDescriptionFont('Lexend Peta');
+    setHeaderFont('Antonio');
+    setFooterFont('Lexend Peta');
     setShowResetDialog(false);
     toast.success('Reset to defaults');
   };
@@ -89,7 +102,9 @@ const SiteSettings = () => {
     siteName !== data.siteSettings.siteName || 
     siteDesc !== data.siteSettings.siteDescription ||
     titleFont !== (data.siteSettings.titleFont || 'Antonio') ||
-    descriptionFont !== (data.siteSettings.descriptionFont || 'Lexend Peta');
+    descriptionFont !== (data.siteSettings.descriptionFont || 'Lexend Peta') ||
+    headerFont !== (data.siteSettings.headerFont || 'Antonio') ||
+    footerFont !== (data.siteSettings.footerFont || 'Lexend Peta');
 
   return (
     <div className="space-y-6">
@@ -111,32 +126,96 @@ const SiteSettings = () => {
             <Input value={siteDesc} onChange={(e) => setSiteDesc(e.target.value)} className="bg-secondary border-border mt-1" />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Main Title Font</Label>
-              <Select value={titleFont} onValueChange={setTitleFont}>
-                <SelectTrigger className="bg-secondary border-border mt-1">
-                  <SelectValue placeholder="Select a font" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AVAILABLE_FONTS.map(font => (
-                    <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <Separator className="my-6" />
+          <h3 className="text-sm font-semibold text-foreground mb-4">Typography Settings</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+              <div>
+                <Label>Header & Logo Font</Label>
+                <Select value={headerFont} onValueChange={setHeaderFont}>
+                  <SelectTrigger className="bg-secondary border-border mt-1">
+                    <SelectValue placeholder="Select a font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_FONTS.map(font => (
+                      <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-background rounded border border-border mt-2 overflow-hidden">
+                <p className="text-xs text-muted-foreground mb-2">Live Preview</p>
+                <div style={{ fontFamily: headerFont }} className="text-primary tracking-wider text-xl uppercase font-bold text-shadow-glow">
+                  {siteName || 'TARUN KAPOOR'}
+                </div>
+              </div>
             </div>
-            <div>
-              <Label>Description Font</Label>
-              <Select value={descriptionFont} onValueChange={setDescriptionFont}>
-                <SelectTrigger className="bg-secondary border-border mt-1">
-                  <SelectValue placeholder="Select a font" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AVAILABLE_FONTS.map(font => (
-                    <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+              <div>
+                <Label>Main Titles Font</Label>
+                <Select value={titleFont} onValueChange={setTitleFont}>
+                  <SelectTrigger className="bg-secondary border-border mt-1">
+                    <SelectValue placeholder="Select a font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_FONTS.map(font => (
+                      <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-background rounded border border-border mt-2 overflow-hidden">
+                <p className="text-xs text-muted-foreground mb-2">Live Preview</p>
+                <div style={{ fontFamily: titleFont }} className="text-primary text-2xl uppercase tracking-wide font-bold">
+                  Cinematic Ad Films
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+              <div>
+                <Label>Description & Body Font</Label>
+                <Select value={descriptionFont} onValueChange={setDescriptionFont}>
+                  <SelectTrigger className="bg-secondary border-border mt-1">
+                    <SelectValue placeholder="Select a font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_FONTS.map(font => (
+                      <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-background rounded border border-border mt-2 overflow-hidden">
+                <p className="text-xs text-muted-foreground mb-2">Live Preview</p>
+                <div style={{ fontFamily: descriptionFont }} className="text-foreground/90 text-sm leading-relaxed">
+                  {siteDesc || 'Director & Cinematographer crafting visual stories that move, inspire, and captivate.'}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+              <div>
+                <Label>Footer Font</Label>
+                <Select value={footerFont} onValueChange={setFooterFont}>
+                  <SelectTrigger className="bg-secondary border-border mt-1">
+                    <SelectValue placeholder="Select a font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_FONTS.map(font => (
+                      <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-background rounded border border-border mt-2 overflow-hidden">
+                <p className="text-xs text-muted-foreground mb-2">Live Preview</p>
+                <div style={{ fontFamily: footerFont }} className="text-muted-foreground text-xs tracking-widest uppercase">
+                  © 2026 {siteName || 'TARUN KAPOOR'}
+                </div>
+              </div>
             </div>
           </div>
 

@@ -9,6 +9,8 @@ export interface SiteSettings {
   youtubeUrl: string;
   titleFont: string;
   descriptionFont: string;
+  headerFont: string;
+  footerFont: string;
 }
 
 export interface HeroContent {
