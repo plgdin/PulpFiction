@@ -55,7 +55,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
   };
 
   return (
-    <section className="relative py-2 md:py-4">
+    <section className="relative py-2 md:py-4 -mb-20 md:-mb-32">
       <h2 
         className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20" 
         style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}
@@ -81,11 +81,11 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="pl-4 md:pl-12 py-16 md:py-28 flex gap-6 md:gap-8 overflow-x-auto overflow-y-visible scrollbar-hide"
+          className="pl-4 md:pl-12 pt-16 pb-36 md:pt-24 md:pb-52 flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide -mt-6 md:-mt-8"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {videos.map((video, index) => (
-            <div key={video.id} className="flex-none w-[260px] md:w-[340px] lg:w-[420px] xl:w-[480px] relative" style={{ scrollSnapAlign: 'start' }}>
+            <div key={video.id} className="flex-none w-[280px] md:w-[360px] lg:w-[440px] xl:w-[500px] relative" style={{ scrollSnapAlign: 'start' }}>
               <VideoCard
                 video={video}
                 onPlay={onPlayVideo}

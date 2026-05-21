@@ -12,16 +12,13 @@ interface VideoCardProps {
 
 const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  // Tracks if the card is on the left edge, right edge, or center of screen
   const [edgePos, setEdgePos] = useState<'center' | 'left' | 'right'>('center');
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    // 1. Grab the physical screen coordinates of the card before it expands
     const rect = e.currentTarget.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     
-    // 2. Determine edge proximity (15% buffer)
     if (rect.left < viewportWidth * 0.15) {
       setEdgePos('left');
     } else if (rect.right > viewportWidth * 0.85) {
@@ -53,7 +50,6 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
     mass: 1,
   };
 
-  // Maps the edge detection to explicit Framer Motion positional coordinates
   const motionStyles = {
     left: { left: '0%', right: 'auto', x: '0%', y: '-50%' },
     right: { left: 'auto', right: '0%', x: '0%', y: '-50%' },
@@ -62,7 +58,8 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
 
   return (
     <div
-      className="relative w-full aspect-video group"
+      className="relative w-full aspect-video flex justify-center items-center"
+      style={{ zIndex: isHovered ? 50 : 1 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -71,7 +68,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         initial={false}
         animate={{
           opacity: isHovered ? 0 : 1,
-          scale: isHovered ? 0.9 : 1,
+          scale: 1, 
         }}
         transition={springTransition}
         className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg"
@@ -94,12 +91,11 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         animate={{
           opacity: isHovered ? 1 : 0,
           scale: isHovered ? 1 : 0.95,
-          // Inject edge-aware coordinates here
           ...motionStyles[edgePos]
         }}
         transition={springTransition}
         className={cn(
-          "absolute w-[115%] z-50 overflow-hidden",
+          "absolute w-[125%] min-w-[320px] z-50 overflow-hidden", 
           "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem]",
           "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]",
           isHovered ? "pointer-events-auto" : "pointer-events-none"
@@ -121,7 +117,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
           
-          <div className="absolute bottom-5 left-6 w-[90%] overflow-hidden">
+          <div className="absolute bottom-5 left-6 w-[90%]">
             <motion.h3 
               initial={false}
               animate={{ 
@@ -129,7 +125,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                 opacity: isHovered ? 1 : 0 
               }}
               transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] line-clamp-2"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
               style={{ 
                 fontFamily: "'Antonio', sans-serif", 
                 letterSpacing: '0.04em', 
@@ -149,7 +145,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         </div>
 
         {/* Bottom: Information Panel */}
-        <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-gradient-to-b from-transparent to-black/30">
+        <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-black/20">
           
           <div className="flex items-center justify-between">
             <div className="flex gap-3">
@@ -193,7 +189,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
               {video.year || '2024'}
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-            <span className="drop-shadow-md">{video.category.replace('-', ' ')}</span>
+            <span className="drop-shadow-md truncate">{video.category?.replace('-', ' ')}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
             <span className="text-primary/90 drop-shadow-[0_0_8px_rgba(245,212,103,0.5)]">Cinematic</span>
           </div>
