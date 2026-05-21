@@ -80,7 +80,7 @@ const Index = () => {
       <main className="relative z-10 -mt-14 pb-8">
         {filteredVideos && (
           <section className="px-4 py-8 md:px-12">
-            <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
+            <h2 className="mb-6 text-2xl md:text-3xl font-display font-bold text-primary text-shadow-cinematic">
               Search Results for "{searchQuery}"
             </h2>
 

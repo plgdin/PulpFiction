@@ -57,8 +57,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
   return (
     <section className="relative py-2 md:py-4">
       <h2 
-        className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20" 
-        style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}
+        className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20 font-display font-bold text-primary" 
       >
         {title}
       </h2>

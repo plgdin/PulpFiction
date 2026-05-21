@@ -129,20 +129,14 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                 opacity: isHovered ? 1 : 0 
               }}
               transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] line-clamp-2"
-              style={{ 
-                fontFamily: "'Antonio', sans-serif", 
-                letterSpacing: '0.04em', 
-                textTransform: 'uppercase'
-              }}
+              className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] line-clamp-2"
             >
               {video.title}
             </motion.h3>
           </div>
 
           <div 
-            className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm"
-            style={{ fontFamily: "'Antonio', sans-serif" }}
+            className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm font-display"
           >
             {video.duration}
           </div>
@@ -161,8 +155,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
               >
                 <Play className="h-5 w-5 fill-current" />
                 <span 
-                  className="font-bold text-[14px] tracking-[0.2em] mt-0.5" 
-                  style={{ fontFamily: "'Antonio', sans-serif" }}
+                  className="font-bold text-[14px] tracking-[0.2em] mt-0.5 font-display" 
                 >
                   PLAY
                 </span>
@@ -186,8 +179,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           </div>
 
           <div 
-            className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold text-white/80 uppercase tracking-widest"
-            style={{ fontFamily: "'Lexend Peta', sans-serif" }}
+            className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold text-white/80 uppercase tracking-widest font-body"
           >
             <span className="bg-white/10 px-2.5 py-1 rounded border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               {video.year || '2024'}
