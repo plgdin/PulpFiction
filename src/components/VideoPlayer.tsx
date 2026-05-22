@@ -41,6 +41,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
   };
 
   useEffect(() => {
+    // Reset state when video changes
     setIsPlayingFull(false);
     setIsMuted(true);
   }, [video]);
@@ -82,6 +83,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <Button
           variant="ghost"
           size="icon"
@@ -91,6 +93,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           <X className="w-6 h-6" />
         </Button>
 
+        {/* Video Player */}
         <div
           ref={containerRef}
           className={cn(
@@ -150,53 +153,63 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
             />
           )}
 
+          {/* Overlay for Preview Mode */}
           {!isPlayingFull && (
             <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/20 to-transparent flex flex-col justify-end p-10 pointer-events-none">
-              <h2 className="text-5xl sm:text-7xl font-display text-primary text-shadow-cinematic mb-8 tracking-tight w-3/4 leading-none">
+              {/* Title */}
+              <h2 
+                className="text-5xl sm:text-7xl font-bold text-white mb-8 leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,1)] w-3/4"
+                style={{ 
+                  fontFamily: "'Antonio', sans-serif", 
+                  letterSpacing: '0.04em', 
+                  textTransform: 'uppercase'
+                }}
+              >
                 {video.title}
               </h2>
 
+              {/* Buttons Row */}
               <div className="flex items-center justify-between w-full pointer-events-auto">
                 <div className="flex items-center gap-3">
-                  <Button
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8 py-6 text-xl gap-3 rounded-md"
+                  <button
+                    className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105"
                     onClick={() => {
                       setIsPlayingFull(true);
                       setIsMuted(false);
                       seekToZero();
 
                       if (containerRef.current) {
-                        if (containerRef.current.requestFullscreen) {
-                          containerRef.current.requestFullscreen();
-                        } else if ((containerRef.current as any).webkitRequestFullscreen) {
-                          (containerRef.current as any).webkitRequestFullscreen();
-                        } else if ((containerRef.current as any).msRequestFullscreen) {
-                          (containerRef.current as any).msRequestFullscreen();
-                        }
+                        if (containerRef.current.requestFullscreen) containerRef.current.requestFullscreen();
+                        else if ((containerRef.current as any).webkitRequestFullscreen) (containerRef.current as any).webkitRequestFullscreen();
+                        else if ((containerRef.current as any).msRequestFullscreen) (containerRef.current as any).msRequestFullscreen();
                       }
                     }}
                   >
-                    <Play className="w-7 h-7 fill-current" />
-                    Play
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
+                    <Play className="w-6 h-6 fill-current" />
+                    <span 
+                      className="font-bold text-[16px] sm:text-[18px] tracking-[0.2em] mt-0.5" 
+                      style={{ fontFamily: "'Antonio', sans-serif" }}
+                    >
+                      PLAY
+                    </span>
+                  </button>
+
+                  <button
+                    className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105"
                     onClick={() => window.location.href = 'mailto:tarunkapoor97@gmail.com'}
                   >
-                    <Mail className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full w-12 h-12 border-2 border-white/50 text-white hover:border-white hover:bg-white hover:text-black hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] bg-[#2a2a2a]/60 transition-all duration-300"
+                    <Mail className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+
+                  <button
+                    className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105"
                     onClick={() => window.open('https://instagram.com/tarunkapoor2', '_blank')}
                   >
-                    <Instagram className="w-5 h-5" />
-                  </Button>
+                    <Instagram className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
                 </div>
 
+                {/* Mute Toggle */}
                 <Button
                   variant="outline"
                   size="icon"
@@ -210,13 +223,20 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           )}
         </div>
 
+        {/* Info Section */}
         <div className="p-10 pt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-5">
-            <div className="flex items-center gap-3 text-base font-medium">
-              <span className="text-[#46d369] font-semibold">98% Match</span>
-              <span className="text-white/90">{video.year}</span>
-              <span className="text-white/90">{video.duration}</span>
-              <span className="border border-white/40 px-1.5 py-0 rounded text-xs text-white/90">HD</span>
+            <div 
+              className="flex flex-wrap items-center gap-3 text-[14px] md:text-[16px] font-bold uppercase tracking-wider text-white/90"
+              style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.08em' }}
+            >
+              <span className="px-3 py-1 rounded bg-white/10 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-white font-extrabold">
+                {video.year || '2024'}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span className="truncate text-white/80">{video.category?.replace('-', ' ')}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span className="text-primary font-extrabold drop-shadow-[0_0_8px_rgba(245,212,103,0.4)]">1080P</span>
             </div>
             <p className="text-white text-base leading-relaxed sm:text-lg">
               {video.description}
@@ -238,10 +258,16 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           </div>
         </div>
 
+        {/* More Like This Section */}
         {moreVideos.length > 0 && (
           <div className="p-10 pt-4">
-            <h3 className="text-2xl font-bold text-white mb-6 font-display">More Like This</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <h3 
+              className="text-3xl sm:text-4xl font-bold text-white mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
+              style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+            >
+              MORE LIKE THIS
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {moreVideos.map((v, index) => (
                 <div
                   key={v.id}
@@ -249,27 +275,40 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                   style={{ animationDelay: `${index * 0.1}s` }}
                   onClick={() => handlePlayRelated(v)}
                 >
-                  <div className="group relative h-full w-full overflow-hidden rounded bg-black/40">
+                  <div className="group relative h-full w-full overflow-hidden rounded-[16px] bg-black/40 border border-white/10 shadow-lg shadow-black/50">
                     <img
                       src={v.thumbnail || (v.videoUrl?.includes('.b-cdn.net') ? v.videoUrl.replace('/play_720p.mp4', '/thumbnail.jpg').replace('/playlist.m3u8', '/thumbnail.jpg') : '/placeholder.svg')}
                       alt={v.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/placeholder.svg';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80" />
+                    
+                    {/* Play button overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                        <Play className="w-6 h-6 text-primary-foreground fill-primary-foreground ml-1" />
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] transform transition-transform duration-300 group-hover:scale-110">
+                        <Play className="w-6 h-6 text-white fill-white ml-1" />
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300 translate-y-2 group-hover:translate-y-0">
-                      <h3 className="font-display text-primary bg-primary-foreground text-sm truncate px-1 text-center">{v.title}</h3>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-primary/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                        <span>{v.year}</span>
-                        <span>•</span>
-                        <span>{v.duration}</span>
+
+                    {/* Bottom Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300">
+                      <h3 
+                        className="text-xl font-bold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] truncate"
+                        style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+                      >
+                        {v.title}
+                      </h3>
+                      
+                      <div 
+                        className="flex items-center gap-2 mt-2 text-[11px] font-bold text-white/70 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+                        style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.08em' }}
+                      >
+                        <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-white">{v.year || '2024'}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/30"></span>
+                        <span className="text-primary drop-shadow-[0_0_4px_rgba(245,212,103,0.4)]">1080P</span>
                       </div>
                     </div>
                   </div>
