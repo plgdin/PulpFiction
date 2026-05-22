@@ -27,7 +27,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
   return (
     <nav
       className={cn(
-        "hidden md:block fixed top-0 left-0 right-0 z-40 transition-all duration-500",
+        "fixed top-0 left-0 right-0 z-40 transition-all duration-500",
         isScrolled 
           ? "bg-black/40 backdrop-blur-lg" 
           : "bg-transparent pt-[0.55rem]"

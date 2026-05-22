@@ -155,10 +155,10 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
 
           {/* Overlay for Preview Mode */}
           {!isPlayingFull && (
-            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/20 to-transparent flex flex-col justify-end p-10 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/20 to-transparent flex flex-col justify-end p-5 sm:p-10 pointer-events-none">
               {/* Title */}
               <h2 
-                className="text-5xl sm:text-7xl font-bold text-white mb-8 leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,1)] w-3/4"
+                className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-8 leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,1)] w-full sm:w-3/4"
                 style={{ 
                   fontFamily: "'Antonio', sans-serif", 
                   letterSpacing: '0.04em', 
@@ -224,7 +224,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         </div>
 
         {/* Info Section */}
-        <div className="p-10 pt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="p-5 sm:p-10 pt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-5">
             <div 
               className="flex flex-wrap items-center gap-3 text-[14px] md:text-[16px] font-bold uppercase tracking-wider text-white/90"
@@ -260,7 +260,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
 
         {/* More Like This Section */}
         {moreVideos.length > 0 && (
-          <div className="p-10 pt-4">
+          <div className="p-5 sm:p-10 pt-4">
             <h3 
               className="text-3xl sm:text-4xl font-bold text-white mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
               style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}

@@ -85,7 +85,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {videos.map((video, index) => (
-            <div key={video.id} className="flex-none w-[280px] md:w-[360px] lg:w-[440px] xl:w-[500px] relative" style={{ scrollSnapAlign: 'start' }}>
+            <div key={video.id} className="flex-none w-[85vw] sm:w-[320px] md:w-[360px] lg:w-[420px] xl:w-[460px] 2xl:w-[500px] relative" style={{ scrollSnapAlign: 'start' }}>
               <VideoCard
                 video={video}
                 onPlay={onPlayVideo}

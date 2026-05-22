@@ -114,11 +114,9 @@
   body :is(h1, h2, h3, h4, h5, h6, p, span, a, button, label, small, strong) {
     transition:
       color 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      text-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
       background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      filter 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* Pulp Fiction display headings */

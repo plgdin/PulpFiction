@@ -8,7 +8,7 @@ import heroBg from '@/assets/hero-bg.jpg';
 
 const CONTENT_COLLAPSE_DELAY_MS = 7000;
 const TITLE_MOTION_MS = 1400;
-const FRAME_SAMPLE_INTERVAL_MS = 280;
+const FRAME_SAMPLE_INTERVAL_MS = 1000;
 const PALETTE_EASE_AMOUNT = 0.045;
 const PALETTE_UPDATE_THRESHOLD = 120;
 const BRIGHT_DOMINANT_COUNT_THRESHOLD = 50;
@@ -402,7 +402,7 @@ const extractPaletteFromSource = (
 };
 
 const extractPaletteFromThumbnail = async (src: string): Promise<HeroPalette> => {
-  if (!src) return DEFAULT_PALETTE;
+  if (!src || src.includes('behance.net')) return DEFAULT_PALETTE;
 
   const image = new Image();
   image.crossOrigin = 'anonymous';
@@ -549,23 +549,30 @@ const HeroSection = ({
 
   useEffect(() => {
     let frameId = 0;
+    let isRunning = true;
 
     const animatePalette = () => {
+      if (!isRunning) return;
+      
       setHeroPalette((currentPalette) => {
         const difference = paletteDistance(currentPalette, targetPalette);
         if (difference <= 8) {
+          isRunning = false;
           return targetPalette;
         }
 
         return interpolatePalette(currentPalette, targetPalette, PALETTE_EASE_AMOUNT);
       });
 
-      frameId = window.requestAnimationFrame(animatePalette);
+      if (isRunning) {
+        frameId = window.requestAnimationFrame(animatePalette);
+      }
     };
 
     frameId = window.requestAnimationFrame(animatePalette);
 
     return () => {
+      isRunning = false;
       window.cancelAnimationFrame(frameId);
     };
   }, [targetPalette]);
