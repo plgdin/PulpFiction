@@ -94,7 +94,7 @@ const FooterTypewriter = () => {
 
 const Footer = () => {
   return (
-    <footer className="bg-card border-t border-border py-12 px-4 md:px-12 mt-12">
+    <footer className="bg-card border-t border-border py-12 px-4 md:px-12 mt-12 font-footer">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
@@ -107,7 +107,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-display text-lg text-primary mb-4">Categories</h4>
+            <h4 className="font-footer uppercase tracking-wider font-bold text-lg text-primary mb-4">Categories</h4>
             <ul className="space-y-2">
               <li>
                 <a href="#ad-films" className="text-muted-foreground hover:text-primary transition-colors text-sm">
@@ -134,7 +134,7 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-display text-lg text-primary mb-4">Connect</h4>
+            <h4 className="font-footer uppercase tracking-wider font-bold text-lg text-primary mb-4">Connect</h4>
             <div className="flex items-center gap-4">
               <a
                 href="https://www.behance.net/tarunkapoor2"

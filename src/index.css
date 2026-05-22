@@ -107,7 +107,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-description, 'Lexend Peta'), system-ui, sans-serif;
     overflow-x: hidden; /* Prevent horizontal scroll from cards pushing past edge */
   }
 
@@ -123,7 +124,7 @@
 
   /* Pulp Fiction display headings */
   .font-display {
-    font-family: 'Antonio', sans-serif;
+    font-family: var(--font-title, 'Antonio'), sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }

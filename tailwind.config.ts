@@ -15,8 +15,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["'Antonio'", "Impact", "sans-serif"],
-        body: ["Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-title, 'Antonio')", "Impact", "sans-serif"],
+        body: ["var(--font-description, 'Inter')", "system-ui", "sans-serif"],
+        header: ["var(--font-header, 'Antonio')", "sans-serif"],
+        footer: ["var(--font-footer, 'Lexend Peta')", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

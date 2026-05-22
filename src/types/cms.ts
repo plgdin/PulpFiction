@@ -7,6 +7,10 @@ export interface SiteSettings {
   email: string;
   instagramUrl: string;
   youtubeUrl: string;
+  titleFont: string;
+  descriptionFont: string;
+  headerFont: string;
+  footerFont: string;
 }
 
 export interface HeroContent {

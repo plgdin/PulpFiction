@@ -655,8 +655,8 @@ const PreviewVideoCard = ({ video, index, onEdit, onDelete, isDragging, isDragOv
         {/* Title bar */}
         <div className={cn(
           'absolute bottom-0 left-0 right-0 p-4',
-          'transform transition-transform duration-300',
-          isHovered ? 'translate-y-0' : 'translate-y-2'
+          'transform transition-all duration-300',
+          isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         )}>
           <h4 className="font-display tracking-wide truncate text-primary bg-primary-foreground text-sm text-center">
             {video.title}
