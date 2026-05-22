@@ -723,26 +723,32 @@ const HeroSection = ({
               style={{ transitionDuration: '1600ms' }}
             >
               {isActive && slide.hasVideoPreview ? (
-                <video
-                  ref={(element) => {
-                    videoRefs.current[slide.id] = element;
-                  }}
-                  src={slide.previewUrl}
-                  poster={slide.thumbnail}
-                  crossOrigin="anonymous"
-                  className="h-full w-full object-cover"
-                  autoPlay
-                  muted={isMuted}
-                  loop={false}
-                  playsInline
-                  onTimeUpdate={(event) => handleVideoProgress(index, event)}
-                  onEnded={handleNextSlide}
-                />
+                <>
+                  <link rel="preload" as="image" href={slide.thumbnail || heroBg} fetchPriority="high" />
+                  <video
+                    ref={(element) => {
+                      videoRefs.current[slide.id] = element;
+                    }}
+                    src={slide.previewUrl}
+                    poster={slide.thumbnail}
+                    crossOrigin="anonymous"
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted={isMuted}
+                    loop={false}
+                    playsInline
+                    preload="auto"
+                    onTimeUpdate={(event) => handleVideoProgress(index, event)}
+                    onEnded={handleNextSlide}
+                  />
+                </>
               ) : (
                 <img
                   src={slide.thumbnail || heroBg}
                   alt={`${slide.title} background`}
                   className="h-full w-full object-cover"
+                  fetchPriority={isActive ? "high" : "auto"}
+                  loading={isActive ? "eager" : "lazy"}
                 />
               )}
             </div>
