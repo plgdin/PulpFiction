@@ -49,7 +49,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
                 <button
                   key={category.id}
                   onClick={() => onCategoryClick(category)}
-                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors text-shadow-glow"
                 >
                   {category.title}
                 </button>
@@ -66,7 +66,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
             >
-              <span className="text-base">Behance</span>
+              <span className="text-base text-shadow-glow">Behance</span>
               <ExternalLink className="w-[1.15rem] h-[1.15rem] drop-shadow-[0_0_8px_rgba(245,212,103,0.8)]" />
             </a>
           </div>

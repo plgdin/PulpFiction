@@ -15,7 +15,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["'Pulp Fiction'", "Impact", "sans-serif"],
+        display: ["'Antonio'", "Impact", "sans-serif"],
         body: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {

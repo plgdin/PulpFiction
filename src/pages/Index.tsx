@@ -63,8 +63,20 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar
+    <div className="min-h-screen bg-black relative text-foreground">
+      {/* Dynamic Background Gradient from Thumbnail Colors */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-40"
+        style={{
+          background: `
+            radial-gradient(circle at 20% 0%, rgb(var(--dynamic-primary-rgb)) 0%, transparent 60%),
+            radial-gradient(circle at 80% 20%, rgb(var(--dynamic-secondary-rgb)) 0%, transparent 60%),
+            radial-gradient(circle at 50% 100%, rgb(var(--dynamic-highlight-rgb)) 0%, transparent 70%)
+          `
+        }}
+      />
+      <div className="relative z-10">
+        <Navbar
         categories={categories}
         onSearch={handleSearch}
         onCategoryClick={handleCategoryClick}
@@ -77,9 +89,9 @@ const Index = () => {
         onPlay={handlePlayVideo}
       />
 
-      <main className="relative z-10 -mt-14 pb-8">
+      <main className="relative z-30 pb-8 -mt-32 md:-mt-48 pointer-events-none">
         {filteredVideos && (
-          <section className="px-4 py-8 md:px-12">
+          <section className="px-4 py-8 md:px-12 pointer-events-auto">
             <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
               Search Results for "{searchQuery}"
             </h2>
@@ -110,7 +122,7 @@ const Index = () => {
                 <section
                   key={cat.id}
                   id={cat.slug}
-                  className={idx === 0 ? 'pt-4 md:pt-6' : undefined}
+                  className={idx === 0 ? 'scroll-mt-24 pt-8 md:pt-12 pointer-events-auto' : 'scroll-mt-24 pointer-events-auto'}
                   ref={(el) => (sectionRefs.current[cat.slug] = el)}
                 >
                   <CategoryRow
@@ -128,6 +140,7 @@ const Index = () => {
       <Footer />
 
       <VideoPlayer video={selectedVideo} onClose={handleClosePlayer} />
+      </div>
     </div>
   );
 };

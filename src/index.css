@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Deep black background */
-    --background: 220 12% 10%;
+    --background: 0 0% 0%;
     /* #F5D467 Foreground */
     --foreground: 46 89% 68%;
 
@@ -54,6 +54,9 @@
     /* Shadows */
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.6);
     --shadow-glow: 0 0 30px hsl(46 89% 68% / 0.4);
+    --dynamic-primary-rgb: 255 205 82;
+    --dynamic-secondary-rgb: 245 101 72;
+    --dynamic-highlight-rgb: 255 244 205;
 
     /* Sidebar - keeping for compatibility */
     --sidebar-background: 0 0% 3%;
@@ -108,6 +111,16 @@
     overflow-x: hidden; /* Prevent horizontal scroll from cards pushing past edge */
   }
 
+  body :is(h1, h2, h3, h4, h5, h6, p, span, a, button, label, small, strong) {
+    transition:
+      color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      text-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   /* Pulp Fiction display headings */
   .font-display {
     font-family: 'Antonio', sans-serif;
@@ -117,11 +130,17 @@
 
   /* Text shadow for cinematic effect */
   .text-shadow-cinematic {
-    text-shadow: 2px 2px 0 hsl(0 0% 10%), 4px 4px 0 hsl(0 0% 5%);
+    text-shadow:
+      2px 2px 0 hsl(0 0% 10% / 0.82),
+      0 0 10px rgb(var(--dynamic-primary-rgb) / 0.12),
+      0 0 18px rgb(var(--dynamic-secondary-rgb) / 0.08);
   }
 
   .text-shadow-glow {
-    text-shadow: 0 0 20px hsl(46 89% 68% / 0.5), 0 0 40px hsl(46 89% 68% / 0.3);
+    text-shadow:
+      2px 3px 1px rgb(0 0 0 / 0.6),
+      0 0 10px rgb(var(--dynamic-primary-rgb) / 0.18),
+      0 0 20px rgb(var(--dynamic-secondary-rgb) / 0.08);
   }
 }
 
@@ -173,6 +192,138 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .hero-synced-shell {
+    background: transparent;
+  }
+
+  .hero-synced-aura {
+    opacity: 0.46;
+    will-change: transform, opacity, background;
+    transition:
+      background 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 420ms ease;
+  }
+
+  .hero-synced-aura-left {
+    background: radial-gradient(circle, rgb(var(--hero-accent-soft) / 0.18) 0%, rgb(var(--hero-accent) / 0.1) 38%, transparent 72%);
+    animation: hero-aura-float-left 16s ease-in-out infinite;
+  }
+
+  .hero-synced-aura-right {
+    background: radial-gradient(circle, rgb(var(--hero-secondary-soft) / 0.16) 0%, rgb(var(--hero-secondary) / 0.1) 42%, transparent 74%);
+    animation: hero-aura-float-right 18s ease-in-out infinite;
+  }
+
+  .hero-synced-aura-center {
+    background: radial-gradient(circle, rgb(var(--hero-highlight) / 0.12) 0%, rgb(var(--hero-accent-soft) / 0.05) 48%, transparent 76%);
+    animation: hero-aura-breathe 14s ease-in-out infinite;
+  }
+
+  .hero-synced-copy {
+    isolation: isolate;
+  }
+
+  .hero-synced-copy-glow {
+    background:
+      linear-gradient(90deg, rgb(var(--hero-accent) / 0.12) 0%, rgb(var(--hero-secondary) / 0.08) 56%, transparent 100%),
+      radial-gradient(circle at left center, rgb(var(--hero-highlight) / 0.12), transparent 56%);
+    opacity: 0.56;
+    transition: background 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: hero-copy-glow-flow 12s ease-in-out infinite;
+  }
+
+  .hero-synced-title {
+    position: relative;
+    color: transparent;
+    background-image: var(--hero-title-gradient);
+    background-size: 180% 180%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(2px 3px 1px rgb(0 0 0 / 0.7)) drop-shadow(0 0 12px rgb(var(--hero-accent) / 0.1));
+    transition:
+      filter 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      text-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-image 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation:
+      hero-gradient-flow 12s ease-in-out infinite,
+      fade-in-up 0.72s ease-out;
+  }
+
+  .hero-synced-description {
+    color: rgb(var(--hero-highlight) / 0.92);
+    text-shadow:
+      0 0 6px rgb(var(--hero-accent-soft) / 0.08),
+      0 0 12px rgb(var(--hero-secondary) / 0.05);
+    transition:
+      color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      text-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: fade-in-up 0.85s ease-out;
+  }
+
+  .hero-synced-primary-button {
+    border-color: rgb(var(--hero-highlight) / 0.55);
+    background: linear-gradient(135deg, rgb(var(--hero-highlight) / 0.98) 0%, rgb(var(--hero-accent-soft) / 0.96) 20%, rgb(var(--hero-accent) / 0.94) 56%, rgb(var(--hero-secondary) / 0.92) 100%);
+    box-shadow:
+      0 10px 24px rgb(var(--hero-accent) / 0.18),
+      0 0 18px rgb(var(--hero-secondary) / 0.08);
+  }
+
+  .hero-synced-primary-button:hover {
+    box-shadow:
+      0 12px 28px rgb(var(--hero-accent) / 0.22),
+      0 0 24px rgb(var(--hero-secondary) / 0.1);
+    filter: saturate(1.08);
+  }
+
+  .hero-synced-secondary-button {
+    border-color: rgb(var(--hero-accent-soft) / 0.42);
+    color: rgb(var(--hero-highlight) / 0.94);
+    background: linear-gradient(135deg, rgb(5 5 8 / 0.54) 0%, rgb(var(--hero-shadow) / 0.42) 100%);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.28);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero-synced-secondary-button:hover {
+    border-color: rgb(var(--hero-highlight) / 0.64);
+    background: linear-gradient(135deg, rgb(var(--hero-accent) / 0.18) 0%, rgb(var(--hero-secondary) / 0.12) 100%);
+    box-shadow: 0 0 30px rgb(var(--hero-accent) / 0.18);
+  }
+
+  .hero-synced-icon-button {
+    border-color: rgb(var(--hero-accent-soft) / 0.62);
+    color: rgb(var(--hero-highlight) / 0.94);
+    background: rgb(5 5 8 / 0.3);
+    box-shadow:
+      0 0 0 1px rgb(var(--hero-highlight) / 0.08),
+      0 0 16px rgb(var(--hero-accent) / 0.08);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero-synced-icon-button:hover {
+    background: rgb(var(--hero-shadow) / 0.42);
+    box-shadow:
+      0 0 0 1px rgb(var(--hero-highlight) / 0.16),
+      0 0 20px rgb(var(--hero-secondary) / 0.12);
+  }
+
+  .hero-synced-arrow {
+    color: rgb(var(--hero-highlight) / 0.92);
+    filter: drop-shadow(0 0 6px rgb(var(--hero-accent) / 0.18));
+    transition:
+      color 320ms ease,
+      filter 320ms ease,
+      transform 240ms ease;
+  }
+
+  .hero-synced-arrow:hover {
+    color: rgb(var(--hero-highlight));
+    filter:
+      drop-shadow(0 0 10px rgb(var(--hero-accent-soft) / 0.28))
+      drop-shadow(0 0 16px rgb(var(--hero-secondary) / 0.12));
+    transform: translateY(-50%) scale(1.04);
   }
 }
 
@@ -228,6 +379,79 @@
 
   .animate-slide-in-right {
     animation: slide-in-right 0.5s ease-out forwards;
+  }
+
+  @keyframes hero-gradient-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes hero-copy-glow-flow {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.98);
+      opacity: 0.78;
+    }
+    50% {
+      transform: translate3d(2%, -1%, 0) scale(1.04);
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(0.98);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes hero-aura-float-left {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.98);
+    }
+    50% {
+      transform: translate3d(6%, 5%, 0) scale(1.06);
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(0.98);
+    }
+  }
+
+  @keyframes hero-aura-float-right {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.96);
+    }
+    50% {
+      transform: translate3d(-7%, -4%, 0) scale(1.05);
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(0.96);
+    }
+  }
+
+  @keyframes hero-aura-breathe {
+    0% {
+      transform: translateX(-50%) scale(0.96);
+      opacity: 0.58;
+    }
+    50% {
+      transform: translateX(-50%) scale(1.05);
+      opacity: 0.84;
+    }
+    100% {
+      transform: translateX(-50%) scale(0.96);
+      opacity: 0.58;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-synced-copy-glow {
+    width: min(90vw, 26rem);
+    left: -1rem;
   }
 }
 
