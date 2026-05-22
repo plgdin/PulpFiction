@@ -767,7 +767,7 @@ const HeroSection = ({
           >
             <h1
               key={activeSlide.id}
-              className="hero-synced-title font-display text-[clamp(3.8rem,8.8vw,8.1rem)] leading-[0.9] tracking-[0.02em] py-2"
+              className="hero-synced-title font-display text-[clamp(2.5rem,10vw,8.1rem)] leading-[0.9] tracking-[0.02em] py-2"
             >
               {activeSlide.title || video.title}
             </h1>

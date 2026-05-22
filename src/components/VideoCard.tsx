@@ -126,7 +126,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           scale: 1, 
         }}
         transition={springTransition}
-        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg"
+        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg relative"
         onClick={() => onPlay(video)}
       >
         <img
@@ -138,6 +138,24 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
         />
+        
+        {/* Mobile Info Overlay (Hidden on md and up) */}
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4">
+          <h3 
+            className="text-white font-bold text-xl leading-tight drop-shadow-md" 
+            style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+          >
+            {video.title}
+          </h3>
+          <div 
+            className="flex items-center gap-2 text-white/80 text-[10px] uppercase tracking-widest mt-1.5" 
+            style={{ fontFamily: "'Lexend Peta', sans-serif" }}
+          >
+            <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/10">{video.year || '2024'}</span>
+            <span className="w-1 h-1 rounded-full bg-white/40"></span>
+            <span>{video.duration}</span>
+          </div>
+        </div>
       </motion.div>
 
       {/* Expanded Hover Card - Liquid Glass + 3D Tilt */}
@@ -150,7 +168,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         }}
         transition={springTransition}
         className={cn(
-          "absolute w-[125%] min-w-[320px] z-50",
+          "absolute w-[125%] min-w-[320px] z-50 hidden md:block",
           isHovered ? "pointer-events-auto" : "pointer-events-none"
         )}
         style={{ top: '50%', perspective: '1000px' }}
