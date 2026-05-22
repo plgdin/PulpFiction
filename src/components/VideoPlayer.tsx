@@ -41,7 +41,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
   };
 
   useEffect(() => {
-    // Reset state when video changes
     setIsPlayingFull(false);
     setIsMuted(true);
   }, [video]);
@@ -83,7 +82,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
         <Button
           variant="ghost"
           size="icon"
@@ -93,7 +91,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           <X className="w-6 h-6" />
         </Button>
 
-        {/* Video Player */}
         <div
           ref={containerRef}
           className={cn(
@@ -153,15 +150,12 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
             />
           )}
 
-          {/* Overlay for Preview Mode */}
           {!isPlayingFull && (
             <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/20 to-transparent flex flex-col justify-end p-10 pointer-events-none">
-              {/* Title */}
               <h2 className="text-5xl sm:text-7xl font-display text-primary text-shadow-cinematic mb-8 tracking-tight w-3/4 leading-none">
                 {video.title}
               </h2>
 
-              {/* Buttons Row */}
               <div className="flex items-center justify-between w-full pointer-events-auto">
                 <div className="flex items-center gap-3">
                   <Button
@@ -171,7 +165,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                       setIsMuted(false);
                       seekToZero();
 
-                      // Request fullscreen
                       if (containerRef.current) {
                         if (containerRef.current.requestFullscreen) {
                           containerRef.current.requestFullscreen();
@@ -204,7 +197,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                   </Button>
                 </div>
 
-                {/* Mute Toggle */}
                 <Button
                   variant="outline"
                   size="icon"
@@ -218,7 +210,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           )}
         </div>
 
-        {/* Info Section */}
         <div className="p-10 pt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-5">
             <div className="flex items-center gap-3 text-base font-medium">
@@ -247,7 +238,6 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
           </div>
         </div>
 
-        {/* More Like This Section */}
         {moreVideos.length > 0 && (
           <div className="p-10 pt-4">
             <h3 className="text-2xl font-bold text-white mb-6 font-display">More Like This</h3>

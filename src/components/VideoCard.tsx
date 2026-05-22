@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
-import { Play, ChevronDown, Plus } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Play, ChevronDown, ExternalLink, Plus } from 'lucide-react';
 import { Video } from '@/types/video';
 import { cn } from '@/lib/utils';
 import { motion, type Transition } from 'framer-motion';
@@ -10,10 +10,91 @@ interface VideoCardProps {
   index?: number;
 }
 
+const extractDominantColor = (imgSrc: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 10;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve('163, 230, 53'); return; }
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i] + data[i+1] + data[i+2] > 60) {
+            r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+          }
+        }
+        if (count === 0) { resolve('163, 230, 53'); return; }
+        resolve(`${Math.round(r/count)}, ${Math.round(g/count)}, ${Math.round(b/count)}`);
+      } catch {
+        resolve('163, 230, 53');
+      }
+    };
+    img.onerror = () => resolve('163, 230, 53');
+    img.src = imgSrc;
+  });
+};
+
 const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [edgePos, setEdgePos] = useState<'center' | 'left' | 'right'>('center');
+  const [dominantColor, setDominantColor] = useState('163, 230, 53');
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const thumbnailSrc =
+    video.thumbnail ||
+    (video.videoUrl?.includes('.b-cdn.net')
+      ? video.videoUrl
+          .replace('/play_720p.mp4', '/thumbnail.jpg')
+          .replace('/playlist.m3u8', '/thumbnail.jpg')
+      : '/placeholder.svg');
+
+  useEffect(() => {
+    if (thumbnailSrc) {
+      extractDominantColor(thumbnailSrc).then(setDominantColor);
+    }
+  }, [thumbnailSrc]);
+
+  // 3D Tilt Effect on Hover
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card || !isHovered) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateY = ((x - centerX) / centerX) * 10;
+      const rotateX = ((y - centerY) / centerY) * -10;
+
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    };
+
+    const handleMouseLeave = () => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    };
+
+    card.addEventListener('mousemove', handleMouseMove);
+    card.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      card.removeEventListener('mousemove', handleMouseMove);
+      card.removeEventListener('mouseleave', handleMouseLeave);
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    };
+  }, [isHovered]);
 
   const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -34,14 +115,6 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
     clearTimeout(hoverTimeoutRef.current);
     setIsHovered(false);
   }, []);
-
-  const thumbnailSrc =
-    video.thumbnail ||
-    (video.videoUrl?.includes('.b-cdn.net')
-      ? video.videoUrl
-          .replace('/play_720p.mp4', '/thumbnail.jpg')
-          .replace('/playlist.m3u8', '/thumbnail.jpg')
-      : '/placeholder.svg');
 
   const springTransition: Transition = {
     type: 'spring',
@@ -85,7 +158,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         />
       </motion.div>
 
-      {/* Expanded Hover Card - Liquid Glass */}
+      {/* Expanded Hover Card - Liquid Glass + 3D Tilt */}
       <motion.div 
         initial={false}
         animate={{
@@ -95,103 +168,142 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         }}
         transition={springTransition}
         className={cn(
-          "absolute w-[125%] min-w-[320px] z-50 overflow-hidden", 
-          "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem]",
-          "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]",
+          "absolute w-[125%] min-w-[320px] z-50",
           isHovered ? "pointer-events-auto" : "pointer-events-none"
         )}
-        style={{ top: '50%' }}
+        style={{ top: '50%', perspective: '1000px' }}
       >
-        {/* Top: Video Poster Area */}
-        <div className="relative w-full aspect-video cursor-pointer overflow-hidden" onClick={() => onPlay(video)}>
-          <motion.img
-            src={thumbnailSrc}
-            alt={video.title}
-            initial={false}
-            animate={{ scale: isHovered ? 1 : 1.1 }}
-            transition={{ type: "tween", duration: 1.5, ease: "easeOut" }}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
+        {/* Cinematic Thumbnail Glow underneath */}
+        <img 
+          src={thumbnailSrc} 
+          alt="" 
+          className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 w-[85%] h-[40%] object-cover blur-[28px] saturate-[1.5] opacity-80 z-0"
+        />
+
+        <div 
+          ref={cardRef}
+          className={cn(
+            "relative z-10 mx-auto w-full overflow-hidden transition-all duration-200 ease-out text-white",
+            "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem]",
+            "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
+          )}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          {/* Dynamic Glare Overlay */}
+          <div 
+            className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.15), transparent)',
+              mixBlendMode: 'overlay'
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-          
-          <div className="absolute bottom-5 left-6 w-[90%]">
-            <motion.h3 
+
+          {/* Top: Video Poster Area */}
+          <div className="relative w-full aspect-video cursor-pointer overflow-hidden" onClick={() => onPlay(video)}>
+            <motion.img
+              src={thumbnailSrc}
+              alt={video.title}
               initial={false}
-              animate={{ 
-                y: isHovered ? 0 : 20, 
-                opacity: isHovered ? 1 : 0 
+              animate={{ scale: isHovered ? 1 : 1.1 }}
+              transition={{ type: "tween", duration: 1.5, ease: "easeOut" }}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
               }}
-              transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
-              style={{ 
-                fontFamily: "'Antonio', sans-serif", 
-                letterSpacing: '0.04em', 
-                textTransform: 'uppercase'
-              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+            
+            <div className="absolute bottom-5 left-6 w-[90%]">
+              <motion.h3 
+                initial={false}
+                animate={{ 
+                  y: isHovered ? 0 : 20, 
+                  opacity: isHovered ? 1 : 0 
+                }}
+                transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
+                className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
+                style={{ 
+                  fontFamily: "'Antonio', sans-serif", 
+                  letterSpacing: '0.04em', 
+                  textTransform: 'uppercase'
+                }}
+              >
+                {video.title}
+              </motion.h3>
+            </div>
+
+            <div 
+              className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm"
+              style={{ fontFamily: "'Antonio', sans-serif" }}
             >
-              {video.title}
-            </motion.h3>
+              {video.duration}
+            </div>
           </div>
 
-          <div 
-            className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm"
-            style={{ fontFamily: "'Antonio', sans-serif" }}
-          >
-            {video.duration}
-          </div>
-        </div>
+          {/* Bottom: Information Panel */}
+          <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-black/20 relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-3">
+                <button
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105"
+                  onClick={() => onPlay(video)}
+                  aria-label="Play"
+                >
+                  <Play className="h-5 w-5 fill-current" />
+                  <span 
+                    className="font-bold text-[14px] tracking-[0.2em] mt-0.5" 
+                    style={{ fontFamily: "'Antonio', sans-serif" }}
+                  >
+                    PLAY
+                  </span>
+                </button>
 
-        {/* Bottom: Information Panel */}
-        <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-black/20">
-          
-          <div className="flex items-center justify-between">
-            <div className="flex gap-3">
+                <button
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105 hidden sm:flex"
+                  aria-label="View Portfolio"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open('https://vimeo.com/adityajangid', '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span 
+                    className="font-bold text-[13px] tracking-[0.15em] mt-0.5" 
+                    style={{ fontFamily: "'Antonio', sans-serif" }}
+                  >
+                    PORTFOLIO
+                  </span>
+                </button>
+
+                <button
+                  className="flex sm:hidden items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105"
+                  aria-label="Add to list"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+              </div>
               
               <button
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-black/30 text-white hover:bg-white/10 border border-white/10 transition-all duration-300"
+                aria-label="More info"
                 onClick={() => onPlay(video)}
-                aria-label="Play"
               >
-                <Play className="h-5 w-5 fill-current" />
-                <span 
-                  className="font-bold text-[14px] tracking-[0.2em] mt-0.5" 
-                  style={{ fontFamily: "'Antonio', sans-serif" }}
-                >
-                  PLAY
-                </span>
-              </button>
-
-              <button
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105"
-                aria-label="Add to list"
-              >
-                <Plus className="h-5 w-5" />
+                <ChevronDown className="h-5 w-5 opacity-80" />
               </button>
             </div>
-            
-            <button
-              className="flex items-center justify-center w-11 h-11 rounded-full bg-black/30 text-white hover:bg-white/10 border border-white/10 transition-all duration-300"
-              aria-label="More info"
-              onClick={() => onPlay(video)}
-            >
-              <ChevronDown className="h-5 w-5 opacity-80" />
-            </button>
-          </div>
 
-          <div 
-            className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold text-white/80 uppercase tracking-widest"
-            style={{ fontFamily: "'Lexend Peta', sans-serif" }}
-          >
-            <span className="bg-white/10 px-2.5 py-1 rounded border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-              {video.year || '2024'}
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-            <span className="drop-shadow-md truncate">{video.category?.replace('-', ' ')}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-            <span className="text-primary/90 drop-shadow-[0_0_8px_rgba(245,212,103,0.5)]">Cinematic</span>
+            <div 
+              className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold text-white/80 uppercase tracking-widest"
+              style={{ fontFamily: "'Lexend Peta', sans-serif" }}
+            >
+              <span className="bg-white/10 px-2.5 py-1 rounded border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+                {video.year || '2024'}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+              <span className="drop-shadow-md truncate">{video.category?.replace('-', ' ')}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+              <span className="text-primary/90 drop-shadow-[0_0_8px_rgba(245,212,103,0.5)]">Cinematic</span>
+            </div>
           </div>
         </div>
       </motion.div>

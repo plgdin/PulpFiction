@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, type SyntheticEvent } from 'react';
-import { Play, ExternalLink, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, ExternalLink, Volume2, VolumeX, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Video } from '@/types/video';
 import { HeroContent } from '@/types/cms';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,38 @@ const isPlayableHeroVideo = (url: string) => {
   if (!url) return false;
   const lower = url.toLowerCase();
   return lower.includes('.m3u8') || lower.includes('.mp4') || lower.includes('.webm') || lower.includes('.mov');
+};
+
+/** Extract the dominant color from an image via a tiny offscreen canvas */
+const extractDominantColor = (imgSrc: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 10;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve('20, 20, 20'); return; }
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i] + data[i+1] + data[i+2] > 60) {
+            r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+          }
+        }
+        if (count === 0) { resolve('20, 20, 20'); return; }
+        resolve(`${Math.round(r/count)}, ${Math.round(g/count)}, ${Math.round(b/count)}`);
+      } catch {
+        resolve('20, 20, 20');
+      }
+    };
+    img.onerror = () => resolve('20, 20, 20');
+    img.src = imgSrc;
+  });
 };
 
 const HeroSection = ({
@@ -101,10 +133,17 @@ const HeroSection = ({
   const [isTitleCompact, setIsTitleCompact] = useState(false);
   const [isDescriptionVisible, setIsDescriptionVisible] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [dominantColor, setDominantColor] = useState('20, 20, 20');
 
   const activeSlide = slides[activeSlideIndex] || slides[0];
 
   if (!activeSlide) return null;
+
+  useEffect(() => {
+    if (activeSlide?.thumbnail) {
+      extractDominantColor(activeSlide.thumbnail).then(setDominantColor);
+    }
+  }, [activeSlide?.thumbnail]);
 
   useEffect(() => {
     setActiveSlideIndex(0);
@@ -155,6 +194,24 @@ const HeroSection = ({
 
   return (
     <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden">
+      {/* SVG Liquid Glass Filter */}
+      <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <filter id="hero-glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+          <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves={1} seed={17} result="turbulence" />
+          <feComponentTransfer in="turbulence" result="mapped">
+            <feFuncR type="gamma" amplitude={1} exponent={10} offset={0.5} />
+            <feFuncG type="gamma" amplitude={0} exponent={1} offset={0} />
+            <feFuncB type="gamma" amplitude={0} exponent={1} offset={0.5} />
+          </feComponentTransfer>
+          <feGaussianBlur in="turbulence" stdDeviation={3} result="softMap" />
+          <feSpecularLighting in="softMap" surfaceScale={5} specularConstant={1} specularExponent={100} lightingColor="white" result="specLight">
+            <fePointLight x={-200} y={-200} z={300} />
+          </feSpecularLighting>
+          <feComposite in="specLight" operator="arithmetic" k1={0} k2={1} k3={1} k4={0} result="litImage" />
+          <feDisplacementMap in="SourceGraphic" in2="softMap" scale={200} xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+
       <div className="absolute inset-0">
         {slides.map((slide, index) => {
           const isActive = index === activeSlideIndex;
@@ -188,18 +245,24 @@ const HeroSection = ({
             </div>
           );
         })}
-
       </div>
+
+      {/* Dynamic color-tinted ambient glow behind the video (Underglow) */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[5] transition-all duration-1000"
+        style={{
+          background: `radial-gradient(ellipse at 50% 80%, rgba(${dominantColor}, 0.25) 0%, transparent 70%)`,
+        }}
+      />
+
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-40 bg-gradient-to-b from-background/70 via-background/38 to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[62%] bg-gradient-to-r from-background/82 via-background/48 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-64 bg-gradient-to-b from-transparent via-background/78 to-background" />
 
-      {/* Content container: buttons anchored at bottom, title+desc group scales above */}
       <div className="relative z-20 flex h-full max-w-4xl flex-col justify-end px-4 pb-20 md:px-12 md:pb-[5.5rem]">
 
-        {/* Title + Description group — scales as ONE unit, no layout changes */}
         <div
-          className="mb-3 will-change-transform"
+          className="mb-5 will-change-transform"
           style={{
             transformOrigin: 'bottom left',
             transform: isTitleCompact ? 'scale(0.72)' : 'scale(1)',
@@ -208,42 +271,89 @@ const HeroSection = ({
         >
           <h1
             className="font-display text-[56px] leading-[0.92] tracking-tight text-primary text-shadow-cinematic md:text-[90px]"
+            style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}
           >
             {activeSlide?.title || video.title}
           </h1>
           <p
-            className="mt-2 max-w-2xl text-base leading-relaxed text-foreground/90 md:text-lg"
+            className="mt-3 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg"
             style={{
               opacity: isDescriptionVisible ? 1 : 0,
               transition: `opacity ${TITLE_MOTION_MS * 0.4}ms ease-out`,
+              fontFamily: "'Antonio', sans-serif",
+              letterSpacing: '0.02em',
             }}
           >
             {activeSlide?.description || video.description}
           </p>
         </div>
 
-        {/* Buttons row — stays in place, never moves */}
+        {/* Liquid Glass Buttons Row */}
         <div
-          className="flex flex-col gap-4 animate-fade-in-up sm:flex-row"
+          className="flex flex-col gap-4 animate-fade-in-up sm:flex-row sm:items-center"
           style={{ animationDelay: '0.5s' }}
         >
-          <Button
-            size="lg"
-            className="w-full gap-2 border border-primary/90 bg-primary px-8 font-display text-lg text-primary-foreground shadow-[0_10px_24px_hsl(var(--primary)/0.25)] transition-all duration-300 hover:bg-primary hover:shadow-[0_0_26px_hsl(var(--primary))] sm:w-auto"
+          <button
+            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 group sm:w-auto w-full justify-center"
             onClick={() => onPlay(activeSlide?.video || video)}
+            style={{
+              boxShadow: `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(${dominantColor}, 0.15)`,
+            }}
           >
-            <Play className="h-5 w-5 fill-current" />
-            {heroContent.ctaPrimaryText || 'View Reel'}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full gap-2 border-primary/80 bg-black/50 px-8 font-display text-lg text-primary shadow-[0_10px_24px_hsl(0_0%_0%/0.3)] transition-all duration-300 hover:border-primary hover:bg-primary/12 hover:text-primary hover:shadow-[0_0_20px_hsl(var(--primary))] sm:w-auto"
+            <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
+              style={{ backdropFilter: 'blur(3px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
+            />
+            <div className="absolute inset-0 z-[1] rounded-full bg-white/90" />
+            <div className="absolute inset-0 z-[2] rounded-full overflow-hidden"
+              style={{ boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.8), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
+            />
+            <Play className="relative z-[3] h-5 w-5 fill-current text-black" />
+            <span
+              className="relative z-[3] font-bold text-black text-lg tracking-[0.15em]"
+              style={{ fontFamily: "'Antonio', sans-serif" }}
+            >
+              {heroContent.ctaPrimaryText || 'VIEW REEL'}
+            </span>
+          </button>
+
+          <button
+            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 group sm:w-auto w-full justify-center"
             onClick={handleViewPortfolio}
+            style={{
+              boxShadow: `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1)`,
+            }}
           >
-            <ExternalLink className="h-5 w-5" />
-            {heroContent.ctaSecondaryText || 'Full Portfolio'}
-          </Button>
+            <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
+              style={{ backdropFilter: 'blur(10px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
+            />
+            <div className="absolute inset-0 z-[1] rounded-full" style={{ background: 'rgba(255, 255, 255, 0.12)' }} />
+            <div className="absolute inset-0 z-[2] rounded-full overflow-hidden border border-white/25"
+              style={{ boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 1px rgba(255,255,255,0.2)' }}
+            />
+            <ExternalLink className="relative z-[3] h-5 w-5 text-white" />
+            <span
+              className="relative z-[3] font-bold text-white text-lg tracking-[0.15em]"
+              style={{ fontFamily: "'Antonio', sans-serif" }}
+            >
+              {heroContent.ctaSecondaryText || 'PORTFOLIO'}
+            </span>
+          </button>
+
+          <button
+            className="relative hidden sm:flex items-center justify-center w-12 h-12 rounded-full overflow-hidden transition-all duration-500 hover:scale-110"
+            style={{
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
+              style={{ backdropFilter: 'blur(10px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
+            />
+            <div className="absolute inset-0 z-[1] rounded-full" style={{ background: 'rgba(255, 255, 255, 0.1)' }} />
+            <div className="absolute inset-0 z-[2] rounded-full overflow-hidden border border-white/20"
+              style={{ boxShadow: 'inset 1px 1px 1px 0 rgba(255,255,255,0.3)' }}
+            />
+            <Plus className="relative z-[3] h-5 w-5 text-white" />
+          </button>
         </div>
       </div>
 
