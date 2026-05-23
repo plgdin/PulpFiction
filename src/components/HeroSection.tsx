@@ -530,20 +530,23 @@ const HeroSection = ({
       return undefined;
     }
 
-    extractPaletteFromThumbnail(activeSlide.thumbnail)
-      .then((palette) => {
-        if (cancelled) return;
-        paletteCacheRef.current[paletteKey] = palette;
-        setTargetPalette(palette);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        paletteCacheRef.current[paletteKey] = DEFAULT_PALETTE;
-        setTargetPalette(DEFAULT_PALETTE);
-      });
+    const timeoutId = setTimeout(() => {
+      extractPaletteFromThumbnail(activeSlide.thumbnail)
+        .then((palette) => {
+          if (cancelled) return;
+          paletteCacheRef.current[paletteKey] = palette;
+          setTargetPalette(palette);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          paletteCacheRef.current[paletteKey] = DEFAULT_PALETTE;
+          setTargetPalette(DEFAULT_PALETTE);
+        });
+    }, 100);
 
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
   }, [activeSlide]);
 
@@ -725,33 +728,29 @@ const HeroSection = ({
               )}
               style={{ transitionDuration: '1600ms' }}
             >
-              {isActive && slide.hasVideoPreview ? (
-                <>
-                  <link rel="preload" as="image" href={slide.thumbnail || heroBg} fetchPriority="high" />
-                  <video
-                    ref={(element) => {
-                      videoRefs.current[slide.id] = element;
-                    }}
-                    src={slide.previewUrl}
-                    poster={slide.thumbnail}
-                    crossOrigin="anonymous"
-                    className="h-full w-full object-cover"
-                    autoPlay
-                    muted={isMuted}
-                    loop={false}
-                    playsInline
-                    preload="metadata"
-                    onTimeUpdate={(event) => handleVideoProgress(index, event)}
-                    onEnded={handleNextSlide}
-                  />
-                </>
-              ) : (
-                <img
-                  src={slide.thumbnail || heroBg}
-                  alt={`${slide.title} background`}
-                  className="h-full w-full object-cover"
-                  fetchPriority={isActive ? "high" : "auto"}
-                  loading={isActive ? "eager" : "lazy"}
+              <img
+                src={slide.thumbnail || heroBg}
+                alt={`${slide.title} background`}
+                className="absolute inset-0 h-full w-full object-cover"
+                fetchPriority={isActive ? "high" : "auto"}
+                loading={isActive ? "eager" : "lazy"}
+              />
+              {isActive && slide.hasVideoPreview && (
+                <video
+                  ref={(element) => {
+                    videoRefs.current[slide.id] = element;
+                  }}
+                  src={slide.previewUrl}
+                  poster={slide.thumbnail || heroBg}
+                  crossOrigin="anonymous"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  autoPlay
+                  muted={isMuted}
+                  loop={false}
+                  playsInline
+                  preload="metadata"
+                  onTimeUpdate={(event) => handleVideoProgress(index, event)}
+                  onEnded={handleNextSlide}
                 />
               )}
             </div>
