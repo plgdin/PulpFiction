@@ -140,9 +140,9 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         />
         
         {/* Mobile Info Overlay (Hidden on md and up) */}
-        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4">
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent opacity-95 flex flex-col justify-end p-3 sm:p-4">
           <h3 
-            className="text-white font-bold text-xl leading-tight drop-shadow-md" 
+            className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" 
             style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
           >
             {video.title}

@@ -597,6 +597,9 @@ const HeroSection = ({
   useEffect(() => {
     if (!activeSlide?.hasVideoPreview) return undefined;
 
+    const isTouchDevice = typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
+    if (isTouchDevice) return undefined;
+
     const activeVideo = videoRefs.current[activeSlide.id];
     if (!activeVideo) return undefined;
 
@@ -737,7 +740,7 @@ const HeroSection = ({
                     muted={isMuted}
                     loop={false}
                     playsInline
-                    preload="auto"
+                    preload="metadata"
                     onTimeUpdate={(event) => handleVideoProgress(index, event)}
                     onEnded={handleNextSlide}
                   />
