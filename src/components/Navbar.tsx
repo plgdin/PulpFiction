@@ -28,8 +28,8 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-all duration-500",
-        isScrolled 
-          ? "bg-black/40 backdrop-blur-lg" 
+        isScrolled
+          ? "bg-black/40 backdrop-blur-lg"
           : "bg-transparent pt-[0.55rem]"
       )}
     >
