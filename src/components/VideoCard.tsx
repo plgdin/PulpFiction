@@ -11,34 +11,7 @@ interface VideoCardProps {
 }
 
 const extractDominantColor = (imgSrc: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        const size = 10;
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { resolve('163, 230, 53'); return; }
-        ctx.drawImage(img, 0, 0, size, size);
-        const data = ctx.getImageData(0, 0, size, size).data;
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          if (data[i] + data[i+1] + data[i+2] > 60) {
-            r += data[i]; g += data[i+1]; b += data[i+2]; count++;
-          }
-        }
-        if (count === 0) { resolve('163, 230, 53'); return; }
-        resolve(`${Math.round(r/count)}, ${Math.round(g/count)}, ${Math.round(b/count)}`);
-      } catch {
-        resolve('163, 230, 53');
-      }
-    };
-    img.onerror = () => resolve('163, 230, 53');
-    img.src = imgSrc;
-  });
+  return Promise.resolve('163, 230, 53');
 };
 
 const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
@@ -64,25 +37,33 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
 
   // 3D Tilt Effect on Hover
   useEffect(() => {
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouchDevice) return;
+
     const card = cardRef.current;
     if (!card || !isHovered) return;
 
+    let rafId: number;
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
 
-      const rotateY = ((x - centerX) / centerX) * 10;
-      const rotateX = ((y - centerY) / centerY) * -10;
+        const rotateY = ((x - centerX) / centerX) * 10;
+        const rotateX = ((y - centerY) / centerY) * -10;
 
-      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      card.style.setProperty('--mouse-x', `${x}px`);
-      card.style.setProperty('--mouse-y', `${y}px`);
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
     };
 
     const handleMouseLeave = () => {
+      cancelAnimationFrame(rafId);
       card.style.transform = 'rotateX(0deg) rotateY(0deg)';
     };
 
@@ -90,6 +71,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
     card.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
+      cancelAnimationFrame(rafId);
       card.removeEventListener('mousemove', handleMouseMove);
       card.removeEventListener('mouseleave', handleMouseLeave);
       card.style.transform = 'rotateX(0deg) rotateY(0deg)';
@@ -144,7 +126,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           scale: 1, 
         }}
         transition={springTransition}
-        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg"
+        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg relative"
         onClick={() => onPlay(video)}
       >
         <img
@@ -156,6 +138,24 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
             (e.target as HTMLImageElement).src = '/placeholder.svg';
           }}
         />
+        
+        {/* Mobile Info Overlay (Hidden on md and up) */}
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4">
+          <h3 
+            className="text-white font-bold text-xl leading-tight drop-shadow-md" 
+            style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+          >
+            {video.title}
+          </h3>
+          <div 
+            className="flex items-center gap-2 text-white/80 text-[10px] uppercase tracking-widest mt-1.5" 
+            style={{ fontFamily: "'Lexend Peta', sans-serif" }}
+          >
+            <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/10">{video.year || '2024'}</span>
+            <span className="w-1 h-1 rounded-full bg-white/40"></span>
+            <span>{video.duration}</span>
+          </div>
+        </div>
       </motion.div>
 
       {/* Expanded Hover Card - Liquid Glass + 3D Tilt */}
@@ -168,7 +168,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         }}
         transition={springTransition}
         className={cn(
-          "absolute w-[125%] min-w-[320px] z-50",
+          "absolute w-[125%] min-w-[320px] z-50 hidden md:block",
           isHovered ? "pointer-events-auto" : "pointer-events-none"
         )}
         style={{ top: '50%', perspective: '1000px' }}

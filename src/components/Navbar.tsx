@@ -27,9 +27,9 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
   return (
     <nav
       className={cn(
-        "hidden md:block fixed top-0 left-0 right-0 z-40 transition-all duration-500",
-        isScrolled 
-          ? "bg-black/40 backdrop-blur-lg" 
+        "fixed top-0 left-0 right-0 z-40 transition-all duration-500",
+        isScrolled
+          ? "bg-black/40 backdrop-blur-lg"
           : "bg-transparent pt-[0.55rem]"
       )}
     >
@@ -38,7 +38,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
           {/* Logo */}
           <div className="flex items-center gap-9">
             <Link to="/" className="block">
-              <h1 className="font-header uppercase text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider hover:text-primary/90 transition-colors cursor-pointer">
+              <h1 className="font-display text-[1.4rem] sm:text-[1.72rem] md:text-[2.16rem] text-primary text-shadow-glow tracking-wider hover:text-primary/90 transition-colors cursor-pointer">
                 TARUN KAPOOR
               </h1>
             </Link>

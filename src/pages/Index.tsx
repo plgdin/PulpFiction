@@ -1,13 +1,14 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import CategoryRow from '@/components/CategoryRow';
 import VideoCard from '@/components/VideoCard';
-import VideoPlayer from '@/components/VideoPlayer';
-import Footer from '@/components/Footer';
 import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
+
+const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
+const Footer = lazy(() => import('@/components/Footer'));
 
 const Index = () => {
 
@@ -137,9 +138,10 @@ const Index = () => {
         )}
       </main>
 
-      <Footer />
-
-      <VideoPlayer video={selectedVideo} onClose={handleClosePlayer} />
+      <Suspense fallback={null}>
+        <Footer />
+        {selectedVideo && <VideoPlayer video={selectedVideo} onClose={handleClosePlayer} />}
+      </Suspense>
       </div>
     </div>
   );
