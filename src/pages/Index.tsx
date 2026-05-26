@@ -6,6 +6,7 @@ import CategoryRow from '@/components/CategoryRow';
 import VideoCard from '@/components/VideoCard';
 import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
+import PitchDeckSection from '@/components/PitchDeckSection';
 
 const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
 const Footer = lazy(() => import('@/components/Footer'));
@@ -64,7 +65,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black relative text-foreground">
+    <div className="min-h-screen bg-gradient-to-b from-[#2a2a2a] via-[#121212] to-black relative text-foreground">
       {/* Dynamic Background Gradient from Thumbnail Colors */}
       <div 
         className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-40"
@@ -90,7 +91,7 @@ const Index = () => {
         onPlay={handlePlayVideo}
       />
 
-      <main className="relative z-30 pb-8 -mt-32 md:-mt-48 pointer-events-none">
+      <main className="relative z-30 pb-8 pt-4 md:pt-8 pointer-events-none">
         {filteredVideos && (
           <section className="px-4 py-8 md:px-12 pointer-events-auto">
             <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
@@ -135,6 +136,13 @@ const Index = () => {
               );
             })}
           </>
+        )}
+
+        {/* Pitch Decks Section */}
+        {!filteredVideos && (
+          <section className="scroll-mt-24 pointer-events-auto">
+            <PitchDeckSection />
+          </section>
         )}
       </main>
 

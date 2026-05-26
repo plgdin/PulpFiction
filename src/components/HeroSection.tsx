@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef, type CSSProperties, type SyntheticEvent } from 'react';
-import { Play, ExternalLink, Volume2, VolumeX, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Play, ExternalLink, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Video } from '@/types/video';
 import { HeroContent } from '@/types/cms';
 import { Button } from '@/components/ui/button';
@@ -696,7 +696,7 @@ const HeroSection = ({
 
   return (
     <section
-      className="hero-synced-shell relative flex min-h-screen min-h-[100svh] w-full items-end overflow-hidden"
+      className="hero-synced-shell relative flex min-h-screen min-h-[100svh] w-full items-end"
       style={heroStyle}
     >
       {/* SVG Liquid Glass Filter */}
@@ -732,7 +732,7 @@ const HeroSection = ({
                 src={slide.thumbnail || heroBg}
                 alt={`${slide.title} background`}
                 className="absolute inset-0 h-full w-full object-cover"
-                fetchPriority={isActive ? "high" : "auto"}
+                fetchpriority={isActive ? "high" : "auto"}
                 loading={isActive ? "eager" : "lazy"}
               />
               {isActive && slide.hasVideoPreview && (
@@ -761,7 +761,15 @@ const HeroSection = ({
       <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
       <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
 
-      <div className="relative z-20 flex h-full w-full items-end px-4 pb-24 pt-28 md:px-12 md:pb-56 md:pt-36">
+      {/* Seamless Grey Transition - extends beyond hero bottom */}
+      <div 
+        className="absolute inset-x-0 -bottom-24 md:-bottom-32 h-[20rem] md:h-[36rem] z-10 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to top, #2a2a2a 0%, #2a2a2a 10%, rgba(42,42,42,0.85) 30%, rgba(42,42,42,0.5) 55%, rgba(42,42,42,0.15) 75%, transparent 100%)'
+        }}
+      />
+
+      <div className="relative z-20 flex h-full w-full items-end px-4 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36">
         <div className="hero-synced-copy relative max-w-5xl">
           <div className="hero-synced-copy-glow absolute -left-10 bottom-0 top-0 w-[min(62vw,44rem)] blur-3xl" />
 
@@ -842,21 +850,7 @@ const HeroSection = ({
             </span>
           </button>
 
-          <button
-            className="relative hidden sm:flex items-center justify-center w-12 h-12 rounded-full overflow-hidden transition-all duration-500 hover:scale-110"
-            style={{
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            }}
-          >
-            <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
-              style={{ backdropFilter: 'blur(10px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
-            />
-            <div className="absolute inset-0 z-[1] rounded-full" style={{ background: 'rgba(255, 255, 255, 0.1)' }} />
-            <div className="absolute inset-0 z-[2] rounded-full overflow-hidden border border-white/20"
-              style={{ boxShadow: 'inset 1px 1px 1px 0 rgba(255,255,255,0.3)' }}
-            />
-            <Plus className="relative z-[3] h-5 w-5 text-white" />
-          </button>
+
         </div>
         </div>
       </div>
