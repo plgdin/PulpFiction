@@ -1,76 +1,67 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, X, Presentation, ExternalLink, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, type Transition } from 'framer-motion';
 
-interface PitchDeck {
-  id: string;
+import { PitchDeck } from '@/types/cms';
+/**
+ * Lazy iframe that only mounts when the container scrolls into view.
+ * This prevents 8 Canva apps from loading simultaneously on page load.
+ */
+const LazyIframe = memo(({ src, title, style, className }: {
+  src: string;
   title: string;
-  embedUrl: string;
-  originalUrl: string;
-  accent: string;
-}
+  style?: React.CSSProperties;
+  className?: string;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-const PITCH_DECKS: PitchDeck[] = [
-  {
-    id: 'deck-1',
-    title: 'Pitch Deck 01',
-    embedUrl: 'https://www.canva.com/design/DAGsqg2zIAc/KGOQQyez5dRGT37dTytVdA/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAGsqg2zIAc/KGOQQyez5dRGT37dTytVdA/view',
-    accent: '#F5D467',
-  },
-  {
-    id: 'deck-2',
-    title: 'Pitch Deck 02',
-    embedUrl: 'https://www.canva.com/design/DAGgAu3cabE/Do2TGdWCExtaMgC_e2jg9g/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAGgAu3cabE/Do2TGdWCExtaMgC_e2jg9g/view',
-    accent: '#67B5F5',
-  },
-  {
-    id: 'deck-3',
-    title: 'Pitch Deck 03',
-    embedUrl: 'https://www.canva.com/design/DAGk4uxEhTc/8FTef9s_GhUeZ_Jpc_eJRg/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAGk4uxEhTc/8FTef9s_GhUeZ_Jpc_eJRg/view',
-    accent: '#F567A5',
-  },
-  {
-    id: 'deck-4',
-    title: 'Pitch Deck 04',
-    embedUrl: 'https://www.canva.com/design/DAG5l_HWoWo/sMYEnc7a2krfakR22fZKlg/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAG5l_HWoWo/sMYEnc7a2krfakR22fZKlg/view',
-    accent: '#A567F5',
-  },
-  {
-    id: 'deck-5',
-    title: 'Pitch Deck 05',
-    embedUrl: 'https://www.canva.com/design/DAHBXD3QO3Y/Aq-yS9cLoEylVIkZMSo9Rg/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAHBXD3QO3Y/Aq-yS9cLoEylVIkZMSo9Rg/view',
-    accent: '#67F5B5',
-  },
-  {
-    id: 'deck-6',
-    title: 'Pitch Deck 06',
-    embedUrl: 'https://www.canva.com/design/DAGtyX7Ltrk/69a5-dPmu-YQzU1IjnvG6Q/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAGtyX7Ltrk/69a5-dPmu-YQzU1IjnvG6Q/view',
-    accent: '#F5A567',
-  },
-  {
-    id: 'deck-7',
-    title: 'Pitch Deck 07',
-    embedUrl: 'https://www.canva.com/design/DAG5b3-rx80/pn7MV4MfAlkYIycTd4HeNw/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAG5b3-rx80/pn7MV4MfAlkYIycTd4HeNw/view',
-    accent: '#F56767',
-  },
-  {
-    id: 'deck-8',
-    title: 'Pitch Deck 08',
-    embedUrl: 'https://www.canva.com/design/DAG5b5gJlvQ/MuOQxV9Fv_2lCFXE418RUw/view?embed',
-    originalUrl: 'https://www.canva.com/design/DAG5b5gJlvQ/MuOQxV9Fv_2lCFXE418RUw/view',
-    accent: '#67D4F5',
-  },
-];
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-const PitchDeckCard = ({
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className={className} style={style}>
+      {isVisible && (
+        <iframe
+          src={src}
+          className={cn("absolute border-0 transition-opacity duration-700 ease-in-out", isLoaded ? "opacity-100" : "opacity-0")}
+          loading="lazy"
+          title={title}
+          tabIndex={-1}
+          onLoad={() => setIsLoaded(true)}
+          style={{
+            pointerEvents: 'none',
+            top: '-5%',
+            left: '-2%',
+            width: '104%',
+            height: '115%',
+          }}
+        />
+      )}
+    </div>
+  );
+});
+
+LazyIframe.displayName = 'LazyIframe';
+
+const PitchDeckCard = memo(({
   deck,
   index,
   onOpen,
@@ -167,42 +158,6 @@ const PitchDeckCard = ({
     center: { left: '50%', right: 'auto', x: '-50%', y: '-50%' },
   };
 
-  // Static first-slide thumbnail via Canva embed (controls hidden)
-  const DeckThumbnail = () => (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Fallback gradient behind iframe */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
-        </div>
-      </div>
-      {/* Canva first slide — scaled up to crop out bottom controls */}
-      <iframe
-        src={deck.embedUrl}
-        className="absolute border-0"
-        loading="eager"
-        title={`${deck.title} preview`}
-        tabIndex={-1}
-        style={{
-          pointerEvents: 'none',
-          top: '-5%',
-          left: '-2%',
-          width: '104%',
-          height: '115%',
-        }}
-      />
-      {/* Cover the bottom controls area */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-12"
-        style={{ background: `linear-gradient(to top, #1a1a1a, #1a1a1a 60%, transparent)` }}
-      />
-    </div>
-  );
 
   return (
     <div
@@ -234,7 +189,7 @@ const PitchDeckCard = ({
           className={cn(
             "w-full h-full overflow-hidden shadow-lg transition-all duration-300",
             isHovered 
-              ? "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
+              ? "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
               : "rounded-2xl md:rounded-[2rem] border border-transparent"
           )}
           style={{ transformStyle: 'preserve-3d' }}
@@ -244,7 +199,40 @@ const PitchDeckCard = ({
           className="relative w-full aspect-video cursor-pointer overflow-hidden pointer-events-auto" 
           onClick={() => onOpen(deck)}
         >
-          <DeckThumbnail />
+          <div className="absolute inset-0 overflow-hidden bg-zinc-900">
+            {/* Fallback gradient behind iframe */}
+            <div 
+              className="absolute inset-0 z-0"
+              style={{
+                background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
+              }}
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
+              </div>
+            </div>
+            
+            {/* Optional Custom Thumbnail Image */}
+            {deck.thumbnail && (
+              <img 
+                src={deck.thumbnail} 
+                alt={deck.title} 
+                className="absolute inset-0 w-full h-full object-cover z-10 opacity-70"
+              />
+            )}
+
+            {/* Canva first slide — lazy loaded, scaled up to crop out bottom controls */}
+            <LazyIframe
+              src={deck.embedUrl}
+              title={`${deck.title} preview`}
+              className="absolute inset-0 z-20"
+            />
+            {/* Cover the bottom controls area */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-12 z-30"
+              style={{ background: `linear-gradient(to top, #1a1a1a, #1a1a1a 60%, transparent)` }}
+            />
+          </div>
           
           {/* Base Card Mobile Info Overlay */}
           <motion.div 
@@ -337,7 +325,9 @@ const PitchDeckCard = ({
       </motion.div>
     </div>
   );
-};
+});
+
+PitchDeckCard.displayName = 'PitchDeckCard';
 
 const PitchDeckModal = ({
   deck,
@@ -428,7 +418,7 @@ const PitchDeckModal = ({
   );
 };
 
-const PitchDeckSection = () => {
+const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -512,7 +502,7 @@ const PitchDeckSection = () => {
             className="pl-4 md:pl-12 pt-16 pb-36 md:pt-24 md:pb-52 flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide -mt-6 md:-mt-8"
             style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
           >
-            {PITCH_DECKS.map((deck, index) => (
+            {pitchDecks.map((deck, index) => (
               <div
                 key={deck.id}
                 className="flex-none w-[85vw] sm:w-[320px] md:w-[360px] lg:w-[420px] xl:w-[460px] 2xl:w-[500px] relative"

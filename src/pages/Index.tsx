@@ -65,7 +65,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2a2a2a] via-[#121212] to-black relative text-foreground">
+    <div className="min-h-screen bg-gradient-to-b from-[#121212] via-[#0d0d0d] to-black relative text-foreground">
       {/* Dynamic Background Gradient from Thumbnail Colors */}
       <div 
         className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-40"
@@ -91,7 +91,7 @@ const Index = () => {
         onPlay={handlePlayVideo}
       />
 
-      <main className="relative z-30 pb-8 pt-4 md:pt-8 pointer-events-none">
+      <main className="relative z-30 pb-8 pointer-events-none">
         {filteredVideos && (
           <section className="px-4 py-8 md:px-12 pointer-events-auto">
             <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
@@ -124,7 +124,7 @@ const Index = () => {
                 <section
                   key={cat.id}
                   id={cat.slug}
-                  className={idx === 0 ? 'scroll-mt-24 pt-8 md:pt-12 pointer-events-auto' : 'scroll-mt-24 pointer-events-auto'}
+                  className={idx === 0 ? 'scroll-mt-24 pt-4 md:pt-6 pointer-events-auto' : 'scroll-mt-24 pointer-events-auto'}
                   ref={(el) => (sectionRefs.current[cat.slug] = el)}
                 >
                   <CategoryRow
@@ -141,7 +141,7 @@ const Index = () => {
         {/* Pitch Decks Section */}
         {!filteredVideos && (
           <section className="scroll-mt-24 pointer-events-auto">
-            <PitchDeckSection />
+            <PitchDeckSection pitchDecks={data.pitchDecks || []} />
           </section>
         )}
       </main>

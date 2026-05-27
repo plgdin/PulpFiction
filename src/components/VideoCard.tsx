@@ -191,7 +191,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           ref={cardRef}
           className={cn(
             "relative z-10 mx-auto w-full overflow-hidden transition-all duration-200 ease-out text-white",
-            "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem]",
+            "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem]",
             "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
           )}
           style={{ transformStyle: 'preserve-3d' }}

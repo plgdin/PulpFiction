@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Mail, Instagram, Youtube } from 'lucide-react';
 
 const FooterTypewriter = () => {
@@ -14,7 +14,25 @@ const FooterTypewriter = () => {
   const [roleIndex, setRoleIndex] = useState(0);
   const targetBase = "TARUN\u00A0KAPOOR";
 
+  // Only run the typewriter when the footer is visible
+  const containerRef = useRef<HTMLHeadingElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return; // Pause when off-screen
+
     let timer: NodeJS.Timeout;
 
     if (mode === 'TYPE_BASE') {
@@ -55,7 +73,7 @@ const FooterTypewriter = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [baseText, prefixText, mode, cursorIndex, roleIndex]);
+  }, [baseText, prefixText, mode, cursorIndex, roleIndex, isVisible]);
 
   const Cursor = () => (
     <span className="inline-flex w-0 justify-center overflow-visible align-baseline">
@@ -86,7 +104,7 @@ const FooterTypewriter = () => {
   };
 
   return (
-    <h3 className="font-display text-2xl text-primary mb-4 whitespace-pre-wrap">
+    <h3 ref={containerRef} className="font-display text-2xl text-primary mb-4 whitespace-pre-wrap">
       {renderText()}
     </h3>
   );

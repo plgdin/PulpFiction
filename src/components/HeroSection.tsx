@@ -493,6 +493,8 @@ const HeroSection = ({
   const [isMuted, setIsMuted] = useState(true);
   const [targetPalette, setTargetPalette] = useState<HeroPalette>(DEFAULT_PALETTE);
   const [heroPalette, setHeroPalette] = useState<HeroPalette>(DEFAULT_PALETTE);
+  const heroRef = useRef<HTMLElement>(null);
+  const isHeroVisibleRef = useRef(true);
 
   const dominantColor = heroPalette.accent.replace(/\s+/g, ', ');
 
@@ -517,6 +519,19 @@ const HeroSection = ({
 
     return () => window.clearTimeout(timer);
   }, [activeSlide]);
+
+  // Track hero visibility — pause frame sampling when off-screen
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { isHeroVisibleRef.current = entry.isIntersecting; },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!activeSlide) return undefined;
@@ -623,6 +638,8 @@ const HeroSection = ({
       const nextFrameId = window.requestAnimationFrame(sampleFrame);
       frameSamplerRef.current = nextFrameId;
 
+      // Skip sampling when hero is scrolled off-screen
+      if (!isHeroVisibleRef.current) return;
       if (timestamp - lastSampleTime < FRAME_SAMPLE_INTERVAL_MS) return;
       if (activeVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
       if (activeVideo.paused || activeVideo.ended || activeVideo.videoWidth === 0 || activeVideo.videoHeight === 0) {
@@ -696,7 +713,8 @@ const HeroSection = ({
 
   return (
     <section
-      className="hero-synced-shell relative flex min-h-screen min-h-[100svh] w-full items-end"
+      ref={heroRef}
+      className="hero-synced-shell relative flex h-screen h-[100svh] w-full items-end"
       style={heroStyle}
     >
       {/* SVG Liquid Glass Filter */}
@@ -716,56 +734,58 @@ const HeroSection = ({
           <feDisplacementMap in="SourceGraphic" in2="softMap" scale={200} xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
-      <div className="absolute inset-0">
-        {slides.map((slide, index) => {
-          const isActive = index === activeSlideIndex;
-          return (
-            <div
-              key={slide.id}
-              className={cn(
-                'absolute inset-0 transition-opacity ease-out',
-                isActive ? 'opacity-100' : 'opacity-0'
-              )}
-              style={{ transitionDuration: '1600ms' }}
-            >
-              <img
-                src={slide.thumbnail || heroBg}
-                alt={`${slide.title} background`}
-                className="absolute inset-0 h-full w-full object-cover"
-                fetchpriority={isActive ? "high" : "auto"}
-                loading={isActive ? "eager" : "lazy"}
-              />
-              {isActive && slide.hasVideoPreview && (
-                <video
-                  ref={(element) => {
-                    videoRefs.current[slide.id] = element;
-                  }}
-                  src={slide.previewUrl}
-                  poster={slide.thumbnail || heroBg}
-                  crossOrigin="anonymous"
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0">
+          {slides.map((slide, index) => {
+            const isActive = index === activeSlideIndex;
+            return (
+              <div
+                key={slide.id}
+                className={cn(
+                  'absolute inset-0 transition-opacity ease-out',
+                  isActive ? 'opacity-100' : 'opacity-0'
+                )}
+                style={{ transitionDuration: '1600ms' }}
+              >
+                <img
+                  src={slide.thumbnail || heroBg}
+                  alt={`${slide.title} background`}
                   className="absolute inset-0 h-full w-full object-cover"
-                  autoPlay
-                  muted={isMuted}
-                  loop={false}
-                  playsInline
-                  preload="metadata"
-                  onTimeUpdate={(event) => handleVideoProgress(index, event)}
-                  onEnded={handleNextSlide}
+                  fetchPriority={isActive ? "high" : "auto"}
+                  loading={isActive ? "eager" : "lazy"}
                 />
-              )}
-            </div>
-          );
-        })}
+                {isActive && slide.hasVideoPreview && (
+                  <video
+                    ref={(element) => {
+                      videoRefs.current[slide.id] = element;
+                    }}
+                    src={slide.previewUrl}
+                    poster={slide.thumbnail || heroBg}
+                    crossOrigin="anonymous"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    autoPlay
+                    muted={isMuted}
+                    loop={false}
+                    playsInline
+                    preload="metadata"
+                    onTimeUpdate={(event) => handleVideoProgress(index, event)}
+                    onEnded={handleNextSlide}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="hero-synced-aura hero-synced-aura-left absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full blur-3xl" />
+        <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
+        <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
       </div>
-      <div className="hero-synced-aura hero-synced-aura-left absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full blur-3xl" />
-      <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
-      <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
 
-      {/* Seamless Grey Transition - extends beyond hero bottom */}
+      {/* Seamless bottom fade — tall gradient that bleeds into the content area below */}
       <div 
-        className="absolute inset-x-0 -bottom-24 md:-bottom-32 h-[20rem] md:h-[36rem] z-10 pointer-events-none"
+        className="absolute inset-x-0 -bottom-40 md:-bottom-52 h-[28rem] md:h-[48rem] z-10 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, #2a2a2a 0%, #2a2a2a 10%, rgba(42,42,42,0.85) 30%, rgba(42,42,42,0.5) 55%, rgba(42,42,42,0.15) 75%, transparent 100%)'
+          background: 'linear-gradient(to top, #121212 0%, rgba(18,18,18,0.98) 8%, rgba(26,26,26,0.9) 22%, rgba(34,34,34,0.65) 42%, rgba(42,42,42,0.3) 65%, rgba(42,42,42,0.08) 82%, transparent 100%)'
         }}
       />
 

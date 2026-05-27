@@ -9,6 +9,15 @@ export interface SiteSettings {
   youtubeUrl: string;
 }
 
+export interface PitchDeck {
+  id: string;
+  title: string;
+  embedUrl: string;
+  originalUrl: string;
+  accent: string;
+  thumbnail?: string;
+}
+
 export interface HeroContent {
   badge: string;
   title: string;
@@ -35,4 +44,5 @@ export interface CmsData {
   categories: VideoCategory[];
   videos: Video[];
   footerContent: FooterContent;
+  pitchDecks: PitchDeck[];
 }
