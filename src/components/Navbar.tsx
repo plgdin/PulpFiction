@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, X, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -14,14 +14,30 @@ interface NavbarProps {
 
 const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    let lastKnownScrollY = 0;
+    let ticking = false;
+
+    const updateScroll = () => {
+      setIsScrolled(lastKnownScrollY > 50);
+      ticking = false;
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      lastKnownScrollY = window.scrollY;
+      if (!ticking) {
+        rafRef.current = requestAnimationFrame(updateScroll);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   return (

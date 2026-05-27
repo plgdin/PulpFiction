@@ -178,10 +178,33 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                       setIsMuted(false);
                       seekToZero();
 
+                      setTimeout(() => {
+                        if (playerRef.current) {
+                          if (typeof playerRef.current.play === 'function') {
+                            const playPromise = playerRef.current.play();
+                            if (playPromise !== undefined) {
+                              playPromise.catch((e: any) => console.log('Play error:', e));
+                            }
+                          } else if (playerRef.current.getInternalPlayer) {
+                            const internalPlayer = playerRef.current.getInternalPlayer();
+                            if (internalPlayer && typeof internalPlayer.play === 'function') {
+                               const playPromise = internalPlayer.play();
+                               if (playPromise !== undefined) {
+                                 playPromise.catch((e: any) => console.log('Play error:', e));
+                               }
+                            }
+                          }
+                        }
+                      }, 50);
+
                       if (containerRef.current) {
-                        if (containerRef.current.requestFullscreen) containerRef.current.requestFullscreen();
-                        else if ((containerRef.current as any).webkitRequestFullscreen) (containerRef.current as any).webkitRequestFullscreen();
-                        else if ((containerRef.current as any).msRequestFullscreen) (containerRef.current as any).msRequestFullscreen();
+                        try {
+                          if (containerRef.current.requestFullscreen) containerRef.current.requestFullscreen();
+                          else if ((containerRef.current as any).webkitRequestFullscreen) (containerRef.current as any).webkitRequestFullscreen();
+                          else if ((containerRef.current as any).msRequestFullscreen) (containerRef.current as any).msRequestFullscreen();
+                        } catch (e) {
+                          console.log("Fullscreen not supported");
+                        }
                       }
                     }}
                   >
@@ -284,7 +307,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                         (e.target as HTMLImageElement).src = '/placeholder.svg';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent opacity-95" />
                     
                     {/* Play button overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -294,9 +317,9 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                     </div>
 
                     {/* Bottom Info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 transform transition-transform duration-300">
                       <h3 
-                        className="text-xl font-bold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] truncate"
+                        className="text-lg sm:text-xl font-bold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2"
                         style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
                       >
                         {v.title}

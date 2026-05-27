@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Video, VideoCategory } from '@/types/video';
-import { CmsData, SiteSettings, HeroContent, FooterContent } from '@/types/cms';
+import { CmsData, SiteSettings, HeroContent, FooterContent, PitchDeck } from '@/types/cms';
 import { supabase } from '@/lib/supabase';
 import {
   videos as defaultVideos,
@@ -47,6 +47,64 @@ const getDefaultData = (): CmsData => ({
       'Director & Cinematographer crafting visual stories that move, inspire, and captivate.',
     copyright: '© {year} Tarun Kapoor. All rights reserved.',
   },
+  pitchDecks: [
+    {
+      id: 'deck-1',
+      title: 'Pitch Deck 01',
+      embedUrl: 'https://www.canva.com/design/DAGsqg2zIAc/KGOQQyez5dRGT37dTytVdA/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAGsqg2zIAc/KGOQQyez5dRGT37dTytVdA/view',
+      accent: '#F5D467',
+    },
+    {
+      id: 'deck-2',
+      title: 'Pitch Deck 02',
+      embedUrl: 'https://www.canva.com/design/DAGgAu3cabE/Do2TGdWCExtaMgC_e2jg9g/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAGgAu3cabE/Do2TGdWCExtaMgC_e2jg9g/view',
+      accent: '#67B5F5',
+    },
+    {
+      id: 'deck-3',
+      title: 'Pitch Deck 03',
+      embedUrl: 'https://www.canva.com/design/DAGk4uxEhTc/8FTef9s_GhUeZ_Jpc_eJRg/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAGk4uxEhTc/8FTef9s_GhUeZ_Jpc_eJRg/view',
+      accent: '#F567A5',
+    },
+    {
+      id: 'deck-4',
+      title: 'Pitch Deck 04',
+      embedUrl: 'https://www.canva.com/design/DAG5l_HWoWo/sMYEnc7a2krfakR22fZKlg/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAG5l_HWoWo/sMYEnc7a2krfakR22fZKlg/view',
+      accent: '#A567F5',
+    },
+    {
+      id: 'deck-5',
+      title: 'Pitch Deck 05',
+      embedUrl: 'https://www.canva.com/design/DAHBXD3QO3Y/Aq-yS9cLoEylVIkZMSo9Rg/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAHBXD3QO3Y/Aq-yS9cLoEylVIkZMSo9Rg/view',
+      accent: '#67F5B5',
+    },
+    {
+      id: 'deck-6',
+      title: 'Pitch Deck 06',
+      embedUrl: 'https://www.canva.com/design/DAGtyX7Ltrk/69a5-dPmu-YQzU1IjnvG6Q/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAGtyX7Ltrk/69a5-dPmu-YQzU1IjnvG6Q/view',
+      accent: '#F5A567',
+    },
+    {
+      id: 'deck-7',
+      title: 'Pitch Deck 07',
+      embedUrl: 'https://www.canva.com/design/DAG5b3-rx80/pn7MV4MfAlkYIycTd4HeNw/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAG5b3-rx80/pn7MV4MfAlkYIycTd4HeNw/view',
+      accent: '#F56767',
+    },
+    {
+      id: 'deck-8',
+      title: 'Pitch Deck 08',
+      embedUrl: 'https://www.canva.com/design/DAG5b5gJlvQ/MuOQxV9Fv_2lCFXE418RUw/view?embed',
+      originalUrl: 'https://www.canva.com/design/DAG5b5gJlvQ/MuOQxV9Fv_2lCFXE418RUw/view',
+      accent: '#67D4F5',
+    },
+  ],
 });
 
 interface CmsContextType {
@@ -60,6 +118,7 @@ interface CmsContextType {
   deleteVideo: (id: string) => void;
   reorderVideos: (reorderedVideos: Video[]) => void;
   updateFooterContent: (footer: FooterContent) => void;
+  updatePitchDecks: (pitchDecks: PitchDeck[]) => void;
   getVideosByCategory: (category: string) => Video[];
   getFeaturedVideo: () => Video;
   exportData: () => string;
@@ -194,7 +253,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           heroContent: { ...finalData.heroContent },
           footerContent: { ...finalData.footerContent },
           categories: finalData.categories,
-          videos: finalData.videos
+          videos: finalData.videos,
+          pitchDecks: finalData.pitchDecks
         });
       } catch (error) {
         console.error('Error fetching Supabase data:', error);
@@ -238,7 +298,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       heroContent: settings?.hero_content ? { ...defaultData.heroContent, ...settings.hero_content, slideshowVideos: settings.hero_content.slideshowVideos || [] } : defaultData.heroContent,
       footerContent: settings?.footer_content || defaultData.footerContent,
       categories: (categories || []).map(c => ({ id: c.id, title: c.title, slug: c.slug })),
-      videos: mappedVideos
+      videos: mappedVideos,
+      pitchDecks: settings?.hero_content?.pitchDecks || defaultData.pitchDecks
     };
   };
 
@@ -328,6 +389,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (error) console.error("Error updating footer content in Supabase:", error);
   }, [updateWithHistory]);
 
+  const updatePitchDecks = useCallback(async (pitchDecks: PitchDeck[]) => {
+    updateWithHistory((d) => ({ ...d, pitchDecks }));
+    const currentHero = data.heroContent;
+    const updatedHero = { ...currentHero, pitchDecks };
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, hero_content: updatedHero });
+    if (error) console.error("Error updating pitch decks in Supabase:", error);
+  }, [updateWithHistory, data.heroContent]);
+
   const getVideosByCategory = useCallback(
     (category: string) => data.videos.filter((v) => v.category === category),
     [data.videos]
@@ -396,6 +465,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteVideo,
         reorderVideos,
         updateFooterContent,
+        updatePitchDecks,
         getVideosByCategory,
         getFeaturedVideo,
         exportData,

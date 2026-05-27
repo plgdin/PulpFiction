@@ -35,7 +35,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
     }
   }, [thumbnailSrc]);
 
-  // 3D Tilt Effect on Hover
+  // 3D Tilt Effect on Hover (Optimized)
   useEffect(() => {
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     if (isTouchDevice) return;
@@ -44,30 +44,37 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
     if (!card || !isHovered) return;
 
     let rafId: number;
+    let ticking = false;
+
     const handleMouseMove = (e: MouseEvent) => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+      if (!ticking) {
+        rafId = requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
 
-        const rotateY = ((x - centerX) / centerX) * 10;
-        const rotateX = ((y - centerY) / centerY) * -10;
+          // Reduced rotation angle for smoother performance
+          const rotateY = ((x - centerX) / centerX) * 8;
+          const rotateX = ((y - centerY) / centerY) * -8;
 
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
-      });
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     const handleMouseLeave = () => {
       cancelAnimationFrame(rafId);
       card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      ticking = false;
     };
 
-    card.addEventListener('mousemove', handleMouseMove);
+    card.addEventListener('mousemove', handleMouseMove, { passive: true });
     card.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
@@ -140,9 +147,9 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         />
         
         {/* Mobile Info Overlay (Hidden on md and up) */}
-        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4">
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent opacity-95 flex flex-col justify-end p-3 sm:p-4">
           <h3 
-            className="text-white font-bold text-xl leading-tight drop-shadow-md" 
+            className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" 
             style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
           >
             {video.title}
@@ -184,19 +191,12 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           ref={cardRef}
           className={cn(
             "relative z-10 mx-auto w-full overflow-hidden transition-all duration-200 ease-out text-white",
-            "bg-white/5 backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/20 rounded-[2.5rem]",
+            "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem]",
             "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
           )}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* Dynamic Glare Overlay */}
-          <div 
-            className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            style={{
-              background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.15), transparent)',
-              mixBlendMode: 'overlay'
-            }}
-          />
+
 
           {/* Top: Video Poster Area */}
           <div className="relative w-full aspect-video cursor-pointer overflow-hidden" onClick={() => onPlay(video)}>
@@ -231,12 +231,18 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                 {video.title}
               </motion.h3>
             </div>
-
+          {/* Dynamic Glare Overlay - Optimized by removing mixBlendMode */}
+          <div 
+            className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12), transparent)'
+            }}
+          />
             <div 
-              className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm"
+              className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm uppercase"
               style={{ fontFamily: "'Antonio', sans-serif" }}
             >
-              {video.duration}
+              {video.category ? video.category.replace('-', ' ') : 'VIDEO'}
             </div>
           </div>
 
@@ -281,6 +287,8 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                 >
                   <Plus className="h-5 w-5" />
                 </button>
+
+
               </div>
               
               <button
