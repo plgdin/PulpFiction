@@ -7,6 +7,7 @@ import { CmsProvider } from "./context/CmsContext";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import AboutContact from "./pages/AboutContact";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
         >
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<AboutContact />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

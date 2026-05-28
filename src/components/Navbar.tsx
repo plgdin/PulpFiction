@@ -75,6 +75,14 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
 
           {/* Right side */}
           <div className="flex items-center gap-5">
+            {/* About link */}
+            <Link
+              to="/about"
+              className="hidden md:flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
+            >
+              <span className="text-base text-shadow-glow">About</span>
+            </Link>
+
             {/* Behance link */}
             <a
               href="https://www.behance.net/tarunkapoor2"
