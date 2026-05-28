@@ -1,44 +1,45 @@
 import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Presentation, ExternalLink, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, X, Presentation, ExternalLink, Maximize2, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, type Transition } from 'framer-motion';
 
 import { PitchDeck } from '@/types/cms';
 /**
- * Lazy iframe that only mounts when the container scrolls into view.
- * This prevents 8 Canva apps from loading simultaneously on page load.
+ * Lazy iframe that only mounts on click (Facade pattern).
+ * This completely prevents Canva apps from loading until explicitly requested.
  */
-const LazyIframe = memo(({ src, title, style, className }: {
+const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
   src: string;
   title: string;
   style?: React.CSSProperties;
   className?: string;
+  thumbnail?: string;
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={containerRef} className={className} style={style}>
-      {isVisible && (
+    <div className={className} style={style}>
+      {!isRevealed ? (
+        <div 
+          className="absolute inset-0 w-full h-full cursor-pointer group flex items-center justify-center bg-zinc-800 overflow-hidden"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsRevealed(true);
+          }}
+        >
+          {thumbnail && (
+            <img 
+              src={thumbnail} 
+              alt={title} 
+              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+            />
+          )}
+          <div className="relative z-10 w-16 h-16 rounded-full bg-black/50 flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <Play className="w-8 h-8 text-white fill-white ml-1" />
+          </div>
+        </div>
+      ) : (
         <iframe
           src={src}
           className={cn("absolute border-0 transition-opacity duration-700 ease-in-out", isLoaded ? "opacity-100" : "opacity-0")}
@@ -212,25 +213,12 @@ const PitchDeckCard = memo(({
               </div>
             </div>
             
-            {/* Optional Custom Thumbnail Image */}
-            {deck.thumbnail && (
-              <img 
-                src={deck.thumbnail} 
-                alt={deck.title} 
-                className="absolute inset-0 w-full h-full object-cover z-10 opacity-70"
-              />
-            )}
-
             {/* Canva first slide — lazy loaded, scaled up to crop out bottom controls */}
             <LazyIframe
               src={deck.embedUrl}
               title={`${deck.title} preview`}
               className="absolute inset-0 z-20"
-            />
-            {/* Cover the bottom controls area */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-12 z-30"
-              style={{ background: `linear-gradient(to top, #1a1a1a, #1a1a1a 60%, transparent)` }}
+              thumbnail={deck.thumbnail}
             />
           </div>
           

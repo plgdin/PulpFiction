@@ -751,7 +751,8 @@ const HeroSection = ({
                   src={slide.thumbnail || heroBg}
                   alt={`${slide.title} background`}
                   className="absolute inset-0 h-full w-full object-cover"
-                  fetchPriority={isActive ? "high" : "auto"}
+                  // @ts-expect-error React types expect fetchPriority but runtime warns to use lowercase
+                  fetchpriority={isActive ? "high" : "auto"}
                   loading={isActive ? "eager" : "lazy"}
                 />
                 {isActive && slide.hasVideoPreview && (
