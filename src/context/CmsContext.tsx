@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Video, VideoCategory } from '@/types/video';
-import { CmsData, SiteSettings, HeroContent, FooterContent, PitchDeck } from '@/types/cms';
+import { CmsData, SiteSettings, HeroContent, FooterContent, PitchDeck, AboutContent } from '@/types/cms';
 import { supabase } from '@/lib/supabase';
 import {
   videos as defaultVideos,
@@ -35,6 +35,23 @@ const getDefaultData = (): CmsData => ({
     featuredVideoThumbnail: defaultFeaturedVideo.thumbnail,
     backgroundImage: '',
     slideshowVideos: [],
+  },
+  aboutContent: {
+    section1Image: '',
+    name: 'Tarun Kapoor',
+    title1: 'About.',
+    description1: 'Tarun Kapoor is a filmmaker with a relentless eye for cinematic storytelling from India. For years, he has worked for brands such as Budweiser, Royal Enfield, OLA Electric, Flipkart, Nykaa, and many more. His passion lies in using the subtle interplay of styles, lighting, and authentic performances to bring creative visions to life.',
+    location: 'Bangalore\nIndia',
+    availability: 'Available for\nFreelance & Fulltime',
+    section2Image: 'https://a.storyblok.com/f/277682/3000x3751/eaee60f06a/otto-van-den-toorn-profile-02.jpg/m/1440x0/filters:quality(60)',
+    title2: 'Background.',
+    description2a: "Creativity has woven its way through every chapter of Tarun's life, seamlessly transitioning from theatre as an actor to crafting captivating images as a director and cinematographer. He's discovered that whether he's captivated by the emotional depth of a performance or the rhythm and mood of a scene, it all springs from the same well of cinematic inspiration within.",
+    description2b: "Tarun has a profound passion for the creative journey. For him, there's something truly special about collaborating with others, grasping their vision, and bringing it to life. It's about transforming concepts into something real. This exchange of creativity is profoundly fulfilling. Without it, filmmaking would lose its authentic charm.",
+    section3Image: '',
+    title3: "Let's Connect.",
+    description3: 'Ready to collaborate on a new project or just want to say hello? Get in touch directly to discuss cinematic storytelling and visual journeys.',
+    quote: '"I believe every frame should make the audience feel something."',
+    quoteAuthor: 'Tarun Kapoor',
   },
   categories: [...defaultCategories],
   videos: [...defaultVideos],
@@ -108,6 +125,7 @@ interface CmsContextType {
   isLoading: boolean;
   updateSiteSettings: (settings: SiteSettings) => void;
   updateHeroContent: (hero: HeroContent) => void;
+  updateAboutContent: (content: AboutContent) => void;
   updateCategories: (categories: VideoCategory[]) => void;
   addVideo: (video: Video) => void;
   updateVideo: (id: string, video: Partial<Video>) => void;
@@ -171,6 +189,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 1,
       site_settings: defaultData.siteSettings,
       hero_content: defaultData.heroContent,
+      about_content: defaultData.aboutContent,
       footer_content: defaultData.footerContent
     });
 
@@ -226,6 +245,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setData({
           siteSettings: { ...finalData.siteSettings },
           heroContent: { ...finalData.heroContent },
+          aboutContent: { ...finalData.aboutContent },
           footerContent: { ...finalData.footerContent },
           categories: finalData.categories,
           videos: finalData.videos,
@@ -268,6 +288,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return {
       siteSettings: settings?.site_settings || defaultData.siteSettings,
       heroContent: settings?.hero_content ? { ...defaultData.heroContent, ...settings.hero_content, slideshowVideos: settings.hero_content.slideshowVideos || [] } : defaultData.heroContent,
+      aboutContent: settings?.about_content || defaultData.aboutContent,
       footerContent: settings?.footer_content || defaultData.footerContent,
       categories: (categories || []).map(c => ({ id: c.id, title: c.title, slug: c.slug })),
       videos: mappedVideos,
@@ -296,6 +317,12 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateWithHistory((d) => ({ ...d, heroContent: hero }));
     const { error } = await supabase.from('global_settings').upsert({ id: 1, hero_content: hero });
     if (error) console.error("Error updating hero content in Supabase:", error);
+  }, [updateWithHistory]);
+
+  const updateAboutContent = useCallback(async (about: AboutContent) => {
+    updateWithHistory((d) => ({ ...d, aboutContent: about }));
+    const { error } = await supabase.from('global_settings').upsert({ id: 1, about_content: about });
+    if (error) console.error("Error updating about content in Supabase:", error);
   }, [updateWithHistory]);
 
   const updateCategories = useCallback(async (categories: VideoCategory[]) => {
@@ -431,6 +458,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isLoading,
         updateSiteSettings,
         updateHeroContent,
+        updateAboutContent,
         updateCategories,
         addVideo,
         updateVideo,

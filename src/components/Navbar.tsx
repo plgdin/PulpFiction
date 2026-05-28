@@ -83,16 +83,6 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
               <span className="text-base text-shadow-glow">About</span>
             </Link>
 
-            {/* Behance link */}
-            <a
-              href="https://www.behance.net/tarunkapoor2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
-            >
-              <span className="text-base text-shadow-glow">Behance</span>
-              <ExternalLink className="w-[1.15rem] h-[1.15rem] drop-shadow-[0_0_8px_rgba(245,212,103,0.8)]" />
-            </a>
           </div>
         </div>
       </div>

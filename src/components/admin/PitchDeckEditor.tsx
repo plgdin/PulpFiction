@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCms } from '@/context/CmsContext';
 import { PitchDeck } from '@/types/cms';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import { toast } from 'sonner';
 
 const PitchDeckEditor = () => {
@@ -137,13 +138,10 @@ const PitchDeckEditor = () => {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label className="flex justify-between">
-                  <span>Thumbnail Image URL / Path</span>
-                </Label>
-                <Input
+                <ImageUpload
+                  label="Thumbnail Image URL / Path"
                   value={deck.thumbnail || ''}
-                  onChange={(e) => handleUpdateDeck(idx, 'thumbnail', e.target.value)}
-                  placeholder="/assets/thumb-1.jpg or https://..."
+                  onChange={(url) => handleUpdateDeck(idx, 'thumbnail', url)}
                 />
               </div>
 

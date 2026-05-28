@@ -19,6 +19,7 @@ import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 const emptyVideo: Omit<Video, 'id'> = {
   title: '', category: '' as Video['category'], thumbnail: '', videoUrl: '',
@@ -368,13 +369,11 @@ const VideoManager = () => {
               </Select>
             </div>
             <div>
-              <Label>Thumbnail URL</Label>
-              <Input value={formData.thumbnail} onChange={(e) => updateField('thumbnail', e.target.value)} className="bg-secondary border-border mt-1" placeholder="https://..." />
-              {formData.thumbnail && (
-                <div className="mt-2 w-32 h-20 rounded overflow-hidden bg-card">
-                  <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              <ImageUpload
+                label="Thumbnail URL"
+                value={formData.thumbnail}
+                onChange={(url) => updateField('thumbnail', url)}
+              />
             </div>
             <div>
               <Label>Video Source</Label>
