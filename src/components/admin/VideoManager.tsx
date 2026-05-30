@@ -145,8 +145,8 @@ const VideoManager = () => {
           upload.start();
         });
         
-        finalVideoUrl = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/play_720p.mp4`;
-        const autoThumbnail = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/thumbnail.jpg`;
+        finalVideoUrl = `https://vz-dadaa479-fe6.b-cdn.net/${videoId}/play_720p.mp4`;
+        const autoThumbnail = `https://vz-dadaa479-fe6.b-cdn.net/${videoId}/thumbnail.jpg`;
         
         setFormData(prev => ({
           ...prev,
