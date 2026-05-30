@@ -348,7 +348,7 @@ const VideoManager = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide" data-lenis-prevent="true">
           <DialogHeader>
             <DialogTitle className="font-display text-xl text-primary">
               {editingId ? 'Edit Video' : 'Add New Video'}
