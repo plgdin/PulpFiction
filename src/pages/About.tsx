@@ -1,94 +1,139 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCms } from "@/context/CmsContext";
 import { Mail, Instagram, Youtube, ExternalLink } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { motion, useScroll, useTransform, AnimatePresence, Variants } from "framer-motion";
 
 /* ==========================================
-   Scroll Reveal Hook
+   Letter-by-Letter Split Reveal Component
    ========================================== */
-const useScrollReveal = (threshold = 0.15) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+const SplitTextReveal = ({ text, className = "", delayOffset = 0 }: { text: string; className?: string; delayOffset?: number }) => {
+  const letters = Array.from(text);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const container: Variants = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.05, delayChildren: delayOffset * 0.2 },
+    }),
+  };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el); // only animate once
-        }
-      },
-      { threshold },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, isVisible };
-};
-
-/* ==========================================
-   Parallax Background Hook
-   ========================================== */
-const useParallax = (speed = 0.15) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const handleScroll = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const scrollProgress = rect.top / window.innerHeight;
-    const translateY = scrollProgress * speed * 100;
-    const img = el.querySelector('img');
-    if (img) {
-      img.style.transform = `translateY(${translateY}px) scale(1.1)`;
-    }
-  }, [speed]);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // initial position
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  return ref;
-};
-
-/* ==========================================
-   Scroll Reveal Wrapper Component
-   ========================================== */
-const Reveal = ({
-  children,
-  variant = 'fade-up',
-  delay = 0,
-  className = '',
-}: {
-  children: React.ReactNode;
-  variant?: 'fade-up' | 'fade-in' | 'slide-left' | 'slide-right' | 'scale-in' | 'blur-in';
-  delay?: number;
-  className?: string;
-}) => {
-  const { ref, isVisible } = useScrollReveal();
-  const delayClass = delay > 0 ? `delay-${delay}` : '';
+  const child: Variants = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", damping: 12, stiffness: 100 },
+    },
+    hidden: {
+      opacity: 0,
+      y: 100,
+      transition: { type: "spring", damping: 12, stiffness: 100 },
+    },
+  };
 
   return (
-    <div
-      ref={ref}
-      className={`scroll-reveal reveal-${variant} ${delayClass} ${isVisible ? 'is-visible' : ''} ${className}`}
+    <motion.div
+      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      className={className}
     >
-      {children}
+      {letters.map((letter, index) => (
+        <motion.span 
+          variants={child} 
+          key={index} 
+          style={{ 
+            display: "inline-block",
+            textShadow: "3px 4px 8px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8)"
+          }}
+        >
+          {letter === " " ? "\u00A0" : letter}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
+/* ==========================================
+   Word-by-Word Reveal Component
+   ========================================== */
+const SplitWordReveal = ({ text, className = "", delayOffset = 0 }: { text: string; className?: string; delayOffset?: number }) => {
+  const words = text.split(" ");
+
+  const container: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.03, delayChildren: delayOffset },
+    },
+  };
+
+  const child: Variants = {
+    hidden: { opacity: 0, y: 30, filter: "blur(5px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] },
+    },
+  };
+
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      className={`flex flex-wrap ${className}`}
+    >
+      {words.map((word, index) => (
+        <motion.span 
+          variants={child} 
+          key={index} 
+          className="mr-[0.25em] inline-block"
+          style={{ 
+            textShadow: "1px 2px 4px rgba(0, 0, 0, 0.9), 0 4px 8px rgba(0, 0, 0, 0.7)"
+          }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
+/* ==========================================
+   Parallax Background Image
+   ========================================== */
+const ParallaxImage = ({ src, alt, className = "" }: { src: string; alt: string; className?: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1.25]);
+
+  return (
+    <div ref={ref} className="absolute inset-0 z-0 overflow-hidden">
+      <motion.img
+        style={{ y, scale }}
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover object-center ${className}`}
+      />
     </div>
   );
 };
 
 /* ==========================================
-   About Typewriter
+   About Typewriter Component
    ========================================== */
 const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { className?: string, targetBase?: string }) => {
   const [baseText, setBaseText] = useState('');
@@ -184,13 +229,20 @@ const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { clas
   };
 
   return (
-    <h1
+    <motion.h1
       ref={containerRef}
-      className={`leading-none font-serif tracking-tight text-center text-primary text-shadow-glow ${className}`}
-      style={{ fontFamily: "'Antonio', sans-serif" }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1 }}
+      className={`leading-[0.9] font-serif tracking-tight text-center text-primary text-shadow-glow ${className}`}
+      style={{ 
+        fontFamily: "'Antonio', sans-serif",
+        textShadow: "3px 4px 8px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8), 0 0 15px hsl(var(--primary) / 0.3)"
+      }}
     >
       {renderText()}
-    </h1>
+    </motion.h1>
   );
 };
 
@@ -200,13 +252,21 @@ const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { clas
 const About = () => {
   const { data } = useCms();
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parallax refs for each section background
-  const parallax1 = useParallax(0.12);
-  const parallax2 = useParallax(0.15);
-  const parallax3 = useParallax(0.1);
+  // Global Scroll Progress for Color Transitions
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
 
-  // Make sure page always starts at top
+  // Map scroll progress to a background color transition (Zinc -> Dark Amber -> Deep Blue)
+  const backgroundColor = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.8],
+    ["#09090b", "#1c140a", "#050e1c"]
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -220,167 +280,198 @@ const About = () => {
   };
 
   return (
-    <div className="bg-zinc-950 text-stone-100 font-sans selection:bg-stone-100 selection:text-zinc-950 min-h-screen">
+    <motion.div 
+      ref={containerRef}
+      style={{ backgroundColor }}
+      className="text-stone-100 font-sans selection:bg-stone-100 selection:text-zinc-950 min-h-screen transition-colors duration-700 ease-out"
+    >
       <Navbar categories={data.categories || []} onSearch={handleSearch} onCategoryClick={handleCategoryClick} />
 
-      <main>
-        {/* Section 1: Tarun */}
-        <section className="relative w-full min-h-screen flex flex-col justify-between px-6 py-24 md:p-12 overflow-hidden">
-          <div ref={parallax1} className="absolute inset-0 z-0">
-            <img
-              src={data.aboutContent.section1Image || heroBg}
-              alt={`${data.aboutContent.name} Profile`}
-              className="w-full h-full object-cover object-center opacity-50 scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80"></div>
-          </div>
+      <main style={{ textShadow: "2px 2px 6px rgba(0, 0, 0, 0.9), 0 4px 12px rgba(0, 0, 0, 0.8)" }}>
+        {/* ================= SECTION 1: HERO ================= */}
+        <section className="relative w-full min-h-screen flex flex-col justify-end px-6 py-12 md:p-12 overflow-hidden">
+          <ParallaxImage 
+            src={data.aboutContent.section1Image || heroBg} 
+            alt="Hero Portrait" 
+            className="opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40 z-0"></div>
 
-          <div className="relative z-10 flex flex-col h-full grow">
+          <div className="relative z-10 w-full">
+            <div className="mb-12 md:mb-16 flex justify-center pb-2">
+              <AboutTypewriter 
+                targetBase={data.aboutContent.name.toUpperCase()} 
+                className="text-[12vw] md:text-[8vw] lg:text-[7vw]"
+              />
+            </div>
 
-            <Reveal variant="scale-in" className="flex-grow flex flex-col justify-center items-center mt-24 md:mt-12 w-full px-4 overflow-hidden">
-              <AboutTypewriter className="text-[14vw] md:text-[9vw]" targetBase={data.aboutContent.name} />
-            </Reveal>
-
-            <Reveal variant="fade-up" delay={2}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-12 md:mt-0 items-end">
-                <div className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl">(§1)</div>
-                <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed">
-                  <span className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6">{data.aboutContent.title1}</span>
-                  {data.aboutContent.description1}
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mt-12 md:mt-0 border-t border-stone-100/20 pt-8">
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.5 }}
+                className="md:col-span-2 text-stone-500 italic font-serif text-2xl"
+                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+              >
+                (§1)
+              </motion.div>
+              
+              <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed">
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-4"
+                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+                >
+                  {data.aboutContent.title1}
+                </motion.span>
+                <SplitWordReveal text={data.aboutContent.description1} delayOffset={0.6} />
               </div>
-            </Reveal>
-
-            <Reveal variant="fade-up" delay={3}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-16 md:mt-24 pt-8 border-t border-stone-100/20 text-xs md:text-sm uppercase tracking-widest">
-                <div className="md:col-span-3">
-                  <p className="leading-relaxed whitespace-pre-line">{data.aboutContent.location}</p>
-                  <span className="text-stone-500 block mt-4">Location.</span>
-                </div>
-                <div className="md:col-span-3 md:col-start-10 mt-8 md:mt-0">
-                  <p className="leading-relaxed whitespace-pre-line">{data.aboutContent.availability}</p>
-                  <span className="text-stone-500 block mt-4">Availability.</span>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* Section 2: Story */}
-        <section className="relative w-full min-h-screen flex flex-col justify-between px-6 py-24 md:p-12 overflow-hidden">
-          <div ref={parallax2} className="absolute inset-0 z-0">
-            <img
-              src={data.aboutContent.section2Image || "https://a.storyblok.com/f/277682/3000x3751/eaee60f06a/otto-van-den-toorn-profile-02.jpg/m/1440x0/filters:quality(60)"}
-              alt="Story Background"
-              className="w-full h-full object-cover object-center opacity-50 scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/80"></div>
-          </div>
-
-          <div className="relative z-10 flex flex-col h-full grow justify-center">
-            <Reveal variant="blur-in" className="flex-grow flex flex-col justify-center items-center mt-12 md:mt-0">
-              <h2 className="text-[25vw] md:text-[18vw] leading-none font-serif tracking-tight text-center text-primary" style={{ fontFamily: "'Antonio', sans-serif" }}>Story</h2>
-            </Reveal>
-
-            <Reveal variant="slide-right" delay={1}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-12 items-start">
-                <div className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl">(§2)</div>
-                <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed whitespace-pre-line">
-                  <span className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6">{data.aboutContent.title2}</span>
-                  {data.aboutContent.description2a}
-                </div>
-              </div>
-            </Reveal>
-
-            <Reveal variant="slide-right" delay={2}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-16 md:mt-24 pt-8 border-t border-stone-100/20">
-                <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed whitespace-pre-line">
-                  {data.aboutContent.description2b}
-                </div>
-              </div>
-            </Reveal>
+            </div>
           </div>
         </section>
 
-        {/* Section 3: Contact */}
-        <section className="relative w-full min-h-screen flex flex-col justify-between px-6 py-24 md:p-12 overflow-hidden">
-          <div ref={parallax3} className="absolute inset-0 z-0">
-            <img
-              src={data.aboutContent.section3Image || heroBg}
-              alt="Contact Background"
-              className="w-full h-full object-cover object-center opacity-40 scale-110"
+        {/* ================= SECTION 2: STORY ================= */}
+        <section className="relative w-full min-h-screen flex flex-col justify-center px-6 py-24 md:p-12 overflow-hidden">
+          <ParallaxImage 
+            src={data.aboutContent.section2Image || "https://a.storyblok.com/f/277682/3000x3751/eaee60f06a/otto-van-den-toorn-profile-02.jpg/m/1440x0/filters:quality(60)"} 
+            alt="Story Background" 
+            className="opacity-30 mix-blend-luminosity"
+          />
+          <div className="absolute inset-0 z-0 bg-black/30 backdrop-blur-sm"></div>
+
+          <div className="relative z-10 w-full max-w-7xl mx-auto">
+            <SplitTextReveal 
+              text="STORY" 
+              className="text-[20vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12 md:mb-24"
             />
-            <div className="absolute inset-0 bg-black/50"></div>
-          </div>
 
-          <div className="relative z-10 flex flex-col h-full grow justify-center">
-            <Reveal variant="blur-in" className="flex-grow flex flex-col justify-center items-center mt-12 md:mt-0">
-              <h2 className="text-[22vw] md:text-[15vw] leading-none font-serif tracking-tight text-center text-primary" style={{ fontFamily: "'Antonio', sans-serif" }}>Contact</h2>
-            </Reveal>
-
-            <Reveal variant="fade-up" delay={1}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-12 items-start">
-                <div className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl">(§3)</div>
-                <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed">
-                  <span className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6">{data.aboutContent.title3}</span>
-                  <span className="whitespace-pre-line">{data.aboutContent.description3}</span>
-                  
-                  <Reveal variant="fade-up" delay={3}>
-                    <div className="mt-12 flex items-center gap-4 flex-wrap">
-                      <a
-                        href={data.siteSettings.behanceUrl || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
-                        title="Behance"
-                      >
-                        <ExternalLink className="w-6 h-6" />
-                      </a>
-                      <a
-                        href={data.siteSettings.email ? `mailto:${data.siteSettings.email}` : "#"}
-                        className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
-                        title="Email"
-                      >
-                        <Mail className="w-6 h-6" />
-                      </a>
-                      <a
-                        href={data.siteSettings.instagramUrl || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
-                        title="Instagram"
-                      >
-                        <Instagram className="w-6 h-6" />
-                      </a>
-                      <a
-                        href={data.siteSettings.youtubeUrl || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
-                        title="YouTube"
-                      >
-                        <Youtube className="w-6 h-6" />
-                      </a>
-                    </div>
-                  </Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              <div 
+                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
+                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+              >
+                (§2)
+              </div>
+              
+              <div className="md:col-span-8 md:col-start-4 text-xl md:text-4xl font-serif leading-snug whitespace-pre-line">
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-8"
+                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+                >
+                  {data.aboutContent.title2}
+                </motion.span>
+                <SplitWordReveal text={data.aboutContent.description2a} delayOffset={0.2} />
+                
+                <div className="mt-12 md:mt-24 pt-12 border-t border-stone-100/10">
+                  <SplitWordReveal text={data.aboutContent.description2b} delayOffset={0.4} />
                 </div>
               </div>
-            </Reveal>
+            </div>
+          </div>
+        </section>
 
-            <Reveal variant="blur-in" delay={4}>
-              <div className="mt-32 md:mt-48 mb-12 text-center">
-                <p className="text-3xl md:text-5xl lg:text-6xl font-serif italic max-w-4xl mx-auto leading-tight whitespace-pre-line">
-                  {data.aboutContent.quote}
-                </p>
-                <p className="mt-12 text-xs md:text-sm uppercase tracking-widest text-stone-500">{data.aboutContent.quoteAuthor}</p>
+        {/* ================= SECTION 3: CONTACT ================= */}
+        <section className="relative w-full min-h-screen flex flex-col justify-between px-6 py-24 md:p-12 overflow-hidden">
+          <ParallaxImage 
+            src={data.aboutContent.section3Image || heroBg} 
+            alt="Contact Background" 
+            className="opacity-20 grayscale"
+          />
+
+          <div className="relative z-10 flex flex-col h-full grow justify-center w-full max-w-7xl mx-auto">
+            <SplitTextReveal 
+              text="CONTACT" 
+              className="text-[18vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12"
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              <div 
+                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
+                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+              >
+                (§3)
               </div>
-            </Reveal>
+              
+              <div className="md:col-span-6 md:col-start-4 text-lg md:text-2xl font-serif leading-relaxed">
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6"
+                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
+                >
+                  {data.aboutContent.title3}
+                </motion.span>
+                
+                <SplitWordReveal text={data.aboutContent.description3} />
+                
+                {/* Social Links Reveal */}
+                <motion.div 
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.1, delayChildren: 0.8 }
+                    }
+                  }}
+                  className="mt-16 flex items-center gap-6 flex-wrap"
+                >
+                  {[
+                    { icon: ExternalLink, url: data.siteSettings.behanceUrl, title: "Behance" },
+                    { icon: Mail, url: data.siteSettings.email ? `mailto:${data.siteSettings.email}` : "#", title: "Email" },
+                    { icon: Instagram, url: data.siteSettings.instagramUrl, title: "Instagram" },
+                    { icon: Youtube, url: data.siteSettings.youtubeUrl, title: "YouTube" }
+                  ].map((social, idx) => (
+                    <motion.a
+                      key={idx}
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.5, rotate: -20 },
+                        visible: { opacity: 1, scale: 1, rotate: 0, transition: { type: "spring" } }
+                      }}
+                      whileHover={{ scale: 1.1, backgroundColor: "#e7e5e4", color: "#09090b" }}
+                      href={social.url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-16 h-16 rounded-full border border-stone-500/30 flex items-center justify-center text-stone-300 transition-colors duration-300"
+                      title={social.title}
+                    >
+                      <social.icon className="w-6 h-6 stroke-[1.5]" />
+                    </motion.a>
+                  ))}
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Massive Quote Section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+              className="mt-32 md:mt-48 mb-12 text-center"
+              style={{ textShadow: "3px 4px 10px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8)" }}
+            >
+              <p className="text-4xl md:text-6xl lg:text-8xl font-serif italic max-w-5xl mx-auto leading-tight text-stone-400">
+                "{data.aboutContent.quote}"
+              </p>
+              <p className="mt-12 text-xs md:text-sm uppercase tracking-widest text-stone-600 font-sans">
+                {data.aboutContent.quoteAuthor}
+              </p>
+            </motion.div>
           </div>
         </section>
       </main>
 
       <Footer />
-    </div>
+    </motion.div>
   );
 };
 
