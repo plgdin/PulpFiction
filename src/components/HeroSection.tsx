@@ -450,7 +450,7 @@ const HeroSection = ({ video, videos, heroContent, onPlay }: HeroSectionProps) =
       <div className="relative z-20 flex h-full w-full items-end px-4 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36">
         <div className="hero-synced-copy relative max-w-5xl will-change-transform">
           <div className="mb-4 will-change-transform" style={{ transformOrigin: 'bottom left', transform: isTitleCompact ? 'scale(0.72)' : 'scale(1)', transition: `transform ${TITLE_MOTION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)` }}>
-            <h1 key={activeSlide.id} className="hero-synced-title font-display text-[clamp(2.1rem,8vw,6.5rem)] font-bold text-white leading-[0.9] tracking-[0.02em] py-2">
+            <h1 key={activeSlide.id} className="hero-synced-title font-display text-[clamp(2.1rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-[0.02em] py-2">
               {activeSlide.title}
             </h1>
             <p key={`${activeSlide.id}-description`} className="hero-synced-description mt-4 max-w-2xl text-sm md:text-base text-neutral-300 leading-relaxed" style={{ opacity: isDescriptionVisible ? 1 : 0, transition: `opacity ${TITLE_MOTION_MS * 0.4}ms ease-out` }}>
@@ -458,17 +458,68 @@ const HeroSection = ({ video, videos, heroContent, onPlay }: HeroSectionProps) =
             </p>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <button className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center" onClick={() => onPlay(activeSlide?.video || video)} style={{ boxShadow: isMobileViewport ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(${dominantColor}, 0.15)` }}>
-              <div className="absolute inset-0 z-0 rounded-full" style={{ backdropFilter: isMobileViewport ? 'none' : 'blur(3px)', filter: isMobileViewport ? 'none' : 'url(#hero-glass-distortion)', isolation: 'isolate' }} />
-              <div className="absolute inset-0 z-[1] rounded-full bg-white" />
-              <Play className="relative z-[3] h-4 w-4 fill-current text-black" />
-              <span className="relative z-[3] font-bold text-black text-base tracking-wider">{heroContent.ctaPrimaryText || 'VIEW REEL'}</span>
+            <button
+              className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center"
+              onClick={() => onPlay(activeSlide?.video || video)}
+              style={{
+                boxShadow: isMobileViewport ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(${dominantColor}, 0.15)`
+              }}
+            >
+              <div 
+                className="absolute inset-0 z-0 rounded-full overflow-hidden" 
+                style={{ 
+                  backdropFilter: isMobileViewport ? 'none' : 'blur(3px)', 
+                  filter: isMobileViewport ? 'none' : 'url(#hero-glass-distortion)', 
+                  isolation: 'isolate' 
+                }} 
+              />
+              <div className="absolute inset-0 z-[1] rounded-full bg-white/90" />
+              <div 
+                className="absolute inset-0 z-[2] rounded-full overflow-hidden" 
+                style={{ 
+                  boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.8), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' 
+                }} 
+              />
+              <Play className="relative z-[3] h-5 w-5 fill-current text-black" />
+              <span 
+                className="relative z-[3] font-bold text-black text-lg tracking-[0.15em]" 
+                style={{ fontFamily: "'Antonio', sans-serif" }}
+              >
+                {heroContent.ctaPrimaryText || 'VIEW REEL'}
+              </span>
             </button>
-            <button className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center" onClick={() => { const url = heroContent.portfolioUrl?.trim(); if (url) window.open(/^https?:\/\//i.test(url) ? url : `https://${url}`, '_blank'); }} style={{ boxShadow: isMobileViewport ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1)` }}>
-              <div className="absolute inset-0 z-0 rounded-full" style={{ backdropFilter: isMobileViewport ? 'none' : 'blur(10px)', filter: isMobileViewport ? 'none' : 'url(#hero-glass-distortion)', isolation: 'isolate' }} />
-              <div className="absolute inset-0 z-[1] rounded-full bg-white/10" />
-              <ExternalLink className="relative z-[3] h-4 w-4 text-white" />
-              <span className="relative z-[3] font-bold text-white text-base tracking-wider">{heroContent.ctaSecondaryText || 'PORTFOLIO'}</span>
+            <button
+              className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center"
+              onClick={() => {
+                const url = heroContent.portfolioUrl?.trim();
+                if (url) window.open(/^https?:\/\//i.test(url) ? url : `https://${url}`, '_blank');
+              }}
+              style={{
+                boxShadow: isMobileViewport ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1)`
+              }}
+            >
+              <div 
+                className="absolute inset-0 z-0 rounded-full overflow-hidden" 
+                style={{ 
+                  backdropFilter: isMobileViewport ? 'none' : 'blur(10px)', 
+                  filter: isMobileViewport ? 'none' : 'url(#hero-glass-distortion)', 
+                  isolation: 'isolate' 
+                }} 
+              />
+              <div className="absolute inset-0 z-[1] rounded-full" style={{ background: 'rgba(255, 255, 255, 0.12)' }} />
+              <div 
+                className="absolute inset-0 z-[2] rounded-full overflow-hidden border border-white/25" 
+                style={{ 
+                  boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 1px 1px rgba(255,255,255,0.2)' 
+                }} 
+              />
+              <ExternalLink className="relative z-[3] h-5 w-5 text-white" />
+              <span 
+                className="relative z-[3] font-bold text-white text-lg tracking-[0.15em]" 
+                style={{ fontFamily: "'Antonio', sans-serif" }}
+              >
+                {heroContent.ctaSecondaryText || 'PORTFOLIO'}
+              </span>
             </button>
           </div>
         </div>
