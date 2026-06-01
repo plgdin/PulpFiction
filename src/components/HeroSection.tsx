@@ -402,6 +402,7 @@ const extractPaletteFromSource = (
 };
 
 const extractPaletteFromThumbnail = async (src: string): Promise<HeroPalette> => {
+  if (typeof window !== 'undefined' && window.innerWidth < 768) return DEFAULT_PALETTE;
   if (!src || src.includes('behance.net')) return DEFAULT_PALETTE;
 
   const image = new Image();
@@ -493,7 +494,17 @@ const HeroSection = ({
   const [isMuted, setIsMuted] = useState(true);
   const [targetPalette, setTargetPalette] = useState<HeroPalette>(DEFAULT_PALETTE);
   const [heroPalette, setHeroPalette] = useState<HeroPalette>(DEFAULT_PALETTE);
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const isHeroVisibleRef = useRef(true);
 
   const dominantColor = heroPalette.accent.replace(/\s+/g, ', ');
@@ -535,6 +546,10 @@ const HeroSection = ({
 
   useEffect(() => {
     if (!activeSlide) return undefined;
+    if (isMobile) {
+      setTargetPalette(DEFAULT_PALETTE);
+      return undefined;
+    }
 
     let cancelled = false;
     const paletteKey = activeSlide.thumbnail || activeSlide.previewUrl || activeSlide.id;
@@ -566,6 +581,11 @@ const HeroSection = ({
   }, [activeSlide]);
 
   useEffect(() => {
+    if (isMobile) {
+      setHeroPalette(targetPalette);
+      return undefined;
+    }
+
     let frameId = 0;
     let isRunning = true;
 
@@ -613,6 +633,7 @@ const HeroSection = ({
   }, [heroPalette]);
 
   useEffect(() => {
+    if (isMobile) return undefined;
     if (!activeSlide?.hasVideoPreview) return undefined;
 
     const isTouchDevice = typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
@@ -742,7 +763,7 @@ const HeroSection = ({
               <div
                 key={slide.id}
                 className={cn(
-                  'absolute inset-0 transition-opacity ease-out',
+                  'absolute inset-0 transition-opacity ease-out will-change-[opacity,transform]',
                   isActive ? 'opacity-100' : 'opacity-0'
                 )}
                 style={{ transitionDuration: '1600ms' }}
@@ -777,9 +798,13 @@ const HeroSection = ({
             );
           })}
         </div>
-        <div className="hero-synced-aura hero-synced-aura-left absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full blur-3xl" />
-        <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
-        <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
+        {!isMobile && (
+          <>
+            <div className="hero-synced-aura hero-synced-aura-left absolute left-[-12%] top-[8%] h-[28rem] w-[28rem] rounded-full blur-3xl" />
+            <div className="hero-synced-aura hero-synced-aura-right absolute bottom-[14%] right-[-10%] h-[24rem] w-[24rem] rounded-full blur-3xl" />
+            <div className="hero-synced-aura hero-synced-aura-center absolute left-1/2 top-[18%] h-[20rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl" />
+          </>
+        )}
       </div>
 
       {/* Seamless bottom fade — tall gradient that bleeds into the content area below */}
@@ -826,18 +851,18 @@ const HeroSection = ({
           style={{ animationDelay: '0.5s' }}
         >
           <button
-            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 group sm:w-auto w-full justify-center"
+            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center"
             onClick={() => onPlay(activeSlide?.video || video)}
             style={{
-              boxShadow: `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(${dominantColor}, 0.15)`,
+              boxShadow: isMobile ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(${dominantColor}, 0.15)`,
             }}
           >
             <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
-              style={{ backdropFilter: 'blur(3px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
+              style={{ backdropFilter: isMobile ? 'none' : 'blur(3px)', filter: isMobile ? 'none' : 'url(#hero-glass-distortion)', isolation: 'isolate' }}
             />
             <div className="absolute inset-0 z-[1] rounded-full bg-white/90" />
             <div className="absolute inset-0 z-[2] rounded-full overflow-hidden"
-              style={{ boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.8), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
+               style={{ boxShadow: 'inset 2px 2px 1px 0 rgba(255,255,255,0.8), inset -1px -1px 1px 1px rgba(255,255,255,0.5)' }}
             />
             <Play className="relative z-[3] h-5 w-5 fill-current text-black" />
             <span
@@ -849,14 +874,14 @@ const HeroSection = ({
           </button>
 
           <button
-            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 group sm:w-auto w-full justify-center"
+            className="relative flex items-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 hover:scale-105 will-change-transform group sm:w-auto w-full justify-center"
             onClick={handleViewPortfolio}
             style={{
-              boxShadow: `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1)`,
+              boxShadow: isMobile ? '0 4px 6px rgba(0,0,0,0.3)' : `0 6px 6px rgba(0,0,0,0.2), 0 0 20px rgba(0,0,0,0.1)`,
             }}
           >
             <div className="absolute inset-0 z-0 rounded-full overflow-hidden"
-              style={{ backdropFilter: 'blur(10px)', filter: 'url(#hero-glass-distortion)', isolation: 'isolate' }}
+              style={{ backdropFilter: isMobile ? 'none' : 'blur(10px)', filter: isMobile ? 'none' : 'url(#hero-glass-distortion)', isolation: 'isolate' }}
             />
             <div className="absolute inset-0 z-[1] rounded-full" style={{ background: 'rgba(255, 255, 255, 0.12)' }} />
             <div className="absolute inset-0 z-[2] rounded-full overflow-hidden border border-white/25"
