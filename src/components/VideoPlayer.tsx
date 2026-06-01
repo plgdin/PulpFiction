@@ -138,7 +138,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                   onProgress={handleProgress as any}
                   onError={(e: any) => console.error("Video Player Error:", e)}
                   onReady={() => console.log("Video Player Ready")}
-                  config={PLAYER_CONFIG}
+                  config={PLAYER_CONFIG as any}
                 />
               </Suspense>
             )
