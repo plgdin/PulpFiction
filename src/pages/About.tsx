@@ -1,160 +1,59 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCms } from "@/context/CmsContext";
-import { Mail, Instagram, Youtube, ExternalLink } from "lucide-react";
+import { Mail, Instagram, Youtube, ExternalLink, Play, Sparkles, Trophy, Flame, Swords, Shield } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-import { motion, useScroll, useTransform, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import NavigationMenu, {
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from "@/components/ui/8bit-navigation-menu";
 
 /* ==========================================
-   Letter-by-Letter Split Reveal Component
+   Retro CRT Scanline Scan Overlay
    ========================================== */
-const SplitTextReveal = ({ text, className = "", delayOffset = 0 }: { text: string; className?: string; delayOffset?: number }) => {
-  const letters = Array.from(text);
-
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    visible: (i = 1) => ({
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: delayOffset * 0.2 },
-    }),
-  };
-
-  const child: Variants = {
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", damping: 12, stiffness: 100 },
-    },
-    hidden: {
-      opacity: 0,
-      y: 100,
-      transition: { type: "spring", damping: 12, stiffness: 100 },
-    },
-  };
-
+const CrtScreen = ({ children }: { children: React.ReactNode }) => {
   return (
-    <motion.div
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
-      variants={container}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      className={className}
-    >
-      {letters.map((letter, index) => (
-        <motion.span 
-          variants={child} 
-          key={index} 
-          style={{ 
-            display: "inline-block",
-            textShadow: "3px 4px 8px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8)"
-          }}
-        >
-          {letter === " " ? "\u00A0" : letter}
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-};
-
-/* ==========================================
-   Word-by-Word Reveal Component
-   ========================================== */
-const SplitWordReveal = ({ text, className = "", delayOffset = 0 }: { text: string; className?: string; delayOffset?: number }) => {
-  const words = text.split(" ");
-
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.03, delayChildren: delayOffset },
-    },
-  };
-
-  const child: Variants = {
-    hidden: { opacity: 0, y: 30, filter: "blur(5px)" },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] },
-    },
-  };
-
-  return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      className={`flex flex-wrap ${className}`}
-    >
-      {words.map((word, index) => (
-        <motion.span 
-          variants={child} 
-          key={index} 
-          className="mr-[0.25em] inline-block"
-          style={{ 
-            textShadow: "1px 2px 4px rgba(0, 0, 0, 0.9), 0 4px 8px rgba(0, 0, 0, 0.7)"
-          }}
-        >
-          {word}
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-};
-
-/* ==========================================
-   Parallax Background Image
-   ========================================== */
-const ParallaxImage = ({ src, alt, className = "" }: { src: string; alt: string; className?: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1.25]);
-
-  return (
-    <div ref={ref} className="absolute inset-0 z-0 overflow-hidden">
-      <motion.img
-        style={{ y, scale }}
-        src={src}
-        alt={alt}
-        className={`w-full h-full object-cover object-center ${className}`}
-      />
+    <div className="relative crt-overlay bg-black min-h-screen text-stone-100 font-mono overflow-hidden">
+      {/* Glare effect inside screen */}
+      <div className="absolute inset-0 pointer-events-none z-10 bg-gradient-to-tr from-transparent via-white/5 to-transparent mix-blend-overlay"></div>
+      {children}
     </div>
   );
 };
 
 /* ==========================================
-   About Typewriter Component
+   RPG Dialogue Box / Text Typing Reveal
    ========================================== */
-const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { className?: string, targetBase?: string }) => {
-  const [baseText, setBaseText] = useState('');
-  const [prefixText, setPrefixText] = useState('');
-
-  type Mode = 'TYPE_BASE' | 'MOVE_CURSOR' | 'TYPE_PREFIX' | 'DELETE_PREFIX' | 'PAUSE';
-  const [mode, setMode] = useState<Mode>('TYPE_BASE');
-  const [cursorIndex, setCursorIndex] = useState(0);
-
-  const roles = ['Writer', 'Actor', 'Director'];
-  const [roleIndex, setRoleIndex] = useState(0);
-
-  const containerRef = useRef<HTMLHeadingElement>(null);
+const PixelDialogueBox = ({ 
+  title, 
+  text, 
+  icon: Icon,
+  accentColor = "#f5d467" 
+}: { 
+  title: string; 
+  text: string; 
+  icon?: any;
+  accentColor?: string;
+}) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 },
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.15 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -162,110 +61,155 @@ const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { clas
 
   useEffect(() => {
     if (!isVisible) return;
-    let timer: NodeJS.Timeout;
-
-    if (mode === 'TYPE_BASE') {
-      if (baseText.length < targetBase.length) {
-        timer = setTimeout(() => {
-          setBaseText(targetBase.slice(0, baseText.length + 1));
-          setCursorIndex(baseText.length + 1);
-        }, 120);
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1));
+        index++;
       } else {
-        timer = setTimeout(() => setMode('MOVE_CURSOR'), 1000);
+        setIsTypingComplete(true);
+        clearInterval(timer);
       }
-    } else if (mode === 'MOVE_CURSOR') {
-      if (cursorIndex > 0) {
-        timer = setTimeout(() => setCursorIndex((prev) => prev - 1), 120);
-      } else {
-        timer = setTimeout(() => setMode('TYPE_PREFIX'), 400);
-      }
-    } else if (mode === 'TYPE_PREFIX') {
-      const currentRole = roles[roleIndex].toUpperCase();
-      if (prefixText.length < currentRole.length) {
-        timer = setTimeout(
-          () => setPrefixText(currentRole.slice(0, prefixText.length + 1)),
-          100,
-        );
-      } else {
-        setMode('PAUSE');
-      }
-    } else if (mode === 'PAUSE') {
-      timer = setTimeout(() => setMode('DELETE_PREFIX'), roleIndex === 2 ? 3000 : 1500);
-    } else if (mode === 'DELETE_PREFIX') {
-      if (prefixText.length > 0) {
-        timer = setTimeout(
-          () => setPrefixText(prefixText.slice(0, prefixText.length - 1)),
-          60,
-        );
-      } else {
-        setRoleIndex((prev) => (prev + 1) % roles.length);
-        setMode('TYPE_PREFIX');
-      }
-    }
+    }, 15);
 
-    return () => clearTimeout(timer);
-  }, [baseText, prefixText, mode, cursorIndex, roleIndex, isVisible]);
-
-  const Cursor = () => (
-    <span className="inline-flex w-0 justify-center overflow-visible align-baseline">
-      <span className="animate-blink font-light text-primary/80 -translate-y-[0.05em]">|</span>
-    </span>
-  );
-
-  const renderText = () => {
-    if (mode === 'TYPE_BASE') return <>{baseText}<Cursor /></>;
-    if (mode === 'MOVE_CURSOR') {
-      return (
-        <>
-          {baseText.slice(0, cursorIndex)}<Cursor />{baseText.slice(cursorIndex)}
-        </>
-      );
-    }
-    return (
-      <span className="flex flex-wrap justify-center items-center whitespace-pre-wrap">
-        {prefixText}<Cursor />{prefixText.length > 0 ? '\u00A0' : ''}{baseText}
-      </span>
-    );
-  };
+    return () => clearInterval(timer);
+  }, [text, isVisible]);
 
   return (
-    <motion.h1
+    <div 
       ref={containerRef}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 1 }}
-      className={`leading-[0.9] font-serif tracking-tight text-center text-primary text-shadow-glow ${className}`}
-      style={{ 
-        fontFamily: "'Antonio', sans-serif",
-        textShadow: "3px 4px 8px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8), 0 0 15px hsl(var(--primary) / 0.3)"
-      }}
+      className="w-full bg-zinc-950 p-6 md:p-8 pixel-border-gold relative flex flex-col gap-4 text-left"
     >
-      {renderText()}
-    </motion.h1>
+      {/* Glowing Header Tab */}
+      <div className="absolute -top-6 left-6 bg-black px-4 py-1.5 border-2 border-primary text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary retro">
+        {title}
+      </div>
+
+      <div className="flex items-start gap-4 mt-2">
+        {Icon && (
+          <div className="p-3 bg-primary/10 border border-primary/20 text-primary rounded shadow-[0_0_12px_rgba(245,212,103,0.3)] shrink-0">
+            <Icon className="w-6 h-6 animate-pulse" />
+          </div>
+        )}
+        <div className="flex-1">
+          <p className="text-[18px] md:text-[24px] retro-text leading-relaxed tracking-wider text-stone-200">
+            {displayedText}
+            {!isTypingComplete && (
+              <span className="inline-block w-2.5 h-4 bg-primary ml-1 animate-blink" />
+            )}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 
 /* ==========================================
-   About Page
+   RPG Stats / Character Display Component
+   ========================================== */
+const CharacterStats = ({ accent = "#f5d467" }) => {
+  const stats = [
+    { name: "CINEMATOGRAPHY", level: 99, icon: Trophy },
+    { name: "STORYTELLING", level: 95, icon: Swords },
+    { name: "CREATIVE VISION", level: 98, icon: Flame },
+    { name: "RELIABILITY", level: 100, icon: Shield },
+  ];
+
+  return (
+    <div className="w-full bg-zinc-950 p-6 pixel-border-gold flex flex-col gap-5 text-left">
+      <div className="border-b border-primary/20 pb-3 flex justify-between items-center">
+        <span className="text-[12px] md:text-sm font-bold uppercase text-primary retro">CHARACTER STATS</span>
+        <span className="text-[10px] text-stone-500 font-mono tracking-widest">LVL. 99</span>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {stats.map((stat, idx) => (
+          <div key={idx} className="flex flex-col gap-2">
+            <div className="flex justify-between items-center text-[10px] md:text-[12px] font-bold text-stone-300 retro">
+              <span className="flex items-center gap-2">
+                <stat.icon className="w-3.5 h-3.5 text-primary" />
+                {stat.name}
+              </span>
+              <span className="text-primary font-bold">LVL {stat.level}</span>
+            </div>
+            {/* 8-bit Progress Bar */}
+            <div className="h-6 w-full border-2 border-stone-800 bg-black p-0.5 relative overflow-hidden">
+              <div 
+                className="h-full bg-primary shadow-[inset_-4px_0px_0px_0px_#d9b841]" 
+                style={{ width: `${stat.level}%` }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================
+   Retro Typewriter Component
+   ========================================== */
+const RetroRoleTypewriter = ({ targetName = "TARUN KAPOOR" }: { targetName?: string }) => {
+  const [role, setRole] = useState("");
+  const [roleIdx, setRoleIdx] = useState(0);
+  const roles = ["DIRECTOR", "CINEMATOGRAPHER", "CREATOR", "STORYTELLER"];
+  const [mode, setMode] = useState<"typing" | "deleting" | "pause">("typing");
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const current = roles[roleIdx];
+
+    if (mode === "typing") {
+      if (role.length < current.length) {
+        timer = setTimeout(() => {
+          setRole(current.slice(0, role.length + 1));
+        }, 100);
+      } else {
+        timer = setTimeout(() => setMode("pause"), 2000);
+      }
+    } else if (mode === "pause") {
+      timer = setTimeout(() => setMode("deleting"), 1500);
+    } else if (mode === "deleting") {
+      if (role.length > 0) {
+        timer = setTimeout(() => {
+          setRole(role.slice(0, role.length - 1));
+        }, 60);
+      } else {
+        setRoleIdx((prev) => (prev + 1) % roles.length);
+        setMode("typing");
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [role, mode, roleIdx]);
+
+  return (
+    <div className="flex flex-col items-center justify-center text-center gap-2">
+      <h1 
+        className="text-[8vw] md:text-[6vw] lg:text-[5vw] text-primary font-bold uppercase tracking-wider text-shadow-glow retro leading-none"
+        style={{ textShadow: "4px 4px 0px #000, 0 0 20px rgba(245,212,103,0.3)" }}
+      >
+        {targetName}
+      </h1>
+      <div className="flex items-center gap-3 mt-4">
+        <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">ACTIVE ROLE:</span>
+        <span className="text-[20px] md:text-[28px] font-bold text-white tracking-widest retro-text bg-primary/10 border border-primary/20 px-4 py-1 flex items-center gap-2 shadow-[0_0_12px_rgba(245,212,103,0.15)]">
+          <Sparkles className="w-4 h-4 text-primary animate-spin" />
+          {role}
+          <span className="inline-block w-2.5 h-5 bg-white ml-0.5 animate-blink" />
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================
+   About Page - Retro Variant
    ========================================== */
 const About = () => {
   const { data } = useCms();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Global Scroll Progress for Color Transitions
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Map scroll progress to a background color transition (Zinc -> Dark Amber -> Deep Blue)
-  const backgroundColor = useTransform(
-    scrollYProgress,
-    [0, 0.4, 0.8],
-    ["#09090b", "#1c140a", "#050e1c"]
-  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -280,198 +224,249 @@ const About = () => {
   };
 
   return (
-    <motion.div 
-      ref={containerRef}
-      style={{ backgroundColor }}
-      className="text-stone-100 font-sans selection:bg-stone-100 selection:text-zinc-950 min-h-screen transition-colors duration-700 ease-out"
-    >
-      <Navbar categories={data.categories || []} onSearch={handleSearch} onCategoryClick={handleCategoryClick} />
+    <CrtScreen>
+      {/* 8-bit styled retro topbar navigation */}
+      <div className="w-full border-b-4 border-primary/30 bg-black/80 backdrop-blur-md sticky top-0 z-[100] px-4 md:px-12 py-3 flex flex-wrap items-center justify-between gap-4">
+        {/* Retro Logo */}
+        <div 
+          onClick={() => navigate("/")}
+          className="cursor-pointer border-2 border-primary px-3 py-1 bg-primary/10 text-primary font-bold text-shadow-glow hover:scale-105 active:scale-95 transition-all retro text-xs md:text-sm tracking-wide"
+        >
+          TK.EXE
+        </div>
 
-      <main style={{ textShadow: "2px 2px 6px rgba(0, 0, 0, 0.9), 0 4px 12px rgba(0, 0, 0, 0.8)" }}>
-        {/* ================= SECTION 1: HERO ================= */}
-        <section className="relative w-full min-h-screen flex flex-col justify-end px-6 py-12 md:p-12 overflow-hidden">
-          <ParallaxImage 
-            src={data.aboutContent.section1Image || heroBg} 
-            alt="Hero Portrait" 
-            className="opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40 z-0"></div>
+        {/* 8-bit Custom Navigation Menu */}
+        <NavigationMenu className="z-[110]">
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="retro text-[10px] md:text-xs">SYSTEM</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-2 p-3 w-48 bg-zinc-950 border border-primary/20">
+                  <li>
+                    <NavigationMenuLink 
+                      className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
+                      onClick={() => navigate("/")}
+                    >
+                      HOME_SITE
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink 
+                      className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
+                      onClick={() => navigate("/about")}
+                    >
+                      ABOUT_ME
+                    </NavigationMenuLink>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
 
-          <div className="relative z-10 w-full">
-            <div className="mb-12 md:mb-16 flex justify-center pb-2">
-              <AboutTypewriter 
-                targetBase={data.aboutContent.name.toUpperCase()} 
-                className="text-[12vw] md:text-[8vw] lg:text-[7vw]"
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="retro text-[10px] md:text-xs">QUESTS</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-2 p-3 w-48 bg-zinc-950 border border-primary/20">
+                  <li>
+                    <NavigationMenuLink 
+                      className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
+                      onClick={() => navigate("/#ad-films")}
+                    >
+                      AD_FILMS
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink 
+                      className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
+                      onClick={() => navigate("/#music-videos")}
+                    >
+                      MUSIC_CLIPS
+                    </NavigationMenuLink>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        {/* Floating Play / Action Hint */}
+        <div className="hidden lg:flex items-center gap-2">
+          <span className="text-[10px] text-stone-500 retro">CREDITS: 99</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 md:px-12 py-16 flex flex-col gap-24 relative z-20">
+        
+        {/* ================= HERO: CHARACTER SELECT SCREEN ================= */}
+        <section className="w-full flex flex-col gap-12 items-center">
+          <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 01 // SELECT CHARACTER</span>
+            <span className="text-primary/70 text-xs font-mono">OK-PLAY_2026</span>
+          </div>
+
+          <RetroRoleTypewriter targetName={data.aboutContent.name.toUpperCase()} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start mt-6">
+            
+            {/* Left: Pixel Frame Portrait */}
+            <div className="lg:col-span-5 flex flex-col gap-4 items-center justify-center">
+              <div className="w-full max-w-[400px] aspect-[4/5] bg-zinc-900 overflow-hidden pixel-border-gold p-2 relative group">
+                {/* 8-bit Bracket overlay highlights */}
+                <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+                <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+                <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+                <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+                
+                <img 
+                  src={data.aboutContent.section1Image || heroBg} 
+                  alt="Tarun Kapoor Portrait" 
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 contrast-125 saturate-150 transition-all duration-300"
+                />
+              </div>
+              <span className="text-[10px] text-stone-500 tracking-widest font-mono uppercase">TARUN_KAPOOR_PROFILE.JPG [512x640]</span>
+            </div>
+
+            {/* Right: RPG Dialogue Panel & Stats */}
+            <div className="lg:col-span-7 flex flex-col gap-8 w-full">
+              <PixelDialogueBox 
+                title="BIO_LOG.TXT" 
+                text={data.aboutContent.description1} 
+                icon={Play}
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mt-12 md:mt-0 border-t border-stone-100/20 pt-8">
-              <motion.div 
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§1)
-              </motion.div>
-              
-              <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed">
-                <motion.span 
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-4"
-                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-                >
-                  {data.aboutContent.title1}
-                </motion.span>
-                <SplitWordReveal text={data.aboutContent.description1} delayOffset={0.6} />
-              </div>
+              <CharacterStats />
             </div>
           </div>
         </section>
 
-        {/* ================= SECTION 2: STORY ================= */}
-        <section className="relative w-full min-h-screen flex flex-col justify-center px-6 py-24 md:p-12 overflow-hidden">
-          <ParallaxImage 
-            src={data.aboutContent.section2Image || "https://a.storyblok.com/f/277682/3000x3751/eaee60f06a/otto-van-den-toorn-profile-02.jpg/m/1440x0/filters:quality(60)"} 
-            alt="Story Background" 
-            className="opacity-30 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 z-0 bg-black/30 backdrop-blur-sm"></div>
+        {/* ================= STORY: ACTIVE QUEST LOG ================= */}
+        <section className="w-full flex flex-col gap-12 items-center">
+          <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 02 // QUEST LOG</span>
+            <span className="text-primary/70 text-xs font-mono">QUEST_STATUS: ACTIVE</span>
+          </div>
 
-          <div className="relative z-10 w-full max-w-7xl mx-auto">
-            <SplitTextReveal 
-              text="STORY" 
-              className="text-[20vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12 md:mb-24"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
+            
+            {/* Story Dialogue Columns */}
+            <div className="lg:col-span-7 flex flex-col gap-8 order-2 lg:order-1">
+              <PixelDialogueBox 
+                title="STORY_ACT_I.TXT" 
+                text={data.aboutContent.description2a} 
+                icon={Sparkles}
+              />
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              <div 
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§2)
-              </div>
-              
-              <div className="md:col-span-8 md:col-start-4 text-xl md:text-4xl font-serif leading-snug whitespace-pre-line">
-                <motion.span 
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 1 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-8"
-                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-                >
-                  {data.aboutContent.title2}
-                </motion.span>
-                <SplitWordReveal text={data.aboutContent.description2a} delayOffset={0.2} />
-                
-                <div className="mt-12 md:mt-24 pt-12 border-t border-stone-100/10">
-                  <SplitWordReveal text={data.aboutContent.description2b} delayOffset={0.4} />
-                </div>
+              <div className="mt-4">
+                <PixelDialogueBox 
+                  title="STORY_ACT_II.TXT" 
+                  text={data.aboutContent.description2b} 
+                />
               </div>
             </div>
+
+            {/* Story Image / Pixel Frames */}
+            <div className="lg:col-span-5 flex flex-col gap-4 items-center justify-center order-1 lg:order-2">
+              <div className="w-full max-w-[400px] aspect-[4/5] bg-zinc-900 overflow-hidden pixel-border-gold p-2 relative group">
+                <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-primary z-30"></div>
+                <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-primary z-30"></div>
+                <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-primary z-30"></div>
+                <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-primary z-30"></div>
+                
+                <img 
+                  src={data.aboutContent.section2Image || "https://a.storyblok.com/f/277682/3000x3751/eaee60f06a/otto-van-den-toorn-profile-02.jpg/m/1440x0/filters:quality(60)"} 
+                  alt="Story Visual" 
+                  className="w-full h-full object-cover grayscale contrast-125 saturate-150 group-hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              <span className="text-[10px] text-stone-500 tracking-widest font-mono uppercase">STORY_STILL_02.JPG [512x640]</span>
+            </div>
+
           </div>
         </section>
 
-        {/* ================= SECTION 3: CONTACT ================= */}
-        <section className="relative w-full min-h-screen flex flex-col justify-between px-6 py-24 md:p-12 overflow-hidden">
-          <ParallaxImage 
-            src={data.aboutContent.section3Image || heroBg} 
-            alt="Contact Background" 
-            className="opacity-20 grayscale"
-          />
+        {/* ================= CONTACT: LEVEL COMPLETED / CONNECT ================= */}
+        <section className="w-full flex flex-col gap-12 items-center">
+          <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 03 // LEVEL COMPLETED</span>
+            <span className="text-primary/70 text-xs font-mono">STAGE_CLEAR_BONUS</span>
+          </div>
 
-          <div className="relative z-10 flex flex-col h-full grow justify-center w-full max-w-7xl mx-auto">
-            <SplitTextReveal 
-              text="CONTACT" 
-              className="text-[18vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12"
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              <div 
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§3)
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
+            
+            {/* Contact Visual Frame */}
+            <div className="lg:col-span-5 flex flex-col gap-4 items-center justify-center">
+              <div className="w-full max-w-[400px] aspect-[4/5] bg-zinc-900 overflow-hidden pixel-border-gold p-2 relative group">
+                <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-primary z-30"></div>
+                <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-primary z-30"></div>
+                <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-primary z-30"></div>
+                <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-primary z-30"></div>
+                
+                <img 
+                  src={data.aboutContent.section3Image || heroBg} 
+                  alt="Contact Visual" 
+                  className="w-full h-full object-cover grayscale contrast-125 saturate-150 group-hover:grayscale-0 transition-all duration-300"
+                />
               </div>
-              
-              <div className="md:col-span-6 md:col-start-4 text-lg md:text-2xl font-serif leading-relaxed">
-                <motion.span 
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6"
-                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-                >
-                  {data.aboutContent.title3}
-                </motion.span>
+              <span className="text-[10px] text-stone-500 tracking-widest font-mono uppercase">CONTACT_STILL_03.JPG [512x640]</span>
+            </div>
+
+            {/* RPG Dialogue Connect Log */}
+            <div className="lg:col-span-7 flex flex-col gap-8 w-full">
+              <PixelDialogueBox 
+                title="CONNECT_LOG.TXT" 
+                text={data.aboutContent.description3} 
+              />
+
+              {/* Action Buttons styled like retro pixel menus */}
+              <div className="flex flex-col gap-4 w-full bg-zinc-950 p-6 pixel-border-gold text-left mt-2">
+                <span className="text-[10px] font-bold text-stone-400 mb-2 retro uppercase block">SELECT ACTION CHANNEL:</span>
                 
-                <SplitWordReveal text={data.aboutContent.description3} />
-                
-                {/* Social Links Reveal */}
-                <motion.div 
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.1, delayChildren: 0.8 }
-                    }
-                  }}
-                  className="mt-16 flex items-center gap-6 flex-wrap"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { icon: ExternalLink, url: data.siteSettings.behanceUrl, title: "Behance" },
-                    { icon: Mail, url: data.siteSettings.email ? `mailto:${data.siteSettings.email}` : "#", title: "Email" },
-                    { icon: Instagram, url: data.siteSettings.instagramUrl, title: "Instagram" },
-                    { icon: Youtube, url: data.siteSettings.youtubeUrl, title: "YouTube" }
+                    { label: "SEND_EMAIL", icon: Mail, url: data.siteSettings.email ? `mailto:${data.siteSettings.email}` : "#" },
+                    { label: "INSTAGRAM", icon: Instagram, url: data.siteSettings.instagramUrl },
+                    { label: "BEHANCE_PORTFOLIO", icon: ExternalLink, url: data.siteSettings.behanceUrl },
+                    { label: "YOUTUBE_REELS", icon: Youtube, url: data.siteSettings.youtubeUrl },
                   ].map((social, idx) => (
-                    <motion.a
+                    <a
                       key={idx}
-                      variants={{
-                        hidden: { opacity: 0, scale: 0.5, rotate: -20 },
-                        visible: { opacity: 1, scale: 1, rotate: 0, transition: { type: "spring" } }
-                      }}
-                      whileHover={{ scale: 1.1, backgroundColor: "#e7e5e4", color: "#09090b" }}
                       href={social.url || "#"}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-16 h-16 rounded-full border border-stone-500/30 flex items-center justify-center text-stone-300 transition-colors duration-300"
-                      title={social.title}
+                      className="pixel-btn text-center flex items-center justify-center gap-3 py-3"
                     >
-                      <social.icon className="w-6 h-6 stroke-[1.5]" />
-                    </motion.a>
+                      <social.icon className="w-4 h-4" />
+                      <span>{social.label}</span>
+                    </a>
                   ))}
-                </motion.div>
+                </div>
               </div>
             </div>
 
-            {/* Massive Quote Section */}
-            <motion.div 
-              initial={{ opacity: 0, y: 100 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-              className="mt-32 md:mt-48 mb-12 text-center"
-              style={{ textShadow: "3px 4px 10px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8)" }}
-            >
-              <p className="text-4xl md:text-6xl lg:text-8xl font-serif italic max-w-5xl mx-auto leading-tight text-stone-400">
-                "{data.aboutContent.quote}"
-              </p>
-              <p className="mt-12 text-xs md:text-sm uppercase tracking-widest text-stone-600 font-sans">
-                {data.aboutContent.quoteAuthor}
-              </p>
-            </motion.div>
           </div>
         </section>
+
+        {/* ================= ITEM FOUND: LEGENDARY QUOTE BOX ================= */}
+        <section className="w-full py-12 flex justify-center">
+          <div className="w-full max-w-4xl bg-zinc-950 p-8 md:p-12 pixel-border-gold relative text-center flex flex-col gap-6 shadow-[0_0_40px_rgba(245,212,103,0.15)]">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black px-4 py-1.5 border-2 border-primary text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary retro">
+              ★ ITEM FOUND: WISDOM ★
+            </div>
+            
+            <p className="text-2xl md:text-4xl lg:text-5xl font-bold italic tracking-wide leading-snug retro-text text-stone-200 mt-4">
+              "{data.aboutContent.quote}"
+            </p>
+            
+            <div className="flex items-center justify-center gap-3 text-stone-500 font-bold text-xs uppercase tracking-widest retro">
+              <span>-- AUTHOR:</span>
+              <span className="text-primary font-bold">{data.aboutContent.quoteAuthor}</span>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <Footer />
-    </motion.div>
+    </CrtScreen>
   );
 };
 
