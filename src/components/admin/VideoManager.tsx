@@ -19,6 +19,7 @@ import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 const emptyVideo: Omit<Video, 'id'> = {
   title: '', category: '' as Video['category'], thumbnail: '', videoUrl: '',
@@ -144,8 +145,8 @@ const VideoManager = () => {
           upload.start();
         });
         
-        finalVideoUrl = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/play_720p.mp4`;
-        const autoThumbnail = `https://vz-5e858353-fc6.b-cdn.net/${videoId}/thumbnail.jpg`;
+        finalVideoUrl = `https://vz-dadaa479-fe6.b-cdn.net/${videoId}/play_720p.mp4`;
+        const autoThumbnail = `https://vz-dadaa479-fe6.b-cdn.net/${videoId}/thumbnail.jpg`;
         
         setFormData(prev => ({
           ...prev,
@@ -347,7 +348,7 @@ const VideoManager = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide" data-lenis-prevent="true">
           <DialogHeader>
             <DialogTitle className="font-display text-xl text-primary">
               {editingId ? 'Edit Video' : 'Add New Video'}
@@ -368,13 +369,11 @@ const VideoManager = () => {
               </Select>
             </div>
             <div>
-              <Label>Thumbnail URL</Label>
-              <Input value={formData.thumbnail} onChange={(e) => updateField('thumbnail', e.target.value)} className="bg-secondary border-border mt-1" placeholder="https://..." />
-              {formData.thumbnail && (
-                <div className="mt-2 w-32 h-20 rounded overflow-hidden bg-card">
-                  <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              <ImageUpload
+                label="Thumbnail URL"
+                value={formData.thumbnail}
+                onChange={(url) => updateField('thumbnail', url)}
+              />
             </div>
             <div>
               <Label>Video Source</Label>

@@ -14,7 +14,7 @@ const PALETTE_UPDATE_THRESHOLD = 120;
 const BRIGHT_DOMINANT_COUNT_THRESHOLD = 50;
 const OLA_VIDEO_ID = 'ad-5';
 const OLA_VIDEO_STREAM =
-  'https://vz-5e858353-fc6.b-cdn.net/6a889e8c-7d03-44de-938d-1c5a7ddd2e0b/playlist.m3u8';
+  'https://vz-dadaa479-fe6.b-cdn.net/6a889e8c-7d03-44de-938d-1c5a7ddd2e0b/playlist.m3u8';
 
 type RgbColor = { r: number; g: number; b: number };
 type RgbQuad = [RgbColor, RgbColor, RgbColor, RgbColor];
@@ -751,7 +751,8 @@ const HeroSection = ({
                   src={slide.thumbnail || heroBg}
                   alt={`${slide.title} background`}
                   className="absolute inset-0 h-full w-full object-cover"
-                  fetchPriority={isActive ? "high" : "auto"}
+                  // @ts-expect-error React types expect fetchPriority but runtime warns to use lowercase
+                  fetchpriority={isActive ? "high" : "auto"}
                   loading={isActive ? "eager" : "lazy"}
                 />
                 {isActive && slide.hasVideoPreview && (
