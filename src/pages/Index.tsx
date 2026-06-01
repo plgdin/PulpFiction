@@ -6,10 +6,9 @@ import CategoryRow from '@/components/CategoryRow';
 import VideoCard from '@/components/VideoCard';
 import { useCms } from '@/context/CmsContext';
 import { Video } from '@/types/video';
-import PitchDeckSection from '@/components/PitchDeckSection';
-
 const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
 const Footer = lazy(() => import('@/components/Footer'));
+const PitchDeckSection = lazy(() => import('@/components/PitchDeckSection'));
 
 const Index = () => {
 
@@ -141,7 +140,9 @@ const Index = () => {
         {/* Pitch Decks Section */}
         {!filteredVideos && (
           <section className="scroll-mt-24 pointer-events-auto">
-            <PitchDeckSection pitchDecks={data.pitchDecks || []} />
+            <Suspense fallback={null}>
+              <PitchDeckSection pitchDecks={data.pitchDecks || []} />
+            </Suspense>
           </section>
         )}
       </main>

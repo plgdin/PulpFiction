@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+const Footer = lazy(() => import("@/components/Footer"));
 import { useCms } from "@/context/CmsContext";
 import { Mail, Instagram, Youtube, ExternalLink } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -470,7 +470,9 @@ const About = () => {
         </section>
       </main>
 
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </motion.div>
   );
 };
