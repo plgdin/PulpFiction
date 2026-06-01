@@ -46,10 +46,10 @@ const Navbar = ({ categories = [], onSearch, onCategoryClick }: NavbarProps) => 
         "fixed top-0 left-0 right-0 z-40 transition-all duration-500",
         isScrolled 
           ? "bg-black/40 backdrop-blur-lg" 
-          : "bg-transparent pt-[0.55rem]"
+          : "bg-transparent pt-[0.2rem]"
       )}
     >
-      <div className="px-[1.15rem] md:px-14 py-[1.15rem]">
+      <div className="px-[1.15rem] md:px-14 py-[0.6rem] md:py-[0.8rem]">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="block">
