@@ -842,7 +842,7 @@ const HeroSection = ({
             <Play className="relative z-[3] h-5 w-5 fill-current text-black" />
             <span
               className="relative z-[3] font-bold text-black text-lg tracking-[0.15em]"
-              style={{ fontFamily: "'Antonio', sans-serif" }}
+              style={{ fontFamily: "var(--font-header, 'Antonio')" }}
             >
               {heroContent.ctaPrimaryText || 'VIEW REEL'}
             </span>
@@ -865,7 +865,7 @@ const HeroSection = ({
             <ExternalLink className="relative z-[3] h-5 w-5 text-white" />
             <span
               className="relative z-[3] font-bold text-white text-lg tracking-[0.15em]"
-              style={{ fontFamily: "'Antonio', sans-serif" }}
+              style={{ fontFamily: "var(--font-header, 'Antonio')" }}
             >
               {heroContent.ctaSecondaryText || 'PORTFOLIO'}
             </span>

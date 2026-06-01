@@ -65,7 +65,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
                 <button
                   key={category.id}
                   onClick={() => onCategoryClick(category)}
-                  className="text-base font-medium font-header uppercase tracking-wide text-muted-foreground hover:text-primary transition-colors text-shadow-glow"
+                  className="text-base font-medium font-header tracking-wide text-muted-foreground hover:text-primary transition-colors text-shadow-glow"
                 >
                   {category.title}
                 </button>

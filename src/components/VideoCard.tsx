@@ -150,7 +150,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
         <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent opacity-95 flex flex-col justify-end p-3 sm:p-4">
           <h3 
             className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" 
-            style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+            style={{ fontFamily: "var(--font-title, 'Antonio')", letterSpacing: '0.04em', textTransform: 'uppercase' }}
           >
             {video.title}
           </h3>
@@ -223,7 +223,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                 transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
                 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
                 style={{ 
-                  fontFamily: "'Antonio', sans-serif", 
+                  fontFamily: "var(--font-title, 'Antonio')", 
                   letterSpacing: '0.04em', 
                   textTransform: 'uppercase'
                 }}
@@ -240,7 +240,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
           />
             <div 
               className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm uppercase"
-              style={{ fontFamily: "'Antonio', sans-serif" }}
+              style={{ fontFamily: "var(--font-header, 'Antonio')" }}
             >
               {video.category ? video.category.replace('-', ' ') : 'VIDEO'}
             </div>
@@ -258,7 +258,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                   <Play className="h-5 w-5 fill-current" />
                   <span 
                     className="font-bold text-[14px] tracking-[0.2em] mt-0.5" 
-                    style={{ fontFamily: "'Antonio', sans-serif" }}
+                    style={{ fontFamily: "var(--font-header, 'Antonio')" }}
                   >
                     PLAY
                   </span>
@@ -275,7 +275,7 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
                   <ExternalLink className="h-4 w-4" />
                   <span 
                     className="font-bold text-[13px] tracking-[0.15em] mt-0.5" 
-                    style={{ fontFamily: "'Antonio', sans-serif" }}
+                    style={{ fontFamily: "var(--font-header, 'Antonio')" }}
                   >
                     PORTFOLIO
                   </span>
