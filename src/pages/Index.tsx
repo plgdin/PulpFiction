@@ -11,6 +11,19 @@ import PitchDeckSection from '@/components/PitchDeckSection';
 const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
 const Footer = lazy(() => import('@/components/Footer'));
 
+/* ==========================================
+   CRT Screen Wrapper (same as About page)
+   ========================================== */
+const CrtScreen = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="relative crt-overlay bg-black min-h-screen text-stone-100 font-mono overflow-hidden">
+      {/* Glare effect inside screen */}
+      <div className="absolute inset-0 pointer-events-none z-10 bg-gradient-to-tr from-transparent via-white/5 to-transparent mix-blend-overlay"></div>
+      {children}
+    </div>
+  );
+};
+
 const Index = () => {
 
   const { data, getVideosByCategory, getFeaturedVideo } = useCms();
@@ -65,93 +78,97 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#121212] via-[#0d0d0d] to-black relative text-foreground">
-      {/* Dynamic Background Gradient from Thumbnail Colors */}
-      <div 
-        className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-40"
-        style={{
-          background: `
-            radial-gradient(circle at 20% 0%, rgb(var(--dynamic-primary-rgb)) 0%, transparent 60%),
-            radial-gradient(circle at 80% 20%, rgb(var(--dynamic-secondary-rgb)) 0%, transparent 60%),
-            radial-gradient(circle at 50% 100%, rgb(var(--dynamic-highlight-rgb)) 0%, transparent 70%)
-          `
-        }}
-      />
-      <div className="relative z-10">
-        <Navbar
+    <CrtScreen>
+      {/* Retro 8-bit Topbar Navigation */}
+      <Navbar
         categories={categories}
         onSearch={handleSearch}
         onCategoryClick={handleCategoryClick}
       />
 
-      <HeroSection
-        video={featuredVideo}
-        videos={videos}
-        heroContent={heroContent}
-        onPlay={handlePlayVideo}
-      />
+      <div className="relative z-20">
+        {/* Hero Section */}
+        <HeroSection
+          video={featuredVideo}
+          videos={videos}
+          heroContent={heroContent}
+          onPlay={handlePlayVideo}
+        />
 
-      <main className="relative z-30 pb-8 pointer-events-none">
-        {filteredVideos && (
-          <section className="px-4 py-8 md:px-12 pointer-events-auto">
-            <h2 className="mb-6 text-2xl md:text-3xl text-shadow-cinematic" style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}>
-              Search Results for "{searchQuery}"
-            </h2>
-
-            {filteredVideos.length > 0 ? (
-              <div className="flex flex-wrap gap-6">
-                {filteredVideos.map((video, index) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    onPlay={handlePlayVideo}
-                    index={index}
-                  />
-                ))}
+        {/* Main Content */}
+        <main className="relative z-30 pb-8">
+          {/* Search Results */}
+          {filteredVideos && (
+            <section className="max-w-7xl mx-auto px-4 md:px-12 py-8">
+              <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3 mb-6">
+                <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">
+                  SEARCH // "{searchQuery.toUpperCase()}"
+                </span>
+                <span className="text-primary/70 text-xs font-mono">
+                  {filteredVideos.length} RESULTS
+                </span>
               </div>
-            ) : (
-              <p className="text-muted-foreground">No videos found matching your search.</p>
-            )}
-          </section>
-        )}
 
-        {!filteredVideos && (
-          <>
-            {categories.map((cat, idx) => {
-              const catVideos = getVideosByCategory(cat.slug);
-              if (catVideos.length === 0) return null;
-              return (
-                <section
-                  key={cat.id}
-                  id={cat.slug}
-                  className={idx === 0 ? 'scroll-mt-24 pt-4 md:pt-6 pointer-events-auto' : 'scroll-mt-24 pointer-events-auto'}
-                  ref={(el) => (sectionRefs.current[cat.slug] = el)}
-                >
-                  <CategoryRow
-                    title={cat.title}
-                    videos={catVideos}
-                    onPlayVideo={handlePlayVideo}
-                  />
-                </section>
-              );
-            })}
-          </>
-        )}
+              {filteredVideos.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredVideos.map((video, index) => (
+                    <VideoCard
+                      key={video.id}
+                      video={video}
+                      onPlay={handlePlayVideo}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full bg-zinc-950 p-6 pixel-border-gold text-center">
+                  <p className="text-stone-400 retro-text text-lg tracking-wider">
+                    NO ITEMS FOUND IN INVENTORY
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
 
-        {/* Pitch Decks Section */}
-        {!filteredVideos && (
-          <section className="scroll-mt-24 pointer-events-auto">
-            <PitchDeckSection pitchDecks={data.pitchDecks || []} />
-          </section>
-        )}
-      </main>
+          {/* Category Rows */}
+          {!filteredVideos && (
+            <>
+              {categories.map((cat, idx) => {
+                const catVideos = getVideosByCategory(cat.slug);
+                if (catVideos.length === 0) return null;
+                return (
+                  <section
+                    key={cat.id}
+                    id={cat.slug}
+                    className="scroll-mt-24"
+                    ref={(el) => (sectionRefs.current[cat.slug] = el)}
+                  >
+                    <CategoryRow
+                      title={cat.title}
+                      videos={catVideos}
+                      onPlayVideo={handlePlayVideo}
+                      stageNumber={idx + 1}
+                    />
+                  </section>
+                );
+              })}
+            </>
+          )}
 
-      <Suspense fallback={null}>
-        <Footer />
-        {selectedVideo && <VideoPlayer video={selectedVideo} onClose={handleClosePlayer} />}
-      </Suspense>
+          {/* Pitch Decks Section */}
+          {!filteredVideos && (
+            <section className="scroll-mt-24">
+              <PitchDeckSection pitchDecks={data.pitchDecks || []} />
+            </section>
+          )}
+        </main>
+
+        <Suspense fallback={null}>
+          <Footer />
+          {selectedVideo && <VideoPlayer video={selectedVideo} onClose={handleClosePlayer} />}
+        </Suspense>
       </div>
-    </div>
+    </CrtScreen>
   );
 };
 

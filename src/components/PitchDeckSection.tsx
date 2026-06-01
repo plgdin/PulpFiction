@@ -1,12 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Presentation, ExternalLink, Maximize2, Play } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence, type Transition } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X, Presentation, ExternalLink, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { PitchDeck } from '@/types/cms';
+
 /**
  * Lazy iframe that only mounts on click (Facade pattern).
- * This completely prevents Canva apps from loading until explicitly requested.
  */
 const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
   src: string;
@@ -22,7 +21,7 @@ const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
     <div className={className} style={style}>
       {!isRevealed ? (
         <div 
-          className="absolute inset-0 w-full h-full cursor-pointer group flex items-center justify-center bg-zinc-800 overflow-hidden"
+          className="absolute inset-0 w-full h-full cursor-pointer group/iframe flex items-center justify-center bg-zinc-900 overflow-hidden"
           onClick={(e) => {
             e.stopPropagation();
             setIsRevealed(true);
@@ -32,17 +31,17 @@ const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
             <img 
               src={thumbnail} 
               alt={title} 
-              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover/iframe:opacity-90 transition-opacity grayscale group-hover/iframe:grayscale-0"
             />
           )}
-          <div className="relative z-10 w-16 h-16 rounded-full bg-black/50 flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-            <Play className="w-8 h-8 text-white fill-white ml-1" />
+          <div className="relative z-10 w-14 h-14 bg-primary/80 flex items-center justify-center border-2 border-primary shadow-[0_0_16px_rgba(245,212,103,0.5)] group-hover/iframe:scale-110 transition-transform">
+            <Play className="w-7 h-7 text-black fill-black ml-0.5" />
           </div>
         </div>
       ) : (
         <iframe
           src={src}
-          className={cn("absolute border-0 transition-opacity duration-700 ease-in-out", isLoaded ? "opacity-100" : "opacity-0")}
+          className="absolute border-0 transition-opacity duration-700 ease-in-out"
           loading="lazy"
           title={title}
           tabIndex={-1}
@@ -53,6 +52,7 @@ const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
             left: '-2%',
             width: '104%',
             height: '115%',
+            opacity: isLoaded ? 1 : 0,
           }}
         />
       )}
@@ -62,6 +62,9 @@ const LazyIframe = memo(({ src, title, style, className, thumbnail }: {
 
 LazyIframe.displayName = 'LazyIframe';
 
+/* ==========================================
+   Retro Pitch Deck Card
+   ========================================== */
 const PitchDeckCard = memo(({
   deck,
   index,
@@ -71,271 +74,62 @@ const PitchDeckCard = memo(({
   index: number;
   onOpen: (deck: PitchDeck) => void;
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [edgePos, setEdgePos] = useState<'center' | 'left' | 'right'>('center');
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // 3D Tilt Effect on Hover (Optimized)
-  useEffect(() => {
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    if (isTouchDevice) return;
-
-    const card = cardRef.current;
-    if (!card || !isHovered) return;
-
-    let rafId: number;
-    let ticking = false;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!ticking) {
-        rafId = requestAnimationFrame(() => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-
-          const rotateY = ((x - centerX) / centerX) * 8;
-          const rotateX = ((y - centerY) / centerY) * -8;
-
-          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-          card.style.setProperty('--mouse-x', `${x}px`);
-          card.style.setProperty('--mouse-y', `${y}px`);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    const handleMouseLeaveCard = () => {
-      cancelAnimationFrame(rafId);
-      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-      ticking = false;
-    };
-
-    card.addEventListener('mousemove', handleMouseMove, { passive: true });
-    card.addEventListener('mouseleave', handleMouseLeaveCard);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      card.removeEventListener('mousemove', handleMouseMove);
-      card.removeEventListener('mouseleave', handleMouseLeaveCard);
-      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    };
-  }, [isHovered]);
-
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-
-    if (rect.left < viewportWidth * 0.15) {
-      setEdgePos('left');
-    } else if (rect.right > viewportWidth * 0.85) {
-      setEdgePos('right');
-    } else {
-      setEdgePos('center');
-    }
-
-    hoverTimeoutRef.current = setTimeout(() => setIsHovered(true), 300);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    clearTimeout(hoverTimeoutRef.current);
-    setIsHovered(false);
-  }, []);
-
-  const springTransition: Transition = {
-    type: 'spring',
-    stiffness: 400,
-    damping: 30,
-    mass: 1,
-  };
-
-  const motionStyles = {
-    left: { left: '0%', right: 'auto', x: '0%', y: '-50%' },
-    right: { left: 'auto', right: '0%', x: '0%', y: '-50%' },
-    center: { left: '50%', right: 'auto', x: '-50%', y: '-50%' },
-  };
-
   return (
     <div
-      className="relative w-full aspect-video flex justify-center items-center"
-      style={{ zIndex: isHovered ? 50 : 1 }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="relative cursor-pointer group"
+      onClick={() => onOpen(deck)}
     >
-      {/* Base Card */}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: isHovered ? 0 : 1,
-          scale: 1,
-        }}
-        transition={springTransition}
-        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg relative bg-zinc-900"
-        onClick={() => onOpen(deck)}
-      >
-        {deck.thumbnail ? (
-          <img
-            src={deck.thumbnail}
-            alt={deck.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div 
-            className="w-full h-full flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
-            }}
-          >
-            <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
-          </div>
-        )}
-        
-        {/* Base Card Mobile Info Overlay */}
-        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 z-10">
-          <h3 className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            {deck.title}
-          </h3>
-          <div className="flex items-center gap-2 text-white/80 text-[10px] uppercase tracking-widest mt-1.5" style={{ fontFamily: "'Lexend Peta', sans-serif" }}>
-            <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/10">DECK</span>
-            <span className="w-1 h-1 rounded-full bg-white/40"></span>
-            <span>Canva</span>
+      {/* Pixel Frame Card */}
+      <div className="w-full aspect-[4/3] bg-zinc-900 overflow-hidden pixel-border-gold p-1.5 relative">
+        {/* 8-bit Corner Brackets */}
+        <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+        <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+        <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+        <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
+
+        {/* Iframe Preview */}
+        <LazyIframe
+          src={deck.embedUrl}
+          title={deck.title}
+          thumbnail={deck.thumbnail}
+          className="absolute inset-0 w-full h-full"
+        />
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary/80 flex items-center justify-center border-2 border-primary shadow-[0_0_16px_rgba(245,212,103,0.5)]">
+            <ExternalLink className="w-6 h-6 text-black" />
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Expanded Hover Card - Liquid Glass + 3D Tilt */}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: isHovered ? 1 : 0,
-          scale: isHovered ? 1 : 0.95,
-          ...motionStyles[edgePos]
-        }}
-        transition={springTransition}
-        className={cn(
-          "absolute w-[125%] min-w-[320px] z-50 hidden md:block",
-          isHovered ? "pointer-events-auto" : "pointer-events-none"
-        )}
-        style={{ top: '50%', perspective: '1000px' }}
-      >
-        <div
-          ref={cardRef}
-          className={cn(
-            "relative z-10 mx-auto w-full overflow-hidden transition-all duration-200 ease-out text-white",
-            "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem]",
-            "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
-          )}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
-          {/* Top: Deck Preview Area */}
-          <div 
-            className="relative w-full aspect-video cursor-pointer overflow-hidden pointer-events-auto" 
-            onClick={() => onOpen(deck)}
-          >
-            <div className="absolute inset-0 overflow-hidden bg-zinc-900">
-              <div 
-                className="absolute inset-0 z-0"
-                style={{
-                  background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
-                </div>
-              </div>
-              
-              <LazyIframe
-                src={deck.embedUrl}
-                title={`${deck.title} preview`}
-                className="absolute inset-0 z-20"
-                thumbnail={deck.thumbnail}
-              />
-            </div>
-            
-            {/* Hover Card Overlay Effects */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none">
-              <div
-                className="absolute inset-0 z-20 mix-blend-overlay"
-                style={{
-                  background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12), transparent)'
-                }}
-              />
-              <div className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm">
-                PITCH DECK
-              </div>
-              <div className="absolute bottom-5 left-6 w-[90%]">
-                <h3
-                  className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
-                  style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
-                >
-                  {deck.title}
-                </h3>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom: Information Panel */}
-          <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-black/20 relative z-10 border-t border-white/10">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <button
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105"
-                  onClick={() => onOpen(deck)}
-                >
-                  <Presentation className="h-5 w-5" />
-                  <span className="font-bold text-[14px] tracking-[0.2em] mt-0.5" style={{ fontFamily: "'Antonio', sans-serif" }}>VIEW</span>
-                </button>
-                <button
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:scale-105 hidden sm:flex"
-                  onClick={(e) => { e.stopPropagation(); window.open(deck.originalUrl, '_blank', 'noopener,noreferrer'); }}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="font-bold text-[13px] tracking-[0.15em] mt-0.5" style={{ fontFamily: "'Antonio', sans-serif" }}>CANVA</span>
-                </button>
-              </div>
-              <button
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-black/30 text-white hover:bg-white/10 border border-white/10 transition-all duration-300"
-                onClick={() => onOpen(deck)}
-              >
-                <ChevronDown className="h-5 w-5 opacity-80" />
-              </button>
-            </div>
-            <div className="flex items-center gap-3 text-[10px] md:text-[11px] font-semibold text-white/80 uppercase tracking-widest" style={{ fontFamily: "'Lexend Peta', sans-serif" }}>
-              <span className="bg-white/10 px-2.5 py-1 rounded border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">2024</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-              <span className="drop-shadow-md truncate">Pitch Deck</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-              <span className="drop-shadow-[0_0_8px_rgba(245,212,103,0.5)]" style={{ color: deck.accent }}>Canva</span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      {/* Info Strip */}
+      <div className="mt-3 flex items-center justify-between">
+        <h3 className="text-[10px] md:text-xs font-bold text-primary retro uppercase tracking-wide">
+          {deck.title}
+        </h3>
+        <span className="text-[9px] text-stone-500 font-mono tracking-widest">
+          DECK_{String(index + 1).padStart(2, '0')}
+        </span>
+      </div>
     </div>
   );
 });
 
 PitchDeckCard.displayName = 'PitchDeckCard';
 
-const PitchDeckModal = ({
-  deck,
-  onClose,
-}: {
-  deck: PitchDeck;
-  onClose: () => void;
-}) => {
-  // Close on Escape
+/* ==========================================
+   Fullscreen Modal
+   ========================================== */
+const PitchDeckModal = ({ deck, onClose }: { deck: PitchDeck; onClose: () => void }) => {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('keydown', handleKey);
+    window.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keydown', handleKey);
       document.body.style.overflow = '';
     };
   }, [onClose]);
@@ -346,56 +140,32 @@ const PitchDeckModal = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] bg-black/95 flex flex-col"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-[95vw] h-[85vh] md:w-[90vw] md:h-[88vh] max-w-7xl rounded-2xl overflow-hidden border border-white/10"
-        style={{
-          boxShadow: `0 0 80px ${deck.accent}15, 0 25px 50px rgba(0,0,0,0.5)`,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 py-3 bg-black/70 backdrop-blur-xl border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: `${deck.accent}25` }}
-            >
-              <Presentation className="w-4 h-4" style={{ color: deck.accent }} />
-            </div>
-            <h3
-              className="text-sm md:text-base font-bold tracking-[0.1em] text-white/90"
-              style={{ fontFamily: "'Antonio', sans-serif", textTransform: 'uppercase' }}
-            >
-              {deck.title}
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={deck.originalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-xs tracking-wider transition-all duration-200"
-            >
-              <ExternalLink className="w-3 h-3" />
-              <span className="hidden sm:inline">OPEN IN CANVA</span>
-            </a>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 md:px-8 py-3 border-b-4 border-primary/30 bg-black/80">
+        <div className="flex items-center gap-3">
+          <Presentation className="w-4 h-4 text-primary" />
+          <span className="text-xs retro text-primary uppercase">{deck.title}</span>
         </div>
+        <button
+          onClick={onClose}
+          className="pixel-btn text-center flex items-center justify-center gap-2 py-1.5 px-3"
+        >
+          <X className="w-3 h-3" />
+          <span>CLOSE</span>
+        </button>
+      </div>
 
-        {/* Canva Embed */}
+      {/* Iframe */}
+      <motion.div
+        className="flex-1 relative"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <iframe
           src={deck.embedUrl}
           className="w-full h-full bg-zinc-900"
@@ -409,12 +179,13 @@ const PitchDeckModal = ({
   );
 };
 
+/* ==========================================
+   PitchDeckSection — RPG Item Collection
+   ========================================== */
 const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [animatingLeft, setAnimatingLeft] = useState(false);
-  const [animatingRight, setAnimatingRight] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState<PitchDeck | null>(null);
 
   const checkScroll = useCallback(() => {
@@ -436,14 +207,6 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
   }, [checkScroll]);
 
   const scroll = (direction: 'left' | 'right') => {
-    if (direction === 'left') {
-      setAnimatingLeft(true);
-      setTimeout(() => setAnimatingLeft(false), 300);
-    } else {
-      setAnimatingRight(true);
-      setTimeout(() => setAnimatingRight(false), 300);
-    }
-
     if (scrollRef.current) {
       const scrollAmount = window.innerWidth < 768 ? window.innerWidth * 0.8 : 800;
       scrollRef.current.scrollBy({
@@ -456,47 +219,39 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
 
   return (
     <>
-      <section className="relative py-2 md:py-4 -mb-20 md:-mb-32 z-40">
-        <h2
-          className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20"
-          style={{
-            fontFamily: "'Antonio', sans-serif",
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            color: 'hsl(var(--primary))',
-          }}
-        >
-          Pitch Decks
-        </h2>
+      <section className="relative py-6 md:py-8 max-w-7xl mx-auto px-4 md:px-12">
+        {/* RPG Stage Header */}
+        <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3 mb-6">
+          <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">
+            STG. 99 // PITCH_DECKS
+          </span>
+          <span className="text-primary/70 text-xs font-mono">
+            {pitchDecks.length} ITEMS
+          </span>
+        </div>
 
-        <div className="relative group pt-10">
+        <div className="relative group">
+          {/* Left Arrow */}
           {canScrollLeft && (
             <button
-              className="hidden md:block absolute left-2 md:left-6 top-[38%] z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
               onClick={() => scroll('left')}
             >
-              <ChevronLeft
-                className={cn(
-                  'w-12 h-12 text-primary drop-shadow-[0_0_10px_rgba(245,212,103,0.8)] transition-all duration-300',
-                  animatingLeft
-                    ? '-translate-x-4 opacity-0 scale-90'
-                    : 'translate-x-0 opacity-100 scale-100 hover:scale-110'
-                )}
-              />
+              <ChevronLeft className="w-6 h-6" />
             </button>
           )}
 
+          {/* Scrollable Deck Row */}
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="pl-4 md:pl-12 pt-16 pb-36 md:pt-24 md:pb-52 flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide -mt-6 md:-mt-8"
+            className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide py-4"
             style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
           >
             {pitchDecks.map((deck, index) => (
               <div
                 key={deck.id}
-                className="flex-none w-[80vw] sm:w-[300px] md:w-[340px] lg:w-[380px] xl:w-[420px] 2xl:w-[450px] relative"
+                className="flex-none w-[80vw] sm:w-[280px] md:w-[320px] lg:w-[360px]"
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <PitchDeckCard deck={deck} index={index} onOpen={setSelectedDeck} />
@@ -510,19 +265,13 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
             </div>
           </div>
 
+          {/* Right Arrow */}
           {canScrollRight && (
             <button
-              className="hidden md:block absolute right-2 md:right-6 top-[38%] z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
               onClick={() => scroll('right')}
             >
-              <ChevronRight
-                className={cn(
-                  'w-12 h-12 text-primary drop-shadow-[0_0_10px_rgba(245,212,103,0.8)] transition-all duration-300',
-                  animatingRight
-                    ? 'translate-x-4 opacity-0 scale-90'
-                    : 'translate-x-0 opacity-100 scale-100 hover:scale-110'
-                )}
-              />
+              <ChevronRight className="w-6 h-6" />
             </button>
           )}
         </div>

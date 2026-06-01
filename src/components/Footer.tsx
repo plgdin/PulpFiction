@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Mail, Instagram, Youtube } from 'lucide-react';
+import { useCms } from '@/context/CmsContext';
 
 const FooterTypewriter = () => {
   const [baseText, setBaseText] = useState('');
@@ -104,47 +105,49 @@ const FooterTypewriter = () => {
   };
 
   return (
-    <h3 ref={containerRef} className="font-display text-2xl text-primary mb-4 whitespace-pre-wrap">
+    <h3 ref={containerRef} className="text-xl md:text-2xl text-primary mb-4 whitespace-pre-wrap retro">
       {renderText()}
     </h3>
   );
 };
 
 const Footer = () => {
+  const { data } = useCms();
+
   return (
-    <footer className="bg-card border-t border-border py-12 px-4 md:px-12 mt-12 font-footer">
+    <footer className="bg-zinc-950 border-t-4 border-primary/30 py-12 px-4 md:px-12 mt-12 font-mono">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
             <FooterTypewriter />
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-stone-400 text-sm leading-relaxed retro-text text-[16px]">
               Crafting visual stories that move, inspire, and captivate.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-footer uppercase tracking-wider font-bold text-lg text-primary mb-4">Categories</h4>
+            <h4 className="retro uppercase tracking-wider font-bold text-[10px] md:text-xs text-primary mb-4">QUEST_LOG</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#ad-films" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Ad Films
+                <a href="#ad-films" className="text-stone-400 hover:text-primary transition-colors text-[13px] retro-text tracking-wider">
+                  {'>'} AD_FILMS
                 </a>
               </li>
               <li>
-                <a href="#music-videos" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Music Videos
+                <a href="#music-videos" className="text-stone-400 hover:text-primary transition-colors text-[13px] retro-text tracking-wider">
+                  {'>'} MUSIC_VIDEOS
                 </a>
               </li>
               <li>
-                <a href="#brand-films" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Brand Films
+                <a href="#brand-films" className="text-stone-400 hover:text-primary transition-colors text-[13px] retro-text tracking-wider">
+                  {'>'} BRAND_FILMS
                 </a>
               </li>
               <li>
-                <a href="#short-films" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Short Films
+                <a href="#short-films" className="text-stone-400 hover:text-primary transition-colors text-[13px] retro-text tracking-wider">
+                  {'>'} SHORT_FILMS
                 </a>
               </li>
             </ul>
@@ -152,42 +155,33 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-footer uppercase tracking-wider font-bold text-lg text-primary mb-4">Connect</h4>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://www.behance.net/tarunkapoor2"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <ExternalLink className="w-5 h-5" />
-              </a>
-              <a
-                href="mailto:contact@tarunkapoor.com"
-                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Youtube className="w-5 h-5" />
-              </a>
+            <h4 className="retro uppercase tracking-wider font-bold text-[10px] md:text-xs text-primary mb-4">CHANNELS</h4>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "EMAIL", icon: Mail, url: data.siteSettings.email ? `mailto:${data.siteSettings.email}` : "#" },
+                { label: "BEHANCE", icon: ExternalLink, url: data.siteSettings.behanceUrl },
+                { label: "INSTA", icon: Instagram, url: data.siteSettings.instagramUrl },
+                { label: "YOUTUBE", icon: Youtube, url: data.siteSettings.youtubeUrl },
+              ].map((social, idx) => (
+                <a
+                  key={idx}
+                  href={social.url || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="pixel-btn text-center flex items-center justify-center gap-2 py-2 text-[8px]"
+                >
+                  <social.icon className="w-3 h-3" />
+                  <span>{social.label}</span>
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-border">
-          <p className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Tarun Kapoor. All rights reserved.
+        <div className="mt-12 pt-8 border-t-2 border-stone-800">
+          <p className="text-center text-[10px] text-stone-500 retro tracking-widest">
+            © {new Date().getFullYear()} TARUN_KAPOOR.EXE // ALL RIGHTS RESERVED
           </p>
         </div>
       </div>
