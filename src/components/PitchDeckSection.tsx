@@ -75,7 +75,6 @@ const PitchDeckCard = memo(({
   const [edgePos, setEdgePos] = useState<'center' | 'left' | 'right'>('center');
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const cardRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // 3D Tilt Effect on Hover (Optimized)
   useEffect(() => {
@@ -159,122 +158,127 @@ const PitchDeckCard = memo(({
     center: { left: '50%', right: 'auto', x: '-50%', y: '-50%' },
   };
 
-
   return (
     <div
-      ref={containerRef}
-      className="relative w-full aspect-video flex justify-center items-center group"
+      className="relative w-full aspect-video flex justify-center items-center"
       style={{ zIndex: isHovered ? 50 : 1 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* 1. Dummy placeholder to preserve layout space while the real card is absolute */}
-      <div className="w-full h-full" />
-
-      {/* 2. The ONE actual card that animates to 125% width */}
+      {/* Base Card */}
       <motion.div
         initial={false}
         animate={{
-          width: isHovered ? '125%' : '100%',
-          ...(isHovered ? motionStyles[edgePos] : { left: '50%', x: '-50%', y: '-50%' })
+          opacity: isHovered ? 0 : 1,
+          scale: 1,
+        }}
+        transition={springTransition}
+        className="w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-lg relative bg-zinc-900"
+        onClick={() => onOpen(deck)}
+      >
+        {deck.thumbnail ? (
+          <img
+            src={deck.thumbnail}
+            alt={deck.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div 
+            className="w-full h-full flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
+            }}
+          >
+            <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
+          </div>
+        )}
+        
+        {/* Base Card Mobile Info Overlay */}
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 z-10">
+          <h3 className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            {deck.title}
+          </h3>
+          <div className="flex items-center gap-2 text-white/80 text-[10px] uppercase tracking-widest mt-1.5" style={{ fontFamily: "'Lexend Peta', sans-serif" }}>
+            <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/10">DECK</span>
+            <span className="w-1 h-1 rounded-full bg-white/40"></span>
+            <span>Canva</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Expanded Hover Card - Liquid Glass + 3D Tilt */}
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isHovered ? 1 : 0,
+          scale: isHovered ? 1 : 0.95,
+          ...motionStyles[edgePos]
         }}
         transition={springTransition}
         className={cn(
-          "absolute top-1/2 z-10",
-          isHovered ? "pointer-events-auto" : "pointer-events-none h-full"
+          "absolute w-[125%] min-w-[320px] z-50 hidden md:block",
+          isHovered ? "pointer-events-auto" : "pointer-events-none"
         )}
-        style={{ perspective: '1000px' }}
+        style={{ top: '50%', perspective: '1000px' }}
       >
         <div
           ref={cardRef}
           className={cn(
-            "w-full h-full overflow-hidden shadow-lg transition-all duration-300",
-            isHovered 
-              ? "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
-              : "rounded-2xl md:rounded-[2rem] border border-transparent"
+            "relative z-10 mx-auto w-full overflow-hidden transition-all duration-200 ease-out text-white",
+            "bg-white/5 backdrop-blur-[20px] backdrop-saturate-[150%] border border-white/20 rounded-[2.5rem]",
+            "shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),_0_30px_60px_-15px_rgba(0,0,0,0.8)]"
           )}
           style={{ transformStyle: 'preserve-3d' }}
         >
-        {/* Top: Deck Preview Area (always aspect-video) */}
-        <div 
-          className="relative w-full aspect-video cursor-pointer overflow-hidden pointer-events-auto" 
-          onClick={() => onOpen(deck)}
-        >
-          <div className="absolute inset-0 overflow-hidden bg-zinc-900">
-            {/* Fallback gradient behind iframe */}
-            <div 
-              className="absolute inset-0 z-0"
-              style={{
-                background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
-              }}
-            >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
+          {/* Top: Deck Preview Area */}
+          <div 
+            className="relative w-full aspect-video cursor-pointer overflow-hidden pointer-events-auto" 
+            onClick={() => onOpen(deck)}
+          >
+            <div className="absolute inset-0 overflow-hidden bg-zinc-900">
+              <div 
+                className="absolute inset-0 z-0"
+                style={{
+                  background: `linear-gradient(135deg, ${deck.accent}30 0%, #1a1a1a 50%, ${deck.accent}15 100%)`,
+                }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Presentation className="w-10 h-10 text-white/20 animate-pulse" />
+                </div>
               </div>
+              
+              <LazyIframe
+                src={deck.embedUrl}
+                title={`${deck.title} preview`}
+                className="absolute inset-0 z-20"
+                thumbnail={deck.thumbnail}
+              />
             </div>
             
-            {/* Canva first slide — lazy loaded, scaled up to crop out bottom controls */}
-            <LazyIframe
-              src={deck.embedUrl}
-              title={`${deck.title} preview`}
-              className="absolute inset-0 z-20"
-              thumbnail={deck.thumbnail}
-            />
+            {/* Hover Card Overlay Effects */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none">
+              <div
+                className="absolute inset-0 z-20 mix-blend-overlay"
+                style={{
+                  background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12), transparent)'
+                }}
+              />
+              <div className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm">
+                PITCH DECK
+              </div>
+              <div className="absolute bottom-5 left-6 w-[90%]">
+                <h3
+                  className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
+                  style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
+                >
+                  {deck.title}
+                </h3>
+              </div>
+            </div>
           </div>
-          
-          {/* Base Card Mobile Info Overlay */}
-          <motion.div 
-            animate={{ opacity: isHovered ? 0 : 0.95 }}
-            className="md:hidden absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 z-10"
-          >
-            <h3 className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,1)] line-clamp-2" style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              {deck.title}
-            </h3>
-            <div className="flex items-center gap-2 text-white/80 text-[10px] uppercase tracking-widest mt-1.5" style={{ fontFamily: "'Lexend Peta', sans-serif" }}>
-              <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/10">DECK</span>
-              <span className="w-1 h-1 rounded-full bg-white/40"></span>
-              <span>Canva</span>
-            </div>
-          </motion.div>
 
-          {/* Hover Card Overlay Effects */}
-          <motion.div
-            initial={false}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none"
-          >
-            <div
-              className="absolute inset-0 z-20 mix-blend-overlay"
-              style={{
-                background: 'radial-gradient(circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12), transparent)'
-              }}
-            />
-            <div className="absolute top-5 right-5 bg-black/40 backdrop-blur-xl border border-white/10 text-white/90 text-xs px-3.5 py-1.5 rounded-full tracking-widest shadow-sm">
-              PITCH DECK
-            </div>
-            <div className="absolute bottom-5 left-6 w-[90%]">
-              <motion.h3
-                initial={false}
-                animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
-                transition={{ ...springTransition, delay: isHovered ? 0.1 : 0 }}
-                className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
-                style={{ fontFamily: "'Antonio', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}
-              >
-                {deck.title}
-              </motion.h3>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Bottom: Information Panel (only visible on hover) */}
-        <motion.div
-          animate={{
-            height: isHovered ? 'auto' : 0,
-            opacity: isHovered ? 1 : 0
-          }}
-          transition={{ duration: 0.2 }}
-          className="overflow-hidden"
-        >
+          {/* Bottom: Information Panel */}
           <div className="p-5 md:p-6 flex flex-col gap-4 md:gap-5 bg-black/20 relative z-10 border-t border-white/10">
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
@@ -308,7 +312,6 @@ const PitchDeckCard = memo(({
               <span className="drop-shadow-[0_0_8px_rgba(245,212,103,0.5)]" style={{ color: deck.accent }}>Canva</span>
             </div>
           </div>
-        </motion.div>
         </div>
       </motion.div>
     </div>
@@ -493,7 +496,7 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
             {pitchDecks.map((deck, index) => (
               <div
                 key={deck.id}
-                className="flex-none w-[85vw] sm:w-[320px] md:w-[360px] lg:w-[420px] xl:w-[460px] 2xl:w-[500px] relative"
+                className="flex-none w-[80vw] sm:w-[300px] md:w-[340px] lg:w-[380px] xl:w-[420px] 2xl:w-[450px] relative"
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <PitchDeckCard deck={deck} index={index} onOpen={setSelectedDeck} />
