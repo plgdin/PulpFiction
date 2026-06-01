@@ -1,13 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { X, Play, Volume2, VolumeX, Mail, Instagram } from 'lucide-react';
 import { Video } from '@/types/video';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import ReactPlayer from 'react-player';
 import { useCms } from '@/context/CmsContext';
 import { useSearchParams } from 'react-router-dom';
 
-const Player = ReactPlayer as any;
+const ReactPlayer = lazy(() => import('react-player'));
 
 const PLAYER_CONFIG = {
   file: {
@@ -131,19 +130,21 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                 }}
               />
             ) : (
-              <Player
-                ref={playerRef}
-                url={video.videoUrl}
-                width="100%"
-                height="100%"
-                playing={true}
-                muted={isMuted}
-                controls={true}
-                onProgress={handleProgress as any}
-                onError={(e: any) => console.error("Video Player Error:", e)}
-                onReady={() => console.log("Video Player Ready")}
-                config={PLAYER_CONFIG}
-              />
+              <Suspense fallback={<div className="w-full h-full bg-black/40 flex items-center justify-center text-white font-semibold">Loading player...</div>}>
+                <ReactPlayer
+                  ref={playerRef}
+                  url={video.videoUrl}
+                  width="100%"
+                  height="100%"
+                  playing={true}
+                  muted={isMuted}
+                  controls={true}
+                  onProgress={handleProgress as any}
+                  onError={(e: any) => console.error("Video Player Error:", e)}
+                  onReady={() => console.log("Video Player Ready")}
+                  config={PLAYER_CONFIG}
+                />
+              </Suspense>
             )
           ) : (
             <img
