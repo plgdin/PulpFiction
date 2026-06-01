@@ -4,7 +4,7 @@ import { Video } from '@/types/video';
 import { HeroContent } from '@/types/cms';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import heroBg from '@/assets/hero-bg.jpg';
+import heroBg from '@/assets/hero-bg.webp';
 
 const CONTENT_COLLAPSE_DELAY_MS = 7000;
 const TITLE_MOTION_MS = 1400;

@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 const Footer = lazy(() => import("@/components/Footer"));
 import { useCms } from "@/context/CmsContext";
 import { Mail, Instagram, Youtube, ExternalLink } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroBg from "@/assets/hero-bg.webp";
 import { motion, useScroll, useTransform, AnimatePresence, Variants } from "framer-motion";
 
 /* ==========================================
