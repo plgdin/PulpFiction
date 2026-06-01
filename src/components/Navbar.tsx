@@ -44,8 +44,8 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-all duration-500",
-        isScrolled
-          ? "bg-black/40 backdrop-blur-lg"
+        isScrolled 
+          ? "bg-black/40 backdrop-blur-lg" 
           : "bg-transparent pt-[0.55rem]"
       )}
     >
@@ -65,7 +65,7 @@ const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
                 <button
                   key={category.id}
                   onClick={() => onCategoryClick(category)}
-                  className="text-base font-medium font-header tracking-wide text-muted-foreground hover:text-primary transition-colors text-shadow-glow"
+                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors text-shadow-glow"
                 >
                   {category.title}
                 </button>

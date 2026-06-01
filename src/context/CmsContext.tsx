@@ -21,10 +21,6 @@ const getDefaultData = (): CmsData => ({
     email: 'contact@tarunkapoor.com',
     instagramUrl: '',
     youtubeUrl: '',
-    titleFont: 'Lexend Peta',
-    descriptionFont: 'Inter',
-    headerFont: 'Inter',
-    footerFont: 'Inter',
   },
   heroContent: {
     badge: 'Director Actor & Writer',
@@ -218,27 +214,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    // Inject fonts into CSS root variables dynamically
-    if (data.siteSettings?.titleFont) {
-      document.documentElement.style.setProperty('--font-title', `'${data.siteSettings.titleFont}', sans-serif`);
-    }
-    if (data.siteSettings?.descriptionFont) {
-      document.documentElement.style.setProperty('--font-description', `'${data.siteSettings.descriptionFont}', sans-serif`);
-    }
-    if (data.siteSettings?.headerFont) {
-      document.documentElement.style.setProperty('--font-header', `'${data.siteSettings.headerFont}', sans-serif`);
-    }
-    if (data.siteSettings?.footerFont) {
-      document.documentElement.style.setProperty('--font-footer', `'${data.siteSettings.footerFont}', sans-serif`);
-    }
-  }, [
-    data.siteSettings?.titleFont, 
-    data.siteSettings?.descriptionFont,
-    data.siteSettings?.headerFont,
-    data.siteSettings?.footerFont
-  ]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
@@ -311,10 +286,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return {
-      siteSettings: {
-        ...defaultData.siteSettings,
-        ...(settings?.site_settings || {}),
-      },
+      siteSettings: settings?.site_settings || defaultData.siteSettings,
       heroContent: settings?.hero_content ? { ...defaultData.heroContent, ...settings.hero_content, slideshowVideos: settings.hero_content.slideshowVideos || [] } : defaultData.heroContent,
       aboutContent: settings?.about_content || defaultData.aboutContent,
       footerContent: settings?.footer_content || defaultData.footerContent,
