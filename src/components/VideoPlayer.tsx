@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useCms } from '@/context/CmsContext';
 import { useSearchParams } from 'react-router-dom';
 
-const Player = lazy(() => import('react-player'));
+const Player = lazy(() => import('react-player')) as any;
 
 const PLAYER_CONFIG = {
   file: {
