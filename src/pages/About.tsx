@@ -36,7 +36,7 @@ const SplitTextReveal = ({ text, className = "", delayOffset = 0 }: { text: stri
 
   return (
     <motion.div
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center", paddingBottom: "0.25em" }}
       variants={container}
       initial="hidden"
       whileInView="visible"
@@ -235,9 +235,8 @@ const AboutTypewriter = ({ className = '', targetBase = 'Tarun Kapoor' }: { clas
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 1 }}
-      className={`leading-[0.9] font-serif tracking-tight text-center text-primary text-shadow-glow ${className}`}
+      className={`leading-[0.9] font-display tracking-wider text-center text-primary text-shadow-glow ${className}`}
       style={{ 
-        fontFamily: "'Antonio', sans-serif",
         textShadow: "3px 4px 8px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8), 0 0 15px hsl(var(--primary) / 0.3)"
       }}
     >
@@ -283,7 +282,7 @@ const About = () => {
     <motion.div 
       ref={containerRef}
       style={{ backgroundColor }}
-      className="text-stone-100 font-sans selection:bg-stone-100 selection:text-zinc-950 min-h-screen transition-colors duration-700 ease-out"
+      className="text-stone-100 font-body selection:bg-stone-100 selection:text-zinc-950 min-h-screen transition-colors duration-700 ease-out"
     >
       <Navbar categories={data.categories || []} onSearch={handleSearch} onCategoryClick={handleCategoryClick} />
 
@@ -306,23 +305,14 @@ const About = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mt-12 md:mt-0 border-t border-stone-100/20 pt-8">
-              <motion.div 
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§1)
-              </motion.div>
+
               
-              <div className="md:col-span-5 md:col-start-7 text-lg md:text-2xl font-serif leading-relaxed">
+              <div className="md:col-span-5 md:col-start-7 text-lg md:text-xl font-body text-stone-300 leading-relaxed">
                 <motion.span 
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   transition={{ delay: 0.8 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-4"
+                  className="text-xs tracking-widest uppercase font-body text-stone-500 block mb-4"
                   style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
                 >
                   {data.aboutContent.title1}
@@ -345,23 +335,18 @@ const About = () => {
           <div className="relative z-10 w-full max-w-7xl mx-auto">
             <SplitTextReveal 
               text="STORY" 
-              className="text-[20vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12 md:mb-24"
+              className="text-[20vw] md:text-[12vw] leading-none font-display tracking-wider text-primary mb-12 md:mb-24"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              <div 
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§2)
-              </div>
+
               
-              <div className="md:col-span-8 md:col-start-4 text-xl md:text-4xl font-serif leading-snug whitespace-pre-line">
+              <div className="md:col-span-8 md:col-start-4 text-lg md:text-2xl font-body text-stone-300 leading-relaxed whitespace-pre-line">
                 <motion.span 
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 1 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-8"
+                  className="text-xs tracking-widest uppercase font-body text-stone-500 block mb-8"
                   style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
                 >
                   {data.aboutContent.title2}
@@ -387,22 +372,17 @@ const About = () => {
           <div className="relative z-10 flex flex-col h-full grow justify-center w-full max-w-7xl mx-auto">
             <SplitTextReveal 
               text="CONTACT" 
-              className="text-[18vw] md:text-[12vw] leading-none font-serif tracking-tighter text-stone-200/90 mb-12"
+              className="text-[18vw] md:text-[12vw] leading-none font-display tracking-wider text-primary mb-12"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              <div 
-                className="md:col-span-2 text-stone-500 italic font-serif text-2xl md:text-3xl"
-                style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
-              >
-                (§3)
-              </div>
+
               
-              <div className="md:col-span-6 md:col-start-4 text-lg md:text-2xl font-serif leading-relaxed">
+              <div className="md:col-span-6 md:col-start-4 text-lg md:text-xl font-body text-stone-300 leading-relaxed">
                 <motion.span 
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
-                  className="text-xs tracking-widest uppercase font-sans text-stone-500 block mb-6"
+                  className="text-xs tracking-widest uppercase font-body text-stone-500 block mb-6"
                   style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}
                 >
                   {data.aboutContent.title3}
@@ -459,10 +439,10 @@ const About = () => {
               className="mt-32 md:mt-48 mb-12 text-center"
               style={{ textShadow: "3px 4px 10px rgba(0, 0, 0, 0.9), 0 10px 20px rgba(0, 0, 0, 0.8)" }}
             >
-              <p className="text-4xl md:text-6xl lg:text-8xl font-serif italic max-w-5xl mx-auto leading-tight text-stone-400">
+              <p className="text-4xl md:text-6xl lg:text-7xl font-display italic max-w-5xl mx-auto leading-tight text-primary">
                 "{data.aboutContent.quote}"
               </p>
-              <p className="mt-12 text-xs md:text-sm uppercase tracking-widest text-stone-600 font-sans">
+              <p className="mt-12 text-xs md:text-sm uppercase tracking-widest text-stone-500 font-body">
                 {data.aboutContent.quoteAuthor}
               </p>
             </motion.div>

@@ -55,15 +55,15 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
   };
 
   return (
-    <section className="relative py-2 md:py-4 -mb-20 md:-mb-32">
+    <section className="relative py-2 md:py-3 -mb-6 md:-mb-20">
       <h2 
-        className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-0 left-0 z-20" 
+        className="text-2xl md:text-3xl px-4 md:px-12 text-shadow-cinematic absolute top-2 md:top-6 left-0 z-20" 
         style={{ fontFamily: "'Antonio', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'hsl(var(--primary))' }}
       >
         {title}
       </h2>
 
-      <div className="relative group pt-10">
+      <div className="relative group pt-4 md:pt-6">
         {canScrollLeft && (
           <button
             className="hidden md:block absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-[110] p-2 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none"
@@ -81,7 +81,7 @@ const CategoryRow = ({ title, videos, onPlayVideo }: CategoryRowProps) => {
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="pl-4 md:pl-12 pt-16 pb-36 md:pt-24 md:pb-52 flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide -mt-6 md:-mt-8"
+          className="pl-0 md:pl-0 pt-4 pb-12 md:pt-24 md:pb-40 flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide -mt-2 md:-mt-12"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {videos.map((video, index) => (

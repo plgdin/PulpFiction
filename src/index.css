@@ -125,7 +125,7 @@
 
   /* Pulp Fiction display headings */
   .font-display {
-    font-family: 'Antonio', sans-serif;
+    font-family: var(--font-title, 'Antonio'), sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }

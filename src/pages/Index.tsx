@@ -67,11 +67,9 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#121212] via-[#0d0d0d] to-black relative text-foreground">
       {/* Dynamic Background Gradient from Thumbnail Colors */}
       <div 
-        className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-40"
+        className="fixed inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-15"
         style={{
           background: `
-            radial-gradient(circle at 20% 0%, rgb(var(--dynamic-primary-rgb)) 0%, transparent 60%),
-            radial-gradient(circle at 80% 20%, rgb(var(--dynamic-secondary-rgb)) 0%, transparent 60%),
             radial-gradient(circle at 50% 100%, rgb(var(--dynamic-highlight-rgb)) 0%, transparent 70%)
           `
         }}

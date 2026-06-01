@@ -159,6 +159,43 @@ export const useCms = (): CmsContextType => {
 export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<CmsData>(getDefaultData());
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const settings = data.siteSettings;
+    if (!settings) return;
+
+    const titleFont = settings.titleFont || 'Antonio';
+    const descriptionFont = settings.descriptionFont || 'Lexend Peta';
+    const headerFont = settings.headerFont || 'Antonio';
+    const footerFont = settings.footerFont || 'Lexend Peta';
+
+    // Set dynamic CSS properties on document
+    document.documentElement.style.setProperty('--font-title', titleFont);
+    document.documentElement.style.setProperty('--font-body', descriptionFont);
+    document.documentElement.style.setProperty('--font-header', headerFont);
+    document.documentElement.style.setProperty('--font-footer', footerFont);
+
+    // Dynamic Google Fonts loading
+    const fontsToLoad = Array.from(new Set([titleFont, descriptionFont, headerFont, footerFont]))
+      .filter(font => font && font !== 'system-ui');
+
+    if (fontsToLoad.length > 0) {
+      const fontQuery = fontsToLoad
+        .map(font => `family=${font.replace(/ /g, '+')}:wght@100..900`)
+        .join('&');
+      
+      const linkId = 'dynamic-google-fonts';
+      let linkElement = document.getElementById(linkId) as HTMLLinkElement;
+      if (!linkElement) {
+        linkElement = document.createElement('link');
+        linkElement.id = linkId;
+        linkElement.rel = 'stylesheet';
+        document.head.appendChild(linkElement);
+      }
+      linkElement.href = `https://fonts.googleapis.com/css2?${fontQuery}&display=swap`;
+    }
+  }, [data.siteSettings]);
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem(CMS_AUTH_KEY) === 'true';
   });

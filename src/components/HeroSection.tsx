@@ -446,7 +446,7 @@ const HeroSection = ({ video, videos, heroContent, onPlay }: HeroSectionProps) =
           </>
         )}
       </div>
-      <div className="absolute inset-x-0 -bottom-40 md:-bottom-52 h-[28rem] md:h-[48rem] z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, #121212 0%, rgba(18,18,18,0.98) 8%, rgba(26,26,26,0.9) 22%, rgba(34,34,34,0.65) 42%, transparent 100%)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-[16rem] md:h-[24rem] z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, #121212 0%, rgba(18,18,18,0.95) 15%, rgba(18,18,18,0.7) 40%, transparent 100%)' }} />
       <div className="relative z-20 flex h-full w-full items-end px-4 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36">
         <div className="hero-synced-copy relative max-w-5xl will-change-transform">
           <div className="mb-4 will-change-transform" style={{ transformOrigin: 'bottom left', transform: isTitleCompact ? 'scale(0.72)' : 'scale(1)', transition: `transform ${TITLE_MOTION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)` }}>

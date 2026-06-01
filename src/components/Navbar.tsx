@@ -61,9 +61,9 @@ const Navbar = ({ categories = [], onSearch, onCategoryClick }: NavbarProps) => 
           {/* Right side: About link always visible */}
           <Link
             to="/about"
-            className="flex items-center gap-2 text-primary font-medium text-shadow-glow hover:text-primary/80 transition-colors"
+            className="flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors"
           >
-            <span className="text-base text-shadow-glow">About</span>
+            <span className="text-base">About</span>
           </Link>
         </div>
       </div>
