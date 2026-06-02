@@ -11,13 +11,24 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('admin@tarunkapoor.com');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(password)) {
-      setError('');
-    } else {
-      setError('Incorrect password');
-      setPassword('');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const success = await login(email, password);
+      if (!success) {
+        setError('Incorrect email or password');
+        setPassword('');
+      }
+    } catch (err) {
+      setError('An error occurred during authentication');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,6 +52,24 @@ const AdminLogin = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="admin-email" className="text-foreground">
+                Email Address
+              </Label>
+              <Input
+                id="admin-email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                }}
+                placeholder="admin@tarunkapoor.com"
+                className="bg-secondary border-border mt-1"
+                required
+              />
+            </div>
+
+            <div>
               <Label htmlFor="admin-password" className="text-foreground">
                 Password
               </Label>
@@ -55,7 +84,7 @@ const AdminLogin = () => {
                   }}
                   placeholder="Enter admin password"
                   className="bg-secondary border-border pr-10"
-                  autoFocus
+                  required
                 />
                 <button
                   type="button"
@@ -71,14 +100,11 @@ const AdminLogin = () => {
               <p className="text-sm text-destructive animate-fade-in-up">{error}</p>
             )}
 
-            <Button type="submit" className="w-full font-display text-lg" size="lg">
-              Sign In
+            <Button type="submit" className="w-full font-display text-lg" size="lg" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Default password: admin123
-          </p>
         </div>
       </div>
     </div>

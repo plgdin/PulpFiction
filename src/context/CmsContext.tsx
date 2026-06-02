@@ -139,9 +139,9 @@ interface CmsContextType {
   importData: (json: string) => boolean;
   resetToDefaults: () => void;
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
-  updatePassword: (newPassword: string) => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   // Undo
   undo: () => void;
   canUndo: boolean;
@@ -196,9 +196,23 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [data.siteSettings]);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem(CMS_AUTH_KEY) === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check current active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Binds state updating to Supabase Auth state modifications
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Undo history stack
   const [undoHistory, setUndoHistory] = useState<CmsData[]>([]);
@@ -469,23 +483,20 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateWithHistory(() => getDefaultData());
   }, [updateWithHistory]);
 
-  const login = useCallback((password: string): boolean => {
-    const stored = localStorage.getItem(CMS_PASSWORD_KEY) || DEFAULT_PASSWORD;
-    if (password === stored) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem(CMS_AUTH_KEY, 'true');
-      return true;
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return !error;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      throw error;
     }
-    return false;
-  }, []);
-
-  const logout = useCallback(() => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem(CMS_AUTH_KEY);
-  }, []);
-
-  const updatePassword = useCallback((newPassword: string) => {
-    localStorage.setItem(CMS_PASSWORD_KEY, newPassword);
   }, []);
 
   return (

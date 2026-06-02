@@ -48,14 +48,18 @@ const SiteSettings = () => {
     toast.success('Site settings saved');
   };
 
-  const handleChangePassword = () => {
-    if (newPassword.length < 4) {
-      toast.error('Password must be at least 4 characters');
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
-    updatePassword(newPassword);
-    setNewPassword('');
-    toast.success('Password updated');
+    try {
+      await updatePassword(newPassword);
+      setNewPassword('');
+      toast.success('Password updated successfully');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update password');
+    }
   };
 
   const handleExport = () => {

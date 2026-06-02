@@ -113,9 +113,15 @@ const VideoManager = () => {
     if (uploadMode === 'file' && selectedFile) {
       setIsUploading(true);
       try {
+        const { supabase } = await import('@/lib/supabase');
+        const { data: { session } } = await supabase.auth.getSession();
+        
         const authRes = await fetch('/api/bunny-upload-auth', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`
+          },
           body: JSON.stringify({ title: formData.title }),
         });
         

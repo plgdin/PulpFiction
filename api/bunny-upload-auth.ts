@@ -16,6 +16,26 @@ export default async function handler(
     return res.status(500).json({ error: 'Missing Bunny CDN environment variables' });
   }
 
+  // Validate Supabase Admin Session prior to Bunny CDN upload slot allocation
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Missing authorization header' });
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  
+  // Dynamically initialize verification client
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL || '',
+    process.env.VITE_SUPABASE_ANON_KEY || ''
+  );
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid user session' });
+  }
+
   const { title } = req.body;
 
   if (!title) {
