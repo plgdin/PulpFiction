@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useCms } from '@/context/CmsContext';
 import { useSearchParams } from 'react-router-dom';
 
-const ReactPlayer = lazy(() => import('react-player'));
+const ReactPlayer = lazy(() => import('react-player')) as any;
 
 const PLAYER_CONFIG = {
   file: {
@@ -142,7 +142,7 @@ const VideoPlayer = ({ video, onClose }: VideoPlayerProps) => {
                   onProgress={handleProgress as any}
                   onError={(e: any) => console.error("Video Player Error:", e)}
                   onReady={() => console.log("Video Player Ready")}
-                  config={PLAYER_CONFIG}
+                  config={PLAYER_CONFIG as any}
                 />
               </Suspense>
             )

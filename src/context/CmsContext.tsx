@@ -21,6 +21,10 @@ const getDefaultData = (): CmsData => ({
     email: 'contact@tarunkapoor.com',
     instagramUrl: '',
     youtubeUrl: '',
+    titleFont: 'Antonio',
+    descriptionFont: 'Lexend Peta',
+    headerFont: 'Antonio',
+    footerFont: 'Lexend Peta',
   },
   heroContent: {
     badge: 'Director Actor & Writer',
