@@ -300,8 +300,7 @@ const About = () => {
         {/* ================= HERO: CHARACTER SELECT SCREEN ================= */}
         <section className="w-full flex flex-col gap-12 items-center">
           <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
-            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 01 // SELECT CHARACTER</span>
-            <span className="text-primary/70 text-xs font-mono">OK-PLAY_2026</span>
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">SELECT CHARACTER</span>
           </div>
 
           <RetroRoleTypewriter targetName={data.aboutContent.name.toUpperCase()} />
@@ -341,8 +340,7 @@ const About = () => {
         {/* ================= STORY: ACTIVE QUEST LOG ================= */}
         <section className="w-full flex flex-col gap-12 items-center">
           <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
-            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 02 // QUEST LOG</span>
-            <span className="text-primary/70 text-xs font-mono">QUEST_STATUS: ACTIVE</span>
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">QUEST LOG</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
@@ -386,8 +384,7 @@ const About = () => {
         {/* ================= CONTACT: LEVEL COMPLETED / CONNECT ================= */}
         <section className="w-full flex flex-col gap-12 items-center">
           <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
-            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 03 // LEVEL COMPLETED</span>
-            <span className="text-primary/70 text-xs font-mono">STAGE_CLEAR_BONUS</span>
+            <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">LEVEL COMPLETED</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">

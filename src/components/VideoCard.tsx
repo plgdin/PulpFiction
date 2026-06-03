@@ -21,13 +21,13 @@ const VideoCard = ({ video, onPlay, index = 0 }: VideoCardProps) => {
 
   return (
     <div 
-      className="relative cursor-pointer group"
+      className="relative cursor-pointer group transition-all duration-300 hover:-translate-y-2 hover:scale-[1.05] hover:z-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onPlay(video)}
     >
       {/* Pixel Frame Card */}
-      <div className="w-full aspect-video bg-zinc-900 overflow-hidden pixel-border-gold p-1.5 relative">
+      <div className="w-full aspect-video bg-zinc-900 overflow-hidden pixel-border-gold p-1.5 relative transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(245,212,103,0.5)]">
         {/* 8-bit Corner Brackets */}
         <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
         <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>

@@ -76,11 +76,11 @@ const PitchDeckCard = memo(({
 }) => {
   return (
     <div
-      className="relative cursor-pointer group"
+      className="relative cursor-pointer group transition-all duration-300 hover:-translate-y-2 hover:scale-[1.05] hover:z-50"
       onClick={() => onOpen(deck)}
     >
       {/* Pixel Frame Card */}
-      <div className="w-full aspect-[4/3] bg-zinc-900 overflow-hidden pixel-border-gold p-1.5 relative">
+      <div className="w-full aspect-[4/3] bg-zinc-900 overflow-hidden pixel-border-gold p-1.5 relative transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(245,212,103,0.5)]">
         {/* 8-bit Corner Brackets */}
         <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
         <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
@@ -220,13 +220,10 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
   return (
     <>
       <section className="relative py-6 md:py-8 max-w-7xl mx-auto px-4 md:px-12">
-        {/* RPG Stage Header */}
+        {/* Section Header */}
         <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3 mb-6">
           <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">
-            STG. 99 // PITCH_DECKS
-          </span>
-          <span className="text-primary/70 text-xs font-mono">
-            {pitchDecks.length} ITEMS
+            PITCH DECKS
           </span>
         </div>
 
@@ -234,7 +231,8 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
           {/* Left Arrow */}
           {canScrollLeft && (
             <button
-              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
+              className="hidden md:flex absolute top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
+              style={{ left: '-48px' }}
               onClick={() => scroll('left')}
             >
               <ChevronLeft className="w-6 h-6" />
@@ -245,7 +243,7 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide py-4"
+            className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide py-4 px-4 md:px-12 -mx-4 md:-mx-12"
             style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
           >
             {pitchDecks.map((deck, index) => (
@@ -268,7 +266,8 @@ const PitchDeckSection = ({ pitchDecks }: { pitchDecks: PitchDeck[] }) => {
           {/* Right Arrow */}
           {canScrollRight && (
             <button
-              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
+              className="hidden md:flex absolute top-1/2 -translate-y-1/2 z-[110] w-10 h-10 items-center justify-center border-2 border-primary bg-black/80 text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-black"
+              style={{ right: '-48px' }}
               onClick={() => scroll('right')}
             >
               <ChevronRight className="w-6 h-6" />

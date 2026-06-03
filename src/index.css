@@ -29,6 +29,385 @@
   pointer-events: none;
 }
 
+/* ============================================
+   CRT TELEVISION — HERO SECTION
+   ============================================ */
+
+.crt-tv-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 760px;
+  cursor: pointer;
+  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.7))
+          drop-shadow(0 0 60px rgba(245, 212, 103, 0.06));
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.crt-tv-wrapper:hover {
+  filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.8))
+          drop-shadow(0 0 80px rgba(245, 212, 103, 0.12));
+  transform: scale(1.02);
+}
+
+/* — Antenna — */
+.crt-tv-antenna {
+  position: relative;
+  width: 60%;
+  height: 48px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2;
+}
+
+.crt-tv-antenna-left,
+.crt-tv-antenna-right {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 44px;
+  background: linear-gradient(to top, #444, #888);
+  border-radius: 2px 2px 0 0;
+}
+
+.crt-tv-antenna-left {
+  left: 30%;
+  transform: rotate(-18deg);
+  transform-origin: bottom center;
+}
+
+.crt-tv-antenna-right {
+  right: 30%;
+  transform: rotate(18deg);
+  transform-origin: bottom center;
+}
+
+.crt-tv-antenna-knob {
+  position: absolute;
+  bottom: -4px;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 40% 35%, #888, #333);
+  border-radius: 50%;
+  border: 1px solid #555;
+  z-index: 3;
+}
+
+/* — TV Body — */
+.crt-tv-body {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 30%, #1e1e1e 70%, #151515 100%);
+  border-radius: 16px;
+  padding: 16px 16px 0 16px;
+  border: 2px solid #4a4a4a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* — Screen Bezel — */
+.crt-tv-bezel {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+  border-radius: 12px;
+  padding: 10px;
+  border: 3px solid #222;
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.9),
+    inset 0 0 4px rgba(245, 212, 103, 0.04);
+}
+
+/* — The CRT Screen — */
+.crt-tv-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px / 14px;
+  overflow: hidden;
+  background: #000;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    inset 0 0 6px rgba(245, 212, 103, 0.05),
+    0 0 2px rgba(100, 200, 100, 0.1);
+}
+
+.crt-tv-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.3) contrast(1.15) brightness(0.95);
+  transition: filter 0.4s ease;
+}
+
+.crt-tv-wrapper:hover .crt-tv-video {
+  filter: saturate(1.5) contrast(1.2) brightness(1.0);
+}
+
+/* Scanline overlay */
+.crt-tv-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+/* RGB sub-pixel pattern */
+.crt-tv-rgb-pixels {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03) 0px,
+    rgba(0, 255, 0, 0.02) 1px,
+    rgba(0, 0, 255, 0.03) 2px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+}
+
+/* Vignette — darkened corners like a real CRT */
+.crt-tv-vignette {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 80px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Screen flicker animation */
+.crt-tv-flicker {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.015);
+  animation: crt-flicker 0.08s infinite alternate;
+}
+
+/* Glare reflection */
+.crt-tv-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 6;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 30%,
+    transparent 50%,
+    transparent 100%
+  );
+}
+
+/* Play button overlay */
+.crt-tv-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.crt-tv-wrapper:hover .crt-tv-play-overlay {
+  opacity: 1;
+}
+
+.crt-tv-play-btn {
+  width: 64px;
+  height: 64px;
+  background: rgba(245, 212, 103, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #f5d467;
+  box-shadow:
+    0 0 30px rgba(245, 212, 103, 0.5),
+    0 0 60px rgba(245, 212, 103, 0.2);
+  animation: crt-play-pulse 2s ease-in-out infinite;
+}
+
+/* — TV Controls Panel — */
+.crt-tv-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 12px;
+  gap: 12px;
+}
+
+.crt-tv-brand {
+  flex: 1;
+}
+
+.crt-tv-knobs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crt-tv-knob {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #555, #222);
+  border: 2px solid #444;
+  position: relative;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.crt-tv-knob:hover {
+  transform: rotate(30deg);
+}
+
+.crt-tv-knob-sm {
+  width: 22px;
+  height: 22px;
+}
+
+.crt-tv-knob-line {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 2px;
+  height: 8px;
+  background: #888;
+  transform: translateX(-50%);
+  border-radius: 1px;
+}
+
+.crt-tv-knob-sm .crt-tv-knob-line {
+  height: 6px;
+  top: 2px;
+}
+
+.crt-tv-power-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow:
+    0 0 4px #22c55e,
+    0 0 10px rgba(34, 197, 94, 0.4);
+  animation: crt-led-blink 3s ease-in-out infinite;
+}
+
+/* — TV Stand / Feet — */
+.crt-tv-feet {
+  display: flex;
+  justify-content: center;
+  gap: 60%;
+  width: 80%;
+  margin-top: -2px;
+}
+
+.crt-tv-foot-left,
+.crt-tv-foot-right {
+  width: 28px;
+  height: 8px;
+  background: linear-gradient(to bottom, #3a3a3a, #252525);
+  border-radius: 0 0 4px 4px;
+  border: 1px solid #444;
+  border-top: none;
+}
+
+/* — Channel indicator — */
+.crt-tv-channel {
+  position: absolute;
+  top: 68px;
+  right: 30px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: rgba(245, 212, 103, 0.5);
+  text-shadow: 0 0 6px rgba(245, 212, 103, 0.3);
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.crt-tv-wrapper:hover .crt-tv-channel {
+  opacity: 1;
+}
+
+/* — CRT Animations — */
+@keyframes crt-flicker {
+  0% { opacity: 0; }
+  50% { opacity: 0.02; }
+  100% { opacity: 0; }
+}
+
+@keyframes crt-play-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(245, 212, 103, 0.5),
+      0 0 60px rgba(245, 212, 103, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(245, 212, 103, 0.7),
+      0 0 80px rgba(245, 212, 103, 0.3);
+  }
+}
+
+@keyframes crt-led-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.4; }
+}
+
+/* — Responsive — */
+@media (max-width: 768px) {
+  .crt-tv-body {
+    padding: 12px 12px 0 12px;
+    border-radius: 12px;
+  }
+  .crt-tv-bezel {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .crt-tv-screen {
+    border-radius: 8px / 10px;
+  }
+  .crt-tv-antenna-left,
+  .crt-tv-antenna-right {
+    height: 32px;
+  }
+  .crt-tv-antenna {
+    height: 36px;
+  }
+}
+
 /* 8-bit pixel border outline */
 .pixel-border {
   border: 4px solid hsl(var(--primary));

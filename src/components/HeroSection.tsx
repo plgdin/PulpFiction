@@ -62,76 +62,125 @@ const RetroRoleTypewriter = ({ targetName = "TARUN KAPOOR" }: { targetName?: str
 };
 
 /* ==========================================
-   RPG Dialogue Box
+   CRT Television Component
    ========================================== */
-const PixelDialogueBox = ({ 
-  title, 
-  text, 
-  icon: Icon
+const CrtTelevision = ({ 
+  videoUrl,
+  thumbnailSrc, 
+  videoTitle, 
+  onClick 
 }: { 
-  title: string; 
-  text: string; 
-  icon?: any;
+  videoUrl: string;
+  thumbnailSrc: string; 
+  videoTitle: string; 
+  onClick: () => void;
 }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const getPlayableVideoUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('.b-cdn.net')) {
+      return url.replace('/playlist.m3u8', '/play_720p.mp4');
+    }
+    // Fallback to OLA video if it is Behance / Youtube etc.
+    if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com') || url.includes('behance.net')) {
+      return 'https://vz-dadaa479-fe6.b-cdn.net/ba463431-e658-4143-bc88-b8f8251521a0/play_720p.mp4';
+    }
+    return url;
+  };
+
+  const playableUrl = getPlayableVideoUrl(videoUrl);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setDisplayedText(text.slice(0, index + 1));
-        index++;
-      } else {
-        setIsTypingComplete(true);
-        clearInterval(timer);
-      }
-    }, 15);
-
-    return () => clearInterval(timer);
-  }, [text, isVisible]);
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(err => {
+        console.log("CRT Television video autoplay failed or was blocked by browser:", err);
+      });
+    }
+  }, [playableUrl]);
 
   return (
-    <div 
-      ref={containerRef}
-      className="w-full bg-zinc-950 p-6 md:p-8 pixel-border-gold relative flex flex-col gap-4 text-left"
-    >
-      {/* Glowing Header Tab */}
-      <div className="absolute -top-6 left-6 bg-black px-4 py-1.5 border-2 border-primary text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary retro">
-        {title}
+    <div className="crt-tv-wrapper" onClick={onClick}>
+      {/* Antenna */}
+      <div className="crt-tv-antenna">
+        <div className="crt-tv-antenna-left"></div>
+        <div className="crt-tv-antenna-right"></div>
+        <div className="crt-tv-antenna-knob"></div>
       </div>
 
-      <div className="flex items-start gap-4 mt-2">
-        {Icon && (
-          <div className="p-3 bg-primary/10 border border-primary/20 text-primary rounded shadow-[0_0_12px_rgba(245,212,103,0.3)] shrink-0">
-            <Icon className="w-6 h-6 animate-pulse" />
-          </div>
-        )}
-        <div className="flex-1">
-          <p className="text-[18px] md:text-[24px] retro-text leading-relaxed tracking-wider text-stone-200">
-            {displayedText}
-            {!isTypingComplete && (
-              <span className="inline-block w-2.5 h-4 bg-primary ml-1 animate-blink" />
+      {/* TV Body */}
+      <div className="crt-tv-body">
+        {/* Screen bezel */}
+        <div className="crt-tv-bezel">
+          {/* The actual screen */}
+          <div className="crt-tv-screen group">
+            {/* Play video if available, else thumbnail */}
+            {playableUrl ? (
+              <video 
+                ref={videoRef}
+                src={playableUrl} 
+                className="crt-tv-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls={false}
+              />
+            ) : (
+              <img 
+                src={thumbnailSrc} 
+                alt={videoTitle} 
+                className="crt-tv-video"
+              />
             )}
-          </p>
+
+            {/* CRT screen effects stack */}
+            <div className="crt-tv-scanlines"></div>
+            <div className="crt-tv-rgb-pixels"></div>
+            <div className="crt-tv-vignette"></div>
+            <div className="crt-tv-flicker"></div>
+            <div className="crt-tv-glare"></div>
+
+            {/* Play overlay on hover */}
+            <div className="crt-tv-play-overlay">
+              <div className="crt-tv-play-btn">
+                <Play className="w-8 h-8 text-black fill-black ml-1" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* TV Bottom Panel - Controls */}
+        <div className="crt-tv-controls">
+          {/* Brand label */}
+          <div className="crt-tv-brand">
+            <span className="retro text-[8px] md:text-[10px] tracking-[0.3em] text-stone-500">PULP·FICTION</span>
+          </div>
+
+          {/* Control knobs */}
+          <div className="crt-tv-knobs">
+            <div className="crt-tv-knob" title="Channel">
+              <div className="crt-tv-knob-line"></div>
+            </div>
+            <div className="crt-tv-knob crt-tv-knob-sm" title="Volume">
+              <div className="crt-tv-knob-line"></div>
+            </div>
+          </div>
+
+          {/* Power LED */}
+          <div className="crt-tv-power-led"></div>
         </div>
       </div>
+
+      {/* TV Stand / Feet */}
+      <div className="crt-tv-feet">
+        <div className="crt-tv-foot-left"></div>
+        <div className="crt-tv-foot-right"></div>
+      </div>
+
+      {/* Channel indicator overlay */}
+      <div className="crt-tv-channel retro">CH-01</div>
     </div>
   );
 };
@@ -147,77 +196,47 @@ const HeroSection = ({ video, videos, heroContent, onPlay }: HeroSectionProps) =
   const thumbnailSrc = video.thumbnail || heroBg;
 
   return (
-    <section className="w-full flex flex-col gap-12 items-center max-w-7xl mx-auto px-4 md:px-12 pt-16 pb-8">
-      {/* Stage Header */}
+    <section className="w-full flex flex-col gap-8 items-center max-w-7xl mx-auto px-4 md:px-12 pt-16 pb-8 text-center">
+      {/* Section Header */}
       <div className="w-full flex justify-between items-center border-b-2 border-stone-800 pb-3">
-        <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">STG. 00 // MAIN REEL</span>
-        <span className="text-primary/70 text-xs font-mono">OK-PLAY_2026</span>
+        <span className="text-xs uppercase text-stone-500 font-bold tracking-widest retro">MAIN REEL</span>
       </div>
 
       {/* Retro Name Typewriter */}
       <RetroRoleTypewriter targetName="TARUN KAPOOR" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start mt-6">
-        
-        {/* Left: Pixel Frame Featured Thumbnail */}
-        <div className="lg:col-span-5 flex flex-col gap-4 items-center justify-center">
-          <div 
-            className="w-full max-w-[480px] aspect-video bg-zinc-900 overflow-hidden pixel-border-gold p-2 relative group cursor-pointer"
-            onClick={() => onPlay(video)}
+      {/* Centered CRT TV */}
+      <div className="w-full flex flex-col items-center justify-center gap-6 mt-6">
+        <CrtTelevision
+          videoUrl={video.videoUrl}
+          thumbnailSrc={thumbnailSrc}
+          videoTitle={video.title}
+          onClick={() => onPlay(video)}
+        />
+        <span className="text-[10px] text-stone-500 tracking-widest font-mono uppercase">FEATURED_REEL.MP4 [1920x1080]</span>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+        <button 
+          className="pixel-btn text-center flex items-center justify-center gap-3 py-3 px-8"
+          onClick={() => onPlay(video)}
+        >
+          <Play className="w-4 h-4" />
+          <span>{heroContent.ctaPrimaryText || 'VIEW REEL'}</span>
+        </button>
+
+        {heroContent.portfolioUrl && (
+          <a
+            href={heroContent.portfolioUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="pixel-btn text-center flex items-center justify-center gap-3 py-3 px-8"
           >
-            {/* 8-bit Bracket overlay highlights */}
-            <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
-            <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
-            <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
-            <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-primary z-30 group-hover:scale-110 transition-transform"></div>
-            
-            <img 
-              src={thumbnailSrc} 
-              alt={video.title} 
-              className="w-full h-full object-cover grayscale group-hover:grayscale-0 contrast-125 saturate-150 transition-all duration-300"
-            />
-
-            {/* Play overlay */}
-            <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-16 h-16 bg-primary/80 flex items-center justify-center border-2 border-primary shadow-[0_0_20px_rgba(245,212,103,0.5)]">
-                <Play className="w-8 h-8 text-black fill-black ml-1" />
-              </div>
-            </div>
-          </div>
-          <span className="text-[10px] text-stone-500 tracking-widest font-mono uppercase">FEATURED_REEL.MP4 [1920x1080]</span>
-        </div>
-
-        {/* Right: RPG Dialogue Panel + CTA */}
-        <div className="lg:col-span-7 flex flex-col gap-8 w-full">
-          <PixelDialogueBox 
-            title="REEL_INFO.TXT" 
-            text={heroContent.description || video.description} 
-            icon={Play}
-          />
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button 
-              className="pixel-btn text-center flex items-center justify-center gap-3 py-3 px-6"
-              onClick={() => onPlay(video)}
-            >
-              <Play className="w-4 h-4" />
-              <span>{heroContent.ctaPrimaryText || 'VIEW REEL'}</span>
-            </button>
-
-            {heroContent.portfolioUrl && (
-              <a
-                href={heroContent.portfolioUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="pixel-btn text-center flex items-center justify-center gap-3 py-3 px-6"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>{heroContent.ctaSecondaryText || 'PORTFOLIO'}</span>
-              </a>
-            )}
-          </div>
-        </div>
+            <ExternalLink className="w-4 h-4" />
+            <span>{heroContent.ctaSecondaryText || 'PORTFOLIO'}</span>
+          </a>
+        )}
       </div>
     </section>
   );
