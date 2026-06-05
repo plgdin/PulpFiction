@@ -1,86 +1,39 @@
-import { useNavigate } from 'react-router-dom';
-import { VideoCategory } from '@/types/video';
-import NavigationMenu, {
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
-  NavigationMenuLink,
-} from '@/components/ui/8bit-navigation-menu';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
-interface NavbarProps {
-  categories: VideoCategory[];
-  onSearch: (query: string) => void;
-  onCategoryClick: (category: VideoCategory) => void;
-}
+export default function Navbar() {
+  const location = useLocation();
 
-const Navbar = ({ categories, onSearch, onCategoryClick }: NavbarProps) => {
-  const navigate = useNavigate();
+  const navItems = [
+    { name: 'UNVEIL ® PROJECTS', path: '/' },
+    { name: 'RESEARCH', path: '/research' },
+    { name: 'STUDIO', path: '/about' },
+    { name: 'CONTACT', path: '/contact' },
+  ];
 
   return (
-    <div className="w-full border-b-4 border-primary/30 bg-black/80 backdrop-blur-md sticky top-0 z-[100] px-4 md:px-12 py-3 flex flex-wrap items-center justify-between gap-4">
-      {/* Retro Logo */}
-      <div 
-        onClick={() => navigate("/")}
-        className="cursor-pointer border-2 border-primary px-3 py-1 bg-primary/10 text-primary font-bold text-shadow-glow hover:scale-105 active:scale-95 transition-all retro text-xs md:text-sm tracking-wide"
-      >
-        TK.EXE
-      </div>
-
-      {/* 8-bit Custom Navigation Menu */}
-      <NavigationMenu className="z-[110]">
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="retro text-[10px] md:text-xs">SYSTEM</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid gap-2 p-3 w-48 bg-zinc-950 border border-primary/20">
-                <li>
-                  <NavigationMenuLink 
-                    className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
-                    onClick={() => navigate("/")}
-                  >
-                    HOME_SITE
-                  </NavigationMenuLink>
-                </li>
-                <li>
-                  <NavigationMenuLink 
-                    className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
-                    onClick={() => navigate("/about")}
-                  >
-                    ABOUT_ME
-                  </NavigationMenuLink>
-                </li>
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="retro text-[10px] md:text-xs">QUESTS</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid gap-2 p-3 w-48 bg-zinc-950 border border-primary/20">
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <NavigationMenuLink 
-                      className="block p-2 text-stone-300 hover:text-primary transition-colors cursor-pointer retro text-[10px]"
-                      onClick={() => onCategoryClick(cat)}
-                    >
-                      {cat.title.toUpperCase().replace(/ /g, '_')}
-                    </NavigationMenuLink>
-                  </li>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-
-      {/* Floating Status */}
-      <div className="hidden lg:flex items-center gap-2">
-        <span className="text-[10px] text-stone-500 retro">CREDITS: 99</span>
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-      </div>
-    </div>
+    <header className="fixed top-0 left-0 z-50 w-full p-6 bg-transparent pointer-events-none">
+      <nav className="flex pointer-events-auto">
+        <ul className="flex items-center gap-x-2 flex-wrap gap-y-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <li key={item.name} className="flex">
+                <Link
+                  to={item.path}
+                  className={`flex items-center px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all duration-300 rounded border ${
+                    isActive 
+                      ? 'border-black bg-black text-white shadow-sm' 
+                      : 'border-neutral-200 bg-white/60 text-neutral-400 hover:text-black hover:border-black/50 hover:bg-white/80'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

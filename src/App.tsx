@@ -1,61 +1,48 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CmsProvider } from "./context/CmsContext";
-import Index from "./pages/Index";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import About from "./pages/About";
-import { useEffect } from "react";
-import Lenis from "lenis";
+import React from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Index from './pages/Index';
+import About from './pages/About';
+import ContactModal from './components/ContactModal';
+import { CmsProvider } from './context/CmsContext';
 
-const queryClient = new QueryClient();
+function AppContent() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-const SmoothScrolling = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    const lenis = new Lenis();
+  const isContactOpen = location.pathname === '/contact';
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+  return (
+    <div className="min-h-screen bg-[#fafafa] text-black selection:bg-black selection:text-white antialiased">
+      <Navbar />
+      
+      <main className="relative z-[2] pt-[9rem] px-4 md:px-8 pb-12">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/research" element={<Index />} />
+          <Route path="/about" element={<About />} />
+          {/* Render Index as the backdrop background when contact modal is active */}
+          <Route path="/contact" element={<Index />} />
+        </Routes>
+      </main>
 
-    requestAnimationFrame(raf);
+      <Footer />
 
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+      {/* Floating Contact Modal Backdrop */}
+      {isContactOpen && (
+        <ContactModal onClose={() => navigate('/')} />
+      )}
+    </div>
+  );
+}
 
-  return <>{children}</>;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SmoothScrolling>
-      <CmsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CmsProvider>
-    </SmoothScrolling>
-  </QueryClientProvider>
-);
-
-export default App;
+export default function App() {
+  return (
+    <CmsProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </CmsProvider>
+  );
+}
