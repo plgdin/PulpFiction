@@ -12,24 +12,25 @@ function AppContent() {
   const navigate = useNavigate();
 
   const isContactOpen = location.pathname === '/contact';
+  const isHome = location.pathname === '/' || location.pathname === '/research' || location.pathname === '/contact';
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-black selection:bg-black selection:text-white antialiased">
+    <div className="min-h-screen bg-[#f5f5f4] text-black selection:bg-neutral-900 selection:text-neutral-100 antialiased">
       <Navbar />
-      
-      <main className="relative z-[2] pt-[9rem] px-4 md:px-8 pb-12">
+
+      <main className={`relative z-[2] ${isHome ? '' : 'pt-24 px-4 md:px-8 pb-12'}`}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/research" element={<Index />} />
           <Route path="/about" element={<About />} />
-          {/* Render Index as the backdrop background when contact modal is active */}
+          {/* Index as backdrop behind contact modal */}
           <Route path="/contact" element={<Index />} />
         </Routes>
       </main>
 
       <Footer />
 
-      {/* Floating Contact Modal Backdrop */}
+      {/* Contact Modal Overlay */}
       {isContactOpen && (
         <ContactModal onClose={() => navigate('/')} />
       )}

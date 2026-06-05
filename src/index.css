@@ -1,20 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── Global Baseline ─────────────────────────────── */
+
 body {
   margin: 0;
-  background-color: #fafafa;
+  background-color: #f5f5f4;
   overflow-x: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom minimal scrollbar to match the high-end editorial feel */
+::selection {
+  background: #1a1a1a;
+  color: #f5f5f4;
+}
+
+/* ── Minimal Scrollbar ───────────────────────────── */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #fafafa;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a1a1a;
+  background: #a3a3a3;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a3a3a3 transparent;
+}
+
+/* ── 3D Perspective System ───────────────────────── */
+.perspective-container {
+  perspective: 1800px;
+  perspective-origin: 50% 50%;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* ── Lightbox ────────────────────────────────────── */
+.lightbox-enter {
+  animation: lightbox-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.lightbox-exit {
+  animation: lightbox-out 0.3s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+@keyframes lightbox-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes lightbox-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(4px);
+  }
+}
+
+/* ── Grid Masonry Helpers ────────────────────────── */
+.masonry-grid {
+  columns: 2;
+  column-gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid { columns: 3; }
+}
+@media (min-width: 768px) {
+  .masonry-grid { columns: 4; }
+}
+@media (min-width: 1024px) {
+  .masonry-grid { columns: 5; }
+}
+@media (min-width: 1280px) {
+  .masonry-grid { columns: 6; }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+/* ── Card Shine Effect ───────────────────────────── */
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    transparent 60%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Loading Pulse ───────────────────────────────── */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+.loading-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* ── Navigation Pill Glow ────────────────────────── */
+.nav-active-glow {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9),
+              0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Smooth page transitions ─────────────────────── */
+.page-enter {
+  animation: page-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
