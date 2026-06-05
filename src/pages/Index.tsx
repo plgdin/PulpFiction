@@ -510,11 +510,11 @@ function Card3D({
   const y = useTransform(smoothProgress, (val: number) => (index - val) * gapY);
   const baseZ = useTransform(smoothProgress, (val: number) => (index - val) * gapZ);
 
-  // ── DRAMATIC hover lift (was 45, now 70) ──
+  // ── DRAMATIC hover lift (was 700, now 350) ──
   const hoverZOffset = useSpring(0, { stiffness: 140, damping: 18 });
 
   useEffect(() => {
-    hoverZOffset.set(isHovered ? 70 : 0);
+    hoverZOffset.set(isHovered ? 350 : 0);
   }, [isHovered, hoverZOffset]);
 
   const z = useTransform([baseZ, hoverZOffset], ([zVal, offsetVal]) => (zVal as number) + (offsetVal as number));
@@ -540,7 +540,7 @@ function Card3D({
       }}
       className={`absolute preserve-3d pointer-events-auto cursor-pointer overflow-hidden transition-shadow duration-600 rounded ${
         isHovered
-          ? 'shadow-[0_30px_80px_rgba(0,0,0,0.25),0_8px_20px_rgba(0,0,0,0.1)]'
+          ? 'shadow-[0_45px_100px_rgba(0,0,0,0.45),0_20px_40px_rgba(0,0,0,0.2)]'
           : isActive
             ? 'shadow-[0_20px_50px_rgba(0,0,0,0.15)]'
             : 'shadow-[0_12px_30px_rgba(0,0,0,0.08)]'
@@ -552,11 +552,13 @@ function Card3D({
         y,
         z,
         opacity,
+        zIndex: isHovered ? 100 : (isActive ? 50 : index + 10),
       }}
       animate={{
-        rotateY: baseRotateY + tiltRotateY,
-        rotateX: baseRotateX + tiltRotateX,
-        rotateZ: baseRotateZ,
+        rotateY: isHovered ? tiltRotateY : baseRotateY + tiltRotateY,
+        rotateX: isHovered ? tiltRotateX : baseRotateX + tiltRotateX,
+        rotateZ: isHovered ? 0 : baseRotateZ,
+        scale: isHovered ? 1.15 : 1,
       }}
       transition={{
         type: 'spring',
