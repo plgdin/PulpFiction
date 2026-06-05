@@ -326,9 +326,9 @@ function Card3D({
   const cardHeight = 365; 
   const cardWidth = cardHeight * aspectRatio;
 
-  const x = useTransform(smoothProgress, (val) => (index - val) * gapX);
-  const y = useTransform(smoothProgress, (val) => (index - val) * gapY);
-  const baseZ = useTransform(smoothProgress, (val) => (index - val) * gapZ);
+  const x = useTransform(smoothProgress, (val: number) => (index - val) * gapX);
+  const y = useTransform(smoothProgress, (val: number) => (index - val) * gapY);
+  const baseZ = useTransform(smoothProgress, (val: number) => (index - val) * gapZ);
   
   const hoverZOffset = useSpring(isHovered ? 45 : 0, { stiffness: 120, damping: 20 });
   
